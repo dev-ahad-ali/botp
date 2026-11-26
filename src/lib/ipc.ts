@@ -48,7 +48,8 @@ export type Api = {
     onEvent: (cb: (e: AutomationEvent) => void) => () => void;
   };
   freeBrowser: {
-    attach: (url: string) => Promise<void>;
+    attach: (url: string, top?: number) => Promise<void>;
+    setTop: (top: number) => Promise<void>;
     navigate: (url: string) => Promise<void>;
     detach: () => Promise<void>;
     back: () => Promise<void>;

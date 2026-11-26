@@ -32,7 +32,8 @@ const api: Api = {
     },
   },
   freeBrowser: {
-    attach: (url) => ipcRenderer.invoke('freeBrowser:attach', url),
+    attach: (url, top) => ipcRenderer.invoke('freeBrowser:attach', url, top),
+    setTop: (top) => ipcRenderer.invoke('freeBrowser:setTop', top),
     navigate: (url) => ipcRenderer.invoke('freeBrowser:navigate', url),
     detach: () => ipcRenderer.invoke('freeBrowser:detach'),
     back: () => ipcRenderer.invoke('freeBrowser:back'),

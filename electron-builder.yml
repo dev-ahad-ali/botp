@@ -1,0 +1,15 @@
+appId: com.prototype.twilio-automation
+productName: Twilio Automation
+directories:
+  output: dist
+files:
+  - out/**
+  - prisma/**
+  - package.json
+asarUnpack:
+  - node_modules/.prisma/client/**
+  - node_modules/@prisma/engines/**
+  - node_modules/@prisma/client/runtime/**
+  - node_modules/**/*.node
+  - prisma/data/**
+npmRebuild: false

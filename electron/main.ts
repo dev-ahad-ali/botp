@@ -8,6 +8,13 @@ import { getNumber } from '../server/numbers/client';
 
 let win: BrowserWindow | null = null;
 let freeView: WebContentsView | null = null;
+let freeTop = 120;
+
+function updateFreeBounds() {
+  if (!freeView || !win) return;
+  const [width, height] = win.getContentSize();
+  freeView.setBounds({ x: 0, y: freeTop, width, height: Math.max(height - freeTop, 0) });
+}
 
 function createWindow() {
   win = new BrowserWindow({
@@ -23,12 +30,7 @@ function createWindow() {
   const url = process.env.ELECTRON_RENDERER_URL ?? `file://${path.join(__dirname, '../renderer/index.html')}`;
   void win.loadURL(url);
   win.on('closed', () => { win = null; freeView = null; });
-  win.on('resize', () => {
-    if (freeView && win) {
-      const [width, height] = win.getContentSize();
-      freeView.setBounds({ x: 0, y: 120, width, height: height - 120 });
-    }
-  });
+  win.on('resize', updateFreeBounds);
 }
 
 function registerIpc() {
@@ -62,16 +64,20 @@ function registerIpc() {
   });
   ipcMain.handle('automation:stop', () => stopAutomation());
 
-  ipcMain.handle('freeBrowser:attach', async (_e, url: string) => {
+  ipcMain.handle('freeBrowser:attach', async (_e, url: string, top?: number) => {
     if (!win) return;
     if (!freeView) {
       freeView = new WebContentsView({ webPreferences: { sandbox: true } });
       win.contentView.addChildView(freeView);
       freeView.webContents.on('did-navigate', (_wc, next) => win?.webContents.send('freeBrowser:url', next));
     }
-    const [width, height] = win.getContentSize();
-    freeView.setBounds({ x: 0, y: 120, width, height: height - 120 });
+    if (top !== undefined) freeTop = top;
+    updateFreeBounds();
     if (url) await freeView.webContents.loadURL(url);
+  });
+  ipcMain.handle('freeBrowser:setTop', (_e, top: number) => {
+    freeTop = top;
+    updateFreeBounds();
   });
   ipcMain.handle('freeBrowser:navigate', (_e, url: string) => freeView?.webContents.loadURL(url));
   ipcMain.handle('freeBrowser:detach', () => {

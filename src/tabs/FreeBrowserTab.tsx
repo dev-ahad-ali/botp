@@ -5,13 +5,18 @@ import { api } from '../lib/ipc';
 export default function FreeBrowserTab() {
   const [url, setUrl] = useState('https://www.google.com');
   const urlRef = useRef(url);
+  const barRef = useRef<HTMLDivElement>(null);
   urlRef.current = url;
+  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
 
   useEffect(() => {
-    void api.freeBrowser.attach(urlRef.current);
+    void api.freeBrowser.attach(urlRef.current, top());
     const off = api.freeBrowser.onUrl(setUrl);
+    const onResize = () => void api.freeBrowser.setTop(top());
+    window.addEventListener('resize', onResize);
     return () => {
       off();
+      window.removeEventListener('resize', onResize);
       void api.freeBrowser.detach();
     };
   }, []);
@@ -20,7 +25,7 @@ export default function FreeBrowserTab() {
 
   return (
     <div className="h-[calc(100%-1.5rem)]">
-      <div className="flex h-[120px] shrink-0 flex-col justify-center gap-2 border-b border-slate-800">
+      <div ref={barRef} className="flex h-[120px] shrink-0 flex-col justify-center gap-2 border-b border-slate-800">
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => void api.freeBrowser.back()}>←</Button>
           <Button variant="outline" onClick={() => void api.freeBrowser.forward()}>→</Button>

@@ -11,6 +11,7 @@ export default function AutomationTab() {
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [attempt, setAttempt] = useState(0);
   const [tempMail, setTempMail] = useState('Package pool (automatic)');
+  const [rangeLabels, setRangeLabels] = useState<Record<number, string>>({});
 
   const refreshRuns = useCallback(() => {
     void api.runs.list(20).then(setRuns).catch(() => undefined);
@@ -18,9 +19,10 @@ export default function AutomationTab() {
 
   useEffect(() => {
     refreshRuns();
-    void Promise.all([api.config.get(), api.providers.list()]).then(([cfg, providers]) => {
+    void Promise.all([api.config.get(), api.providers.list(), api.ranges.list()]).then(([cfg, providers, ranges]) => {
       const found = providers.find((p) => String(p.id) === cfg.selected_tempmail_id);
       setTempMail(found?.name ?? 'Package pool (automatic)');
+      setRangeLabels(Object.fromEntries(ranges.map((r) => [r.id, r.display])));
     }).catch(() => undefined);
 
     const off = api.automation.onEvent((e: AutomationEvent) => {
@@ -77,7 +79,7 @@ export default function AutomationTab() {
             {runs.map((r) => (
               <tr key={r.id} className="border-t border-slate-800">
                 <td className="py-2">{r.id}</td>
-                <td>{r.rangeId ?? '—'}</td>
+                <td>{r.rangeId ? rangeLabels[r.rangeId] ?? r.rangeId : '—'}</td>
                 <td>{r.serviceKey}</td>
                 <td>{r.status}</td>
                 <td>{new Date(r.startedAt).toLocaleString()}</td>
