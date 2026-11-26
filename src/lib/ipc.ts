@@ -6,6 +6,7 @@ export type Service = { id: number; key: string; name: string; enabled: boolean 
 export type RunRow = {
   id: number;
   serviceKey: string;
+  rangeId: number | null;
   status: string;
   startedAt: string | Date;
   endedAt: string | Date | null;

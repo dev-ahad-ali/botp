@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Tabs } from './components/ui';
+import AutomationTab from './tabs/AutomationTab';
+import ConfigTab from './tabs/ConfigTab';
+import FreeBrowserTab from './tabs/FreeBrowserTab';
 
 const tabs = [
   { id: 'config', label: 'Configuration' },
@@ -12,8 +15,10 @@ export default function App() {
   return (
     <div className="flex h-full flex-col">
       <Tabs tabs={tabs} value={tab} onChange={setTab} />
-      <main className="flex-1 overflow-auto p-6">
-        <p className="text-sm text-slate-400">{tab} tab</p>
+      <main className="min-h-0 flex-1 overflow-auto p-6">
+        {tab === 'config' && <ConfigTab />}
+        {tab === 'automation' && <AutomationTab />}
+        {tab === 'browser' && <FreeBrowserTab />}
       </main>
     </div>
   );
