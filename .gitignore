@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+*.log
+.env
+prisma/data/*.db-journal
+test-results/
+playwright-report/
+.DS_Store

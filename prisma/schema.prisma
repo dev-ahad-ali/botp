@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./data/app.db"
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model TempMailProvider {
+  id        Int      @id @default(autoincrement())
+  name      String
+  domain    String   @unique
+  enabled   Boolean  @default(true)
+  isBuiltin Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Range {
+  id        Int      @id @default(autoincrement())
+  display   String   @unique
+  prefix    String
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id      Int     @id @default(autoincrement())
+  key     String  @unique
+  name    String
+  enabled Boolean @default(true)
+}
+
+model Run {
+  id         Int       @id @default(autoincrement())
+  serviceKey String
+  providerId Int?
+  rangeId    Int?
+  status     String
+  startedAt  DateTime  @default(now())
+  endedAt    DateTime?
+  error      String?
+  logs       RunLog[]
+}
+
+model RunLog {
+  id        Int      @id @default(autoincrement())
+  runId     Int
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  level     String
+  message   String
+  data      String?
+  createdAt DateTime @default(now())
+}
