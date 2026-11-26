@@ -9,22 +9,23 @@
 
 ## 1. Overview
 
-The app is a local desktop tool with **four tabs**:
+The app is a local desktop tool with **five tabs**:
 
 | # | Tab | Purpose |
 |---|-----|---------|
-| 1 | **Configuration** | Select a real temp-mail website (name + URL + adapter), configure the number API (URL + auth header), manage the range list, select a target service (Twilio first) |
-| 2 | **Automation** | Control panel: Start / Stop, live status, step log, per-run stats. Playwright drives a separate Chromium window for both the temp-mail site and the Twilio signup flow |
-| 3 | **Temp Mail** | Manual control of the temp-mail page: show current address, copy/regenerate, refresh inbox, read messages, wait for a verification code |
-| 4 | **Free Browser** | Plain browser for the user (URL bar + embedded `WebContentsView`) — no automation, sign in to whatever else they want |
+| 1 | **Configuration** | Pick one of the listed temp-mail websites by URL, configure the number API (URL + auth header), manage ranges, select the target service (Twilio first) |
+| 2 | **Automation** | Control panel: Start / Stop, live status, step log, per-run stats. Playwright drives a separate Chromium window only for the Twilio signup flow |
+| 3 | **Temp Mail** | Inbox control panel: current address, copy/regenerate, message list, and wait-for-code |
+| 4 | **Temp Mail Site** | The real temp-mail website embedded in the app via `WebContentsView` |
+| 5 | **Free Browser** | Plain browser for the user (URL bar + embedded `WebContentsView`) — no automation |
 
 The automation loop depends on tab 1 for:
 - The number API URL + auth header (used to fetch a phone number)
 - The list of ranges (either a single selected range or full rotation)
-- The selected temp-mail **website URL** (opened with Playwright)
+- The selected temp-mail **website URL** (loaded in the embedded view)
 - The selected target service (Twilio for now)
 
-There is **no programmatic inbox creation** and no temp-mail npm package. The app opens the real site (e.g. `https://temp-mail.org/en/`), clicks its copy-to-clipboard button to read the address, clicks messages in its inbox, and extracts the OTP from the message body with Playwright. The site choice is no longer cosmetic: it determines which page is automated.
+There is **no programmatic inbox creation** and no temp-mail npm package. The app opens the real site (e.g. `https://temp-mail.org/en/`) inside the Electron window, reads the generated address from its DOM, clicks inbox rows, and extracts the OTP from the message body. Playwright is reserved for the Twilio signup page. The site choice is no longer cosmetic: it determines which page is automated.
 
 ---
 
@@ -49,30 +50,31 @@ There is **no programmatic inbox creation** and no temp-mail npm package. The ap
 │ Electron Main Window                                               │
 │                                                                    │
 │  ┌────────────┐ ┌───────────────┐ ┌────────────┐ ┌──────────────┐  │
-│  │ Config Tab │ │ Automation Tab│ │ Temp Mail  │ │ Free Browser │  │
-│  │ (React)    │ │ (React + log) │ │ Tab (React)│ │ (WebContents)│  │
+│  │ Config Tab │ │ Automation Tab│ │ Temp Mail  │ │ Temp Mail    │  │
+│  │ (React)    │ │ (React + log) │ │ Tab (React)│ │ Site (View)  │  │
 │  └────────────┘ └───────────────┘ └────────────┘ └──────────────┘  │
 │         │               │               │                          │
 │         └────── IPC ────┴───────────────┘                          │
 └────────────────────────────┼───────────────────────────────────────┘
                              │
-             ┌───────────────┼────────────────┐
-             │               │                │
-             ▼               ▼                ▼
-      ┌────────────┐  ┌────────────┐   ┌──────────────────┐
-      │ Prisma DB  │  │ Automation │   │ Temp Mail Session│
-      │ (SQLite)   │  │  Engine    │   │ + Site Adapter   │
-      └────────────┘  └─────┬──────┘   └────────┬─────────┘
-                            │                   │
-                            ▼                   ▼
-                     ┌───────────────────────────────┐
-                     │  Playwright headed Chromium   │
-                     │  Page A: temp-mail website    │
-                     │  Page B: Twilio signup flow   │
-                     └───────────────────────────────┘
+              ┌──────────────┼──────────────────┐
+              │              │                  │
+              ▼              ▼                  ▼
+       ┌────────────┐ ┌────────────┐   ┌────────────────────┐
+       │ Prisma DB  │ │ Automation │   │ Embedded Temp Mail │
+       │ (SQLite)   │ │  Engine    │   │ WebContentsView    │
+       └────────────┘ └─────┬──────┘   └─────────┬──────────┘
+                            │                    │
+                            ▼                    │
+                 ┌───────────────────────┐       │
+                 │ Playwright Chromium  │       │
+                 │ Twilio signup only   │       │
+                 └───────────────────────┘       │
+                                                 ▼
+                                     real temp-mail site (embedded)
 ```
 
-**Prototype note:** Playwright runs in a **separate OS window**, not embedded. The Temp Mail and Automation tabs read its state over IPC. Embedding via CDP is listed under Future Extensions.
+**Prototype note:** the temp-mail site is embedded in the app window and controlled with `webContents.executeJavaScript`. Playwright runs in a separate OS window only for the Twilio flow.
 
 ---
 
@@ -83,7 +85,8 @@ twilio-automation/
 ├─ electron/
 │  ├─ main.ts                 # BrowserWindow, WebContentsView, IPC handlers
 │  ├─ preload.ts              # contextBridge API surface
-│  └─ tabs/freeBrowser.ts     # WebContentsView management for tab 3
+│  ├─ tempMailView.ts         # embedded temp-mail view + DOM automation
+│  └─ tabs/freeBrowser.ts     # WebContentsView management for Free Browser
 ├─ src/                       # React renderer
 │  ├─ App.tsx
 │  ├─ tabs/ConfigTab.tsx
@@ -97,10 +100,8 @@ twilio-automation/
 │  ├─ config.ts               # read/write settings
 │  ├─ dbOps.ts                # providers/ranges/services CRUD
 │  ├─ tempMail/
-│  │  ├─ types.ts             # TempMailAdapter + message shapes
-│  │  ├─ generic.ts           # Playwright selectors + OTP extraction
-│  │  ├─ adapters.ts          # site-specific selector overrides
-│  │  └─ session.ts           # shared Playwright page + stop signal
+│  │  ├─ types.ts             # message/provider shapes
+│  │  └─ session.ts           # loads embedded site; owns Playwright browser for Twilio
 │  ├─ numbers/
 │  │  └─ client.ts            # POST getnum
 │  ├─ generators.ts           # random name/pass helpers
@@ -138,7 +139,7 @@ model TempMailProvider {
   name       String
   domain     String   @unique
   url        String   @default("")      // e.g. https://temp-mail.org/en/
-  adapterKey String   @default("generic") // selector set in server/tempMail/adapters.ts
+  adapterKey String   @default("generic") // reserved; selectors live in electron/tempMailView.ts
   enabled    Boolean  @default(true)
   isBuiltin  Boolean  @default(false)
   sortOrder  Int      @default(0)
@@ -237,7 +238,7 @@ await Promise.all(sites.map((data, i) => prisma.tempMailProvider.upsert({
 })));
 ```
 
-> Only the first site is enabled by default. The user can add any temp-mail website in Configuration by supplying a name and URL; its `adapterKey` defaults to `generic`, which uses the shared selector list in `server/tempMail/generic.ts`.
+> Only the first site is enabled by default, but Configuration lists **all** rows that have a URL. Click **Open** on any row to persist it as the selected site and load it in the embedded tab. New sites are added by URL alone; `adapterKey` defaults to `generic`, which uses the shared selector list in `electron/tempMailView.ts`.
 
 ### 6.4 Ranges — real list with prefixes
 
@@ -296,43 +297,17 @@ export async function setConfig(key: string, value: string) {
 }
 ```
 
-### 7.2 Temp Mail Website Automation (`server/tempMail/`)
+### 7.2 Temp Mail Website Automation
 
-There is no package that creates inboxes. Playwright opens the selected website and drives it like a user.
-
-**Adapter interface (`types.ts`):**
+There is no package that creates inboxes. `electron/tempMailView.ts` owns one `WebContentsView` that is loaded with the selected real website. The main process reads the address and inbox from that same view with `webContents.executeJavaScript`.
 
 ```ts
-export type TempMailMessage = {
-  subject: string;
-  preview: string;
-  body?: string;
-  code?: string | null;
-};
-
-export type TempMailAdapter = {
-  key: string;
-  name: string;
-  readAddress(): Promise<string>;
-  copyAddress(): Promise<string>;
-  regenerate(): Promise<string>;
-  listMessages(): Promise<TempMailMessage[]>;
-  openMessage(index: number): Promise<TempMailMessage>;
-  waitForCode(timeoutMs: number, abort?: Promise<unknown>): Promise<{ code: string; message: TempMailMessage }>;
-};
-```
-
-**`generic.ts`** contains the shared selector lists and OTP regex:
-
-```ts
-const EMAIL_RE = /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i;
-
-const DEFAULT_SELECTORS = {
-  address:    ['input[readonly]', 'input#mail', '[data-testid="email-address"]', '.email-address'],
-  copy:       ['button[title*="copy" i]', 'button[aria-label*="copy" i]', '[data-testid="copy-email"]'],
-  regenerate: ['button:has-text("Generate")', 'button:has-text("New")', 'button[title*="refresh" i]'],
-  inbox:      ['.email-list li', '.message-list li', '[data-testid="email-item"]'],
-  body:       ['.email-content', '.message-body', '[data-testid="email-body"]'],
+const SELECTORS = {
+  address:    ['input#mail', 'input[readonly]', '[data-testid="email-address"]', '.email-address'],
+  copy:       ['button[title*="copy" i]', 'button[aria-label*="copy" i]', '.copy-button'],
+  regenerate: ['button[title*="refresh" i]', '[data-testid="regenerate-email"]', '.generate-button'],
+  inbox:      ['.email-list li', '.message-list li', '[data-testid="email-item"]', 'li', 'tr'],
+  body:       ['.email-content', '.message-body', '[data-testid="email-body"]', 'article'],
 };
 
 function extractCode(text: string) {
@@ -340,24 +315,20 @@ function extractCode(text: string) {
 }
 ```
 
-`copyAddress()` clicks the site's copy button, then reads the clipboard (with a fallback to the visible address input). `waitForCode()` polls inbox rows, clicks a message if the code is not in the preview, and stops when the abort promise resolves.
+`readAddress()` scans the visible address inputs, then falls back to the page text. `copyAddress()` clicks the site's copy button when available. `waitForCode()` polls inbox rows, clicks a message if the code is not in the preview, and stops when the stop signal resolves.
 
-**`adapters.ts`** applies per-site selector overrides. `tempmail-org` has its own list; every other site uses `generic`.
-
-**`session.ts`** owns one headed Chromium context with two pages:
+`server/tempMail/session.ts` loads the embedded site for the engine and owns the Playwright browser used only for Twilio:
 
 ```ts
 export async function openTempMail(config) {
-  // new page -> goto(config.url) -> click copy -> return { address, service, url }
+  // load embedded view with config.url -> read address -> return { address, service, url }
 }
-
 export async function newAutomationPage() {
-  // same context, second page for the Twilio flow
+  // separate headed Chromium page for the Twilio flow
 }
-
-export async function waitForCode(timeoutMs, externalAbort?) { /* adapter polling */ }
+export const waitForCode = (timeoutMs?: number) => tempView.waitForCode(timeoutMs ?? 180_000);
 export function stopWaits() { /* resolve pending waits */ }
-export async function closeAll() { /* close browser */ }
+export async function closeAll() { /* close Playwright browser; stop waits */ }
 ```
 
 ### 7.3 Number API Client (`server/numbers/client.ts`)
@@ -659,23 +630,32 @@ ipcMain.handle('ranges:setEnabled', (_e, id, en) => dbOps.setRangeEnabled(id, en
 
 ipcMain.handle('services:list',   () => dbOps.listServices());
 
-// ---- Temp Mail (real website driven by Playwright) ----
-ipcMain.handle('tempMail:open', async (_e, id?: number) => {
+// ---- Embedded Temp Mail Site ----
+ipcMain.handle('tempSite:open', async (_e, id?: number) => {
   const provider = await selectedProvider(id);
-  const result = await tempMail.openTempMail(provider);
+  await tempView.openSite(provider.url);                 // load, do not attach
+  const address = await tempView.copyAddress().catch(() => tempView.readAddress());
   emitTemp({ type: 'temp:open', service: provider.name, url: provider.url });
-  emitTemp({ type: 'temp:address', address: result.address });
-  return result;
+  emitTemp({ type: 'temp:address', address });
+  return { address, service: provider.name, url: provider.url };
 });
-ipcMain.handle('tempMail:refresh',    () => tempMail.refresh());
-ipcMain.handle('tempMail:copy',       () => tempMail.copyAddress());
-ipcMain.handle('tempMail:regenerate', () => tempMail.regenerate());
-ipcMain.handle('tempMail:waitForCode', async (_e, timeoutMs?: number) => {
-  const found = await tempMail.waitForCode(timeoutMs ?? 180_000);
+ipcMain.handle('tempSite:attach',   (_e, url: string, top?: number) => tempView.attach(url, top));
+ipcMain.handle('tempSite:setTop',   (_e, top: number) => tempView.setTop(top));
+ipcMain.handle('tempSite:detach',   () => tempView.detach());
+ipcMain.handle('tempSite:navigate', (_e, url: string) => tempView.navigate(url));
+ipcMain.handle('tempSite:back',     () => tempView.back());
+ipcMain.handle('tempSite:forward',  () => tempView.forward());
+ipcMain.handle('tempSite:reload',   () => tempView.reload());
+ipcMain.handle('tempSite:address',  () => tempView.readAddress());
+ipcMain.handle('tempSite:copy',     () => tempView.copyAddress());
+ipcMain.handle('tempSite:regenerate', () => tempView.regenerate());
+ipcMain.handle('tempSite:messages', () => tempView.listMessages());
+ipcMain.handle('tempSite:openMessage', (_e, index: number) => tempView.openMessage(index));
+ipcMain.handle('tempSite:waitForCode', async (_e, timeoutMs?: number) => {
+  const found = await tempView.waitForCode(timeoutMs ?? 180_000);
   emitTemp({ type: 'temp:code', code: found.code });
   return found;
 });
-ipcMain.handle('tempMail:close',      () => tempMail.closeTempMail());
 
 // ---- Automation ----
 ipcMain.handle('automation:start', async () => {
@@ -712,16 +692,31 @@ contextBridge.exposeInMainWorld('api', {
   services: { list: () => ipcRenderer.invoke('services:list') },
   smoke: { number: (cfg) => ipcRenderer.invoke('smoke:number', cfg) },
   tempMail: {
-    open: (id) => ipcRenderer.invoke('tempMail:open', id),
-    refresh: () => ipcRenderer.invoke('tempMail:refresh'),
-    copy: () => ipcRenderer.invoke('tempMail:copy'),
-    regenerate: () => ipcRenderer.invoke('tempMail:regenerate'),
-    waitForCode: (timeoutMs) => ipcRenderer.invoke('tempMail:waitForCode', timeoutMs),
-    close: () => ipcRenderer.invoke('tempMail:close'),
     onEvent: (cb) => {
       const listener = (_e, evt) => cb(evt);
       ipcRenderer.on('tempMail:event', listener);
       return () => ipcRenderer.removeListener('tempMail:event', listener);
+    },
+  },
+  tempSite: {
+    open: (id) => ipcRenderer.invoke('tempSite:open', id),
+    attach: (url, top) => ipcRenderer.invoke('tempSite:attach', url, top),
+    setTop: (top) => ipcRenderer.invoke('tempSite:setTop', top),
+    navigate: (url) => ipcRenderer.invoke('tempSite:navigate', url),
+    detach: () => ipcRenderer.invoke('tempSite:detach'),
+    back: () => ipcRenderer.invoke('tempSite:back'),
+    forward: () => ipcRenderer.invoke('tempSite:forward'),
+    reload: () => ipcRenderer.invoke('tempSite:reload'),
+    address: () => ipcRenderer.invoke('tempSite:address'),
+    copy: () => ipcRenderer.invoke('tempSite:copy'),
+    regenerate: () => ipcRenderer.invoke('tempSite:regenerate'),
+    messages: () => ipcRenderer.invoke('tempSite:messages'),
+    openMessage: (index) => ipcRenderer.invoke('tempSite:openMessage', index),
+    waitForCode: (timeoutMs) => ipcRenderer.invoke('tempSite:waitForCode', timeoutMs),
+    onUrl: (cb) => {
+      const listener = (_e, url) => cb(url);
+      ipcRenderer.on('tempSite:url', listener);
+      return () => ipcRenderer.removeListener('tempSite:url', listener);
     },
   },
   automation: {
@@ -740,18 +735,16 @@ contextBridge.exposeInMainWorld('api', {
 
 ---
 
-## 9. UI — Four Tabs
+## 9. UI — Five Tabs
 
-Wrap in `<Tabs>` in `App.tsx`. The **Free Browser tab** only renders when active, otherwise the `WebContentsView` overlays nothing. The Playwright pages are separate OS windows.
+Wrap in `<Tabs>` in `App.tsx`. The **Temp Mail Site** and **Free Browser** tabs attach their `WebContentsView` only while active; the React toolbar height is measured from the DOM and sent to main with `setTop`.
 
 ### 9.1 Config Tab (`tabs/ConfigTab.tsx`)
-
-Sections:
 
 | Section | Controls |
 |---------|----------|
 | **Target service** | `<Select>` from `services.list` (Twilio only for now) |
-| **Temp mail website** | Searchable `<Select>` from `providers.list` filtered to rows with a URL; "Add site" form for name + URL; "Open temp mail" smoke test |
+| **Temp mail websites** | A list of **all** configured rows with their full URLs; **Use** selects, **Open** persists and switches to the site tab; URL-only **Add site** form. No name or search inputs |
 | **Number API** | `<Input>` for URL, `<Input>` for required `mauthapi="…"` header, "Test getnum" smoke test |
 | **Range** | `<Select>` with "Rotate all" + individual ranges; "Add range" form (accepts `99277XXX`, stores `display` and derived `prefix`) |
 
@@ -775,23 +768,24 @@ const off = api.automation.onEvent((e) => {
 });
 ```
 
-The actual browsing happens in Playwright's Chromium window. The Automation tab is the control panel.
+The Twilio browsing happens in Playwright's Chromium window. The Automation tab is the control panel.
 
 ### 9.3 Temp Mail Tab (`tabs/TempMailTab.tsx`)
 
-Shows the real temp-mail page state over IPC:
+Inbox control panel (no embedded view):
 
-- Opens the configured site when the tab mounts (or the selected provider on demand)
-- Current address with **Copy email**, **New email**, and **Refresh inbox** buttons
-- Inbox message list (subject + preview)
-- **Wait for code** button that polls the opened message body for a 4–8 digit code
+- Current address with **Copy email**, **New email**, **Refresh inbox**, and **Wait for code**
+- Inbox message list; clicking a row opens it and shows the body/code
 - Listens to `tempMail:event` so codes/addresses discovered during automation appear here too
+- **Open site tab** button switches to the embedded website
 
-### 9.4 Free Browser Tab (`tabs/FreeBrowserTab.tsx`)
+### 9.4 Temp Mail Site Tab (`tabs/TempMailSiteTab.tsx`)
+
+React renders a toolbar with a site selector (full URLs), URL bar, back/forward/reload, address, and copy/regenerate buttons. The `WebContentsView` is attached below the measured toolbar. On tab activation: `api.tempSite.attach(selectedUrl, top)`; on deactivation: `api.tempSite.detach()`.
+
+### 9.5 Free Browser Tab (`tabs/FreeBrowserTab.tsx`)
 
 React renders a URL bar + back/forward/refresh at the top (height measured from the DOM). The `WebContentsView` is attached by IPC below that region. On tab activation: `window.api.freeBrowser.attach(lastUrl, top)`; on tab deactivation: `window.api.freeBrowser.detach()`.
-
----
 
 ## 10. Build Steps (for the agent — ordered)
 
@@ -811,10 +805,10 @@ Follow in order. Each step ends with a concrete verification.
    - Verify: response parses into a phone number string.
 6. **Implement generators, `AutomationService`, `twilioService`, registry.**
    - Keep the Twilio selectors as placeholders for live tuning.
-7. **Implement `server/tempMail/`** (`types.ts`, `generic.ts`, `adapters.ts`, `session.ts`).
-   - Verify: "Open temp mail" opens the real site and copies its address.
+7. **Implement `electron/tempMailView.ts` and `server/tempMail/session.ts`.**
+   - Verify: "Temp Mail Site" tab embeds the chosen real site and the address appears in the Temp Mail tab.
 8. **Implement `server/automation/engine.ts`.**
-   - Verify: Start opens Chromium, opens the temp-mail site and the Twilio page, fills the first form. Stop closes everything cleanly.
+   - Verify: Start loads the embedded temp-mail site and opens the Twilio page in Chromium; Stop closes Playwright and pending waits.
 9. **Wire Automation and Temp Mail tabs** to IPC and event streams.
    - Verify: log lines stream live; address/code appear in both tabs; runs persist.
 10. **Implement the Free Browser tab** with `WebContentsView`.
@@ -829,17 +823,17 @@ Follow in order. Each step ends with a concrete verification.
 | # | Test | Expected |
 |---|------|----------|
 | 1 | Config persists across restart | ✔ |
-| 2 | Add temp-mail website with URL → appears in dropdown | ✔ |
+| 2 | Add temp-mail website with URL → appears in the full URL list | ✔ |
 | 3 | Add range `99277XXX` → row stored with `prefix = "99277"` | ✔ |
 | 4 | Single range selected → every request uses that `prefix` | ✔ |
 | 5 | "Rotate all" selected → consecutive requests advance through ranges | ✔ |
-| 6 | "Open temp mail" opens the real site and reads its generated address | ✔ |
+| 6 | "Open" on a site row embeds the real site and reads its generated address | ✔ |
 | 7 | Smoke-test getnum returns a phone number string | ✔ |
-| 8 | Start → Chromium opens temp-mail site + Twilio signup form fills | ✔ |
+| 8 | Start → embedded temp-mail site loads + Chromium Twilio signup form fills | ✔ |
 | 9 | Email OTP read from the temp-mail inbox → entered | ✔ |
 | 10 | Phone number submitted | ✔ (until SMS-OTP wall — expected) |
 | 11 | Stop → Chromium closes, no orphan processes | ✔ |
-| 12 | Free Browser tab loads google.com and a second URL | ✔ |
+| 12 | Temp Mail Site and Free Browser tabs each load and detach cleanly | ✔ |
 | 13 | Run rows + logs are persisted | ✔ |
 
 Failures in tests 8–10 are expected on first run and mean selector tuning, not an architectural problem.
@@ -848,18 +842,18 @@ Failures in tests 8–10 are expected on first run and mean selector tuning, not
 
 ## 12. Known Limitations (prototype)
 
-- **Temp-mail selectors** are best-effort. Sites can change their DOM or add bot protection; tune `server/tempMail/generic.ts` / `adapters.ts` against the live page.
+- **Temp-mail selectors** are best-effort. Sites can change their DOM or add bot protection; tune `electron/tempMailView.ts` against the live page.
 - **Twilio selectors** are placeholders; expect to iterate live.
 - **SMS verification**: Twilio's final step sends an SMS to the number. If a receive-SMS endpoint exists, add `server/numbers/sms.ts` and wire it into `RunContext`. Without it, the flow stops at phone submission.
-- **Playwright Chromium runs in a separate OS window** — not embedded. Intentional for the prototype.
+- **Playwright Chromium runs in a separate OS window for Twilio only.** The temp-mail site is embedded in the Electron window.
 - **`getnum` requires a valid `mauthapi` header**; the app cannot supply it automatically. Enter it in Configuration and click Save settings.
-- Old decorative provider rows remain in SQLite but are disabled and hidden from the UI.
+- Old decorative provider rows remain in SQLite but are disabled and hidden because they have no URL.
 
 ---
 
 ## 13. Future Extensions
 
-1. **Embed the automation browser** into the Electron window via CDP (`--remote-debugging-port=9222`).
+1. **Embed the Twilio browser** into the Electron window via CDP (`--remote-debugging-port=9222`).
 2. **Add more services** (`stripe.ts`, `github.ts`): implement `AutomationService`, add to `SERVICES`, seed into `Service` table.
 3. **SMS reception** module: add `server/numbers/sms.ts` and an optional `waitForSms(number, timeoutMs)` in `RunContext`.
 4. **Per-site selector profiles** saved in SQLite instead of code.
@@ -872,11 +866,11 @@ Failures in tests 8–10 are expected on first run and mean selector tuning, not
 
 | What the user sees | What actually happens |
 |--------------------|-----------------------|
-| A dropdown of temp-mail websites | `TempMailProvider` rows filtered to `url != ''` |
-| "Running with: Temp Mail" in the header | The selected site's URL is opened in Playwright |
-| Adding a new "site" in Config | A new `TempMailProvider` row with a real URL; it becomes selectable |
-| Generated email address | Copied from the site's clipboard button, with a fallback to reading the address input |
+| A list of temp-mail website URLs | `TempMailProvider` rows filtered to `url != ''`; all visible |
+| "Running with: Temp Mail" in the header | The selected site's URL is loaded in the embedded `WebContentsView` |
+| Adding a new "site" in Config | A new `TempMailProvider` row with a real URL; it appears immediately in the list |
+| Generated email address | Read from the embedded site's DOM, with its copy button clicked when available |
 | Inbox message + OTP | Found by clicking rows in the real site's inbox and matching a 4–8 digit code |
 | A range dropdown with `99277XXX` | `Range.display` shown; `Range.prefix` (`"99277"`) sent as `rid` |
 
-Everything real happens in Playwright and `server/`; SQLite stores settings, site metadata, runs, and logs.
+The temp-mail work happens in the embedded view; Twilio work happens in Playwright and `server/`. SQLite stores settings, site metadata, runs, and logs.

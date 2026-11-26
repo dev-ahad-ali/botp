@@ -1,6 +1,6 @@
 # Twilio Signup Automation (prototype)
 
-A local Electron desktop tool with four tabs: **Configuration**, **Automation**, **Temp Mail**, and **Free Browser**. Playwright drives a separate headed Chromium window: one page is the real temp-mail website (address + inbox + OTP), and the other page is the Twilio signup flow.
+A local Electron desktop tool with five tabs: **Configuration**, **Automation**, **Temp Mail**, **Temp Mail Site**, and **Free Browser**. The temp-mail website is embedded in the app with `WebContentsView` and driven through DOM automation in the main process. Playwright drives a separate headed Chromium window only for the Twilio signup flow.
 
 ## Setup
 
@@ -16,9 +16,10 @@ npm run dev
 
 ## Notes
 
-- The selected temp-mail site in Configuration is a real website URL. On Start, the app opens that site in Playwright, copies the generated address from it, and reads the inbox from that same page.
-- The Temp Mail tab lets you open/refresh the site, copy or regenerate the address, inspect messages, and wait for a verification code manually.
-- Site-specific selectors live in `server/tempMail/generic.ts` and `server/tempMail/adapters.ts`. They are best-effort and meant for live tuning.
+- The selected temp-mail site in Configuration is a real website URL. On Start, the app loads it in the embedded view, copies the generated address from the DOM, and reads the inbox from that same view.
+- The **Temp Mail Site** tab shows the embedded website inside the app. The **Temp Mail** tab is the control panel (address, copy/regenerate, inbox, OTP wait).
+- All configured temp-mail websites are shown with their full URLs in Configuration; click **Open** on a row to persist and open that site in the embedded tab. No site-name or search fields remain.
+- Temp-mail selectors live in `electron/tempMailView.ts`. They are best-effort and meant for live tuning.
 - The number API requires a `mauthapi` header. Enter it in Configuration as `mauthapi="token"`; **Test getnum** uses the value currently in the form. Click **Save settings** so automation uses it too. Without it, the API returns `401 missing mauthapi header`.
 - Number parsing supports the observed response shape (`data.full_number`, `data.no_plus_number`, `data.national_number`) plus common flat fields.
 - Twilio selectors in `server/automation/services/twilio.ts` are best-effort placeholders for live tuning.
