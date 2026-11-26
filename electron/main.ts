@@ -6,7 +6,7 @@ import { getConfig, setConfig } from '../server/config';
 import * as dbOps from '../server/dbOps';
 import { prisma } from '../server/db';
 import { getNumber } from '../server/numbers/client';
-import * as tempMail from '../server/tempMail/session';
+import * as tempView from './tempMailView';
 
 let win: BrowserWindow | null = null;
 let freeView: WebContentsView | null = null;
@@ -43,8 +43,9 @@ function createWindow() {
 
   const url = process.env.ELECTRON_RENDERER_URL ?? `file://${path.join(__dirname, '../renderer/index.html')}`;
   void win.loadURL(url);
+  tempView.setMainWindow(win);
   win.on('closed', () => { win = null; freeView = null; });
-  win.on('resize', updateFreeBounds);
+  win.on('resize', () => { updateFreeBounds(); tempView.updateBounds(); });
 }
 
 function registerIpc() {
@@ -76,22 +77,34 @@ function registerIpc() {
     return { phone, range: range.display };
   });
 
-  ipcMain.handle('tempMail:open', async (_e, id?: number) => {
+  ipcMain.handle('tempSite:open', async (_e, id?: number) => {
     const provider = await selectedProvider(id);
-    const result = await tempMail.openTempMail(provider);
+    await tempView.openSite(provider.url);
+    const address = await tempView.copyAddress().catch(() => tempView.readAddress());
     emitTemp({ type: 'temp:open', service: provider.name, url: provider.url });
-    emitTemp({ type: 'temp:address', address: result.address });
-    return result;
+    emitTemp({ type: 'temp:address', address });
+    return { address, service: provider.name, url: provider.url };
   });
-  ipcMain.handle('tempMail:refresh', () => tempMail.refresh());
-  ipcMain.handle('tempMail:copy', () => tempMail.copyAddress());
-  ipcMain.handle('tempMail:regenerate', () => tempMail.regenerate());
-  ipcMain.handle('tempMail:waitForCode', async (_e, timeoutMs?: number) => {
-    const found = await tempMail.waitForCode(timeoutMs ?? 180_000);
+  ipcMain.handle('tempSite:attach', async (_e, url?: string, top?: number) => {
+    await tempView.attach(url, top);
+    return tempView.getUrl();
+  });
+  ipcMain.handle('tempSite:setTop', (_e, top: number) => tempView.setTop(top));
+  ipcMain.handle('tempSite:navigate', (_e, url: string) => tempView.navigate(url));
+  ipcMain.handle('tempSite:detach', () => tempView.detach());
+  ipcMain.handle('tempSite:back', () => tempView.back());
+  ipcMain.handle('tempSite:forward', () => tempView.forward());
+  ipcMain.handle('tempSite:reload', () => tempView.reload());
+  ipcMain.handle('tempSite:address', () => tempView.readAddress());
+  ipcMain.handle('tempSite:copy', () => tempView.copyAddress());
+  ipcMain.handle('tempSite:regenerate', () => tempView.regenerate());
+  ipcMain.handle('tempSite:messages', () => tempView.listMessages());
+  ipcMain.handle('tempSite:openMessage', (_e, index: number) => tempView.openMessage(index));
+  ipcMain.handle('tempSite:waitForCode', async (_e, timeoutMs?: number) => {
+    const found = await tempView.waitForCode(timeoutMs ?? 180_000);
     emitTemp({ type: 'temp:code', code: found.code });
     return found;
   });
-  ipcMain.handle('tempMail:close', () => tempMail.closeTempMail());
 
   ipcMain.handle('automation:start', () => {
     if (!win) return;

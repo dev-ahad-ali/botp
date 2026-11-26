@@ -42,7 +42,7 @@ export type Api = {
   };
   providers: {
     list: () => Promise<Provider[]>;
-    add: (p: { name: string; domain?: string; url?: string; adapterKey?: string }) => Promise<Provider>;
+    add: (p: { url: string; name?: string; domain?: string; adapterKey?: string }) => Promise<Provider>;
     setEnabled: (id: number, enabled: boolean) => Promise<Provider>;
   };
   ranges: {
@@ -56,13 +56,24 @@ export type Api = {
     number: (cfg?: { url?: string; header?: string; rangeId?: string }) => Promise<{ phone: string; range: string }>;
   };
   tempMail: {
+    onEvent: (cb: (e: TempMailEvent) => void) => () => void;
+  };
+  tempSite: {
     open: (providerId?: number) => Promise<{ address: string; service: string; url: string }>;
-    refresh: () => Promise<{ address: string; messages: TempMailMessage[] }>;
+    attach: (url?: string, top?: number) => Promise<string>;
+    setTop: (top: number) => Promise<void>;
+    navigate: (url: string) => Promise<void>;
+    detach: () => Promise<void>;
+    back: () => Promise<void>;
+    forward: () => Promise<void>;
+    reload: () => Promise<void>;
+    address: () => Promise<string>;
     copy: () => Promise<string>;
     regenerate: () => Promise<string>;
+    messages: () => Promise<TempMailMessage[]>;
+    openMessage: (index: number) => Promise<TempMailMessage>;
     waitForCode: (timeoutMs?: number) => Promise<{ code: string; message: TempMailMessage }>;
-    close: () => Promise<void>;
-    onEvent: (cb: (e: TempMailEvent) => void) => () => void;
+    onUrl: (cb: (url: string) => void) => () => void;
   };
   automation: {
     start: () => Promise<void>;

@@ -11,16 +11,19 @@ const domainFromUrl = (url?: string) => {
   try { return new URL(url ?? '').hostname.replace(/^www\./, ''); } catch { return ''; }
 };
 
-export const addProvider = (p: { name: string; domain?: string; url?: string; adapterKey?: string }) =>
-  prisma.tempMailProvider.create({
+export const addProvider = (p: { url: string; name?: string; domain?: string; adapterKey?: string }) => {
+  const domain = p.domain || domainFromUrl(p.url);
+  if (!domain) throw new Error('Enter a valid temp-mail URL');
+  return prisma.tempMailProvider.create({
     data: {
-      name: p.name,
-      domain: p.domain || domainFromUrl(p.url) || `${p.name}.local`,
-      url: p.url ?? '',
+      name: p.name || domain.split('.')[0],
+      domain,
+      url: p.url,
       adapterKey: p.adapterKey ?? 'generic',
       isBuiltin: false,
     },
   });
+};
 
 export const setProviderEnabled = (id: number, enabled: boolean) =>
   prisma.tempMailProvider.update({ where: { id }, data: { enabled } });

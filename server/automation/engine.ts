@@ -9,14 +9,12 @@ import type { AutomationEvent } from './types';
 
 let running = false;
 let shouldStop = false;
-let signalStop: () => void = () => undefined;
 
 export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
   if (running) return;
   running = true;
   shouldStop = false;
 
-  const stopped = new Promise<null>((resolve) => { signalStop = () => resolve(null); });
   const emit = (e: AutomationEvent) => onEvent(e);
   emit({ type: 'status', running: true });
 
@@ -81,7 +79,7 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
           phone,
           rangeDisplay: range.display,
           getOtp: async () => {
-            const found = await tempMail.waitForCode(180_000, stopped);
+            const found = await tempMail.waitForCode(180_000);
             emit({ type: 'temp:code', code: found.code });
             await log(`verification code: ${found.code}`);
             return found.code;
@@ -117,7 +115,6 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
 export function stopAutomation() {
   if (!running) return;
   shouldStop = true;
-  signalStop();
   tempMail.stopWaits();
   void tempMail.closeAll();
 }

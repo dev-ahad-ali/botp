@@ -20,16 +20,31 @@ const api: Api = {
   runs: { list: (limit) => ipcRenderer.invoke('runs:list', limit) },
   smoke: { number: (cfg) => ipcRenderer.invoke('smoke:number', cfg) },
   tempMail: {
-    open: (providerId) => ipcRenderer.invoke('tempMail:open', providerId),
-    refresh: () => ipcRenderer.invoke('tempMail:refresh'),
-    copy: () => ipcRenderer.invoke('tempMail:copy'),
-    regenerate: () => ipcRenderer.invoke('tempMail:regenerate'),
-    waitForCode: (timeoutMs) => ipcRenderer.invoke('tempMail:waitForCode', timeoutMs),
-    close: () => ipcRenderer.invoke('tempMail:close'),
     onEvent: (cb) => {
       const listener = (_e: unknown, evt: Parameters<typeof cb>[0]) => cb(evt);
       ipcRenderer.on('tempMail:event', listener);
       return () => ipcRenderer.removeListener('tempMail:event', listener);
+    },
+  },
+  tempSite: {
+    open: (providerId) => ipcRenderer.invoke('tempSite:open', providerId),
+    attach: (url, top) => ipcRenderer.invoke('tempSite:attach', url, top),
+    setTop: (top) => ipcRenderer.invoke('tempSite:setTop', top),
+    navigate: (url) => ipcRenderer.invoke('tempSite:navigate', url),
+    detach: () => ipcRenderer.invoke('tempSite:detach'),
+    back: () => ipcRenderer.invoke('tempSite:back'),
+    forward: () => ipcRenderer.invoke('tempSite:forward'),
+    reload: () => ipcRenderer.invoke('tempSite:reload'),
+    address: () => ipcRenderer.invoke('tempSite:address'),
+    copy: () => ipcRenderer.invoke('tempSite:copy'),
+    regenerate: () => ipcRenderer.invoke('tempSite:regenerate'),
+    messages: () => ipcRenderer.invoke('tempSite:messages'),
+    openMessage: (index) => ipcRenderer.invoke('tempSite:openMessage', index),
+    waitForCode: (timeoutMs) => ipcRenderer.invoke('tempSite:waitForCode', timeoutMs),
+    onUrl: (cb) => {
+      const listener = (_e: unknown, url: string) => cb(url);
+      ipcRenderer.on('tempSite:url', listener);
+      return () => ipcRenderer.removeListener('tempSite:url', listener);
     },
   },
   automation: {
