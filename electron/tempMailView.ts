@@ -180,7 +180,25 @@ const READ_BODY = `(arg) => {
 }`;
 
 export function findOtp(text: string) {
-  return text.match(/\b(\d{6})\b/)?.[1] ?? text.match(/\b(\d{4,8})\b/)?.[1] ?? null;
+  const normalized = text.replace(/\u00a0/g, ' ');
+  const patterns = [
+    /(?:verification|confirmation|one[- ]?time|otp|security)\s*(?:code)?\s*(?:is|:|=)?\s*[#*]?\s*(\d{4,8})\b/i,
+    /\b(?:code|pin)\s*(?:is|:|=)?\s*[#*]?\s*(\d{4,8})\b/i,
+    /\b(\d{6})\b/,
+    /\b(\d{4,8})\b/,
+  ];
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+
+  // Twilio sometimes renders codes with spaces or dashes (e.g. "482 913").
+  const groups = normalized.match(/\b(?:\d[\s-]?){3,7}\d\b/g) ?? [];
+  for (const group of groups) {
+    const digits = group.replace(/\D/g, '');
+    if (digits.length >= 4 && digits.length <= 8) return digits;
+  }
+  return null;
 }
 
 export function getUrl() {
