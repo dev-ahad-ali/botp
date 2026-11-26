@@ -5,9 +5,21 @@ const stripX = (display: string) => display.replace(/X+$/, '');
 export const listProviders = () =>
   prisma.tempMailProvider.findMany({ orderBy: [{ enabled: 'desc' }, { sortOrder: 'asc' }] });
 
-export const addProvider = (p: { name: string; domain?: string }) =>
+export const getProvider = (id: number) => prisma.tempMailProvider.findUnique({ where: { id } });
+
+const domainFromUrl = (url?: string) => {
+  try { return new URL(url ?? '').hostname.replace(/^www\./, ''); } catch { return ''; }
+};
+
+export const addProvider = (p: { name: string; domain?: string; url?: string; adapterKey?: string }) =>
   prisma.tempMailProvider.create({
-    data: { name: p.name, domain: p.domain || `${p.name}.local`, isBuiltin: false },
+    data: {
+      name: p.name,
+      domain: p.domain || domainFromUrl(p.url) || `${p.name}.local`,
+      url: p.url ?? '',
+      adapterKey: p.adapterKey ?? 'generic',
+      isBuiltin: false,
+    },
   });
 
 export const setProviderEnabled = (id: number, enabled: boolean) =>

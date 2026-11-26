@@ -28,11 +28,19 @@ async function main() {
     update: { name: 'Twilio', enabled: true },
   });
 
-  const domains = seedArray('TEMPMAIL_SEED');
-  await Promise.all(domains.map((domain, i) => {
-    const data = { name: domain.split('.')[0], domain, isBuiltin: true, sortOrder: i };
-    return prisma.tempMailProvider.upsert({ where: { domain }, create: data, update: data });
-  }));
+  // Old decorative domains are kept but disabled: automation now uses real sites.
+  await prisma.tempMailProvider.updateMany({ where: { url: '' }, data: { enabled: false } });
+
+  const services = [
+    { name: 'Temp Mail', domain: 'temp-mail.org', url: 'https://temp-mail.org/en/', adapterKey: 'tempmail-org' },
+    { name: 'Temp Mail IO', domain: 'temp-mail.io', url: 'https://temp-mail.io/en/', adapterKey: 'generic' },
+    { name: '1SecMail', domain: '1secmail.com', url: 'https://www.1secmail.com/', adapterKey: 'generic' },
+  ];
+  await Promise.all(services.map((data, i) => prisma.tempMailProvider.upsert({
+    where: { domain: data.domain },
+    create: { ...data, enabled: i === 0, isBuiltin: true, sortOrder: i },
+    update: { ...data, enabled: i === 0, sortOrder: i },
+  })));
 
   const ranges = seedArray('RANGE_SEED');
   await Promise.all(ranges.map((display, i) => {
@@ -40,7 +48,7 @@ async function main() {
     return prisma.range.upsert({ where: { display }, create: data, update: data });
   }));
 
-  console.log(`Seeded ${domains.length} providers and ${ranges.length} ranges`);
+  console.log(`Seeded ${services.length} mail sites and ${ranges.length} ranges`);
 }
 
 main()
