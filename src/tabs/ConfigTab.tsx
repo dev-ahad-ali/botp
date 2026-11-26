@@ -133,9 +133,14 @@ export default function ConfigTab() {
             <Button variant="outline" onClick={() => void api.tempMail.open().then((r) => setMessage(`Opened ${r.service}: ${r.address}`)).catch((e) => setMessage(String(e)))}>
               Open temp mail
             </Button>
-            <Button variant="outline" onClick={() => void api.smoke.number().then((r) => setMessage(`Number: ${r.phone} (${r.range})`)).catch((e) => setMessage(String(e)))}>
+            <Button variant="outline" onClick={() => void api.smoke.number({
+              url: draft.number_api_url,
+              header: draft.number_api_header,
+              rangeId: draft.selected_range_id,
+            }).then((r) => setMessage(`Number: ${r.phone} (${r.range})`)).catch((e) => setMessage(String(e)))}>
               Test getnum
             </Button>
+            <span className="text-xs text-slate-500">Uses the values currently in the form — no need to save first.</span>
           </div>
         </Card>
       </div>

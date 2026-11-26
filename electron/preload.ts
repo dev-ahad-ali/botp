@@ -18,7 +18,7 @@ const api: Api = {
   },
   services: { list: () => ipcRenderer.invoke('services:list') },
   runs: { list: (limit) => ipcRenderer.invoke('runs:list', limit) },
-  smoke: { number: () => ipcRenderer.invoke('smoke:number') },
+  smoke: { number: (cfg) => ipcRenderer.invoke('smoke:number', cfg) },
   tempMail: {
     open: (providerId) => ipcRenderer.invoke('tempMail:open', providerId),
     refresh: () => ipcRenderer.invoke('tempMail:refresh'),

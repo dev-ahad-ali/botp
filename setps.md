@@ -710,7 +710,7 @@ contextBridge.exposeInMainWorld('api', {
     setEnabled: (id: number, en: boolean) => ipcRenderer.invoke('ranges:setEnabled', id, en),
   },
   services: { list: () => ipcRenderer.invoke('services:list') },
-  smoke: { number: () => ipcRenderer.invoke('smoke:number') },
+  smoke: { number: (cfg) => ipcRenderer.invoke('smoke:number', cfg) },
   tempMail: {
     open: (id) => ipcRenderer.invoke('tempMail:open', id),
     refresh: () => ipcRenderer.invoke('tempMail:refresh'),
@@ -755,7 +755,7 @@ Sections:
 | **Number API** | `<Input>` for URL, `<Input>` for required `mauthapi="…"` header, "Test getnum" smoke test |
 | **Range** | `<Select>` with "Rotate all" + individual ranges; "Add range" form (accepts `99277XXX`, stores `display` and derived `prefix`) |
 
-On save: `api.config.set('selected_service', …)` etc. Store `selected_range_id` and `selected_tempmail_id` as strings (`''` means default/rotate-all).
+On save: `api.config.set('selected_service', …)` etc. Store `selected_range_id` and `selected_tempmail_id` as strings (`''` means default/rotate-all). The **Test getnum** button passes the current form values (`url`, `header`, `rangeId`) into the IPC handler so an unsaved header is still exercised; automation itself always uses the saved settings.
 
 ### 9.2 Automation Tab (`tabs/AutomationTab.tsx`)
 

@@ -52,7 +52,9 @@ export type Api = {
   };
   services: { list: () => Promise<Service[]> };
   runs: { list: (limit?: number) => Promise<RunRow[]> };
-  smoke: { number: () => Promise<{ phone: string; range: string }> };
+  smoke: {
+    number: (cfg?: { url?: string; header?: string; rangeId?: string }) => Promise<{ phone: string; range: string }>;
+  };
   tempMail: {
     open: (providerId?: number) => Promise<{ address: string; service: string; url: string }>;
     refresh: () => Promise<{ address: string; messages: TempMailMessage[] }>;

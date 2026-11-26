@@ -62,12 +62,17 @@ function registerIpc() {
   ipcMain.handle('services:list', () => dbOps.listServices());
   ipcMain.handle('runs:list', (_e, limit?: number) => dbOps.listRuns(limit ?? 20));
 
-  ipcMain.handle('smoke:number', async () => {
+  ipcMain.handle('smoke:number', async (_e, overrides?: { url?: string; header?: string; rangeId?: string }) => {
     const cfg = await getConfig();
     const ranges = await dbOps.listRanges();
-    const range = ranges.find((r) => r.id === Number(cfg.selected_range_id)) ?? ranges[0];
+    const selectedId = Number(overrides?.rangeId || cfg.selected_range_id || 0);
+    const range = ranges.find((r) => r.id === selectedId) ?? ranges[0];
     if (!range) throw new Error('No ranges configured');
-    const phone = await getNumber({ url: cfg.number_api_url, headerRaw: cfg.number_api_header, rid: range.prefix });
+    const phone = await getNumber({
+      url: overrides?.url?.trim() || cfg.number_api_url,
+      headerRaw: overrides?.header ?? cfg.number_api_header ?? '',
+      rid: range.prefix,
+    });
     return { phone, range: range.display };
   });
 
