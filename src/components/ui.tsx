@@ -14,20 +14,22 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function Button({ className, variant = 'default', ...props }: ButtonProps) {
   const styles = {
-    default: 'bg-indigo-600 hover:bg-indigo-500 text-white',
-    destructive: 'bg-red-600 hover:bg-red-500 text-white',
-    outline: 'border border-slate-600 hover:bg-slate-800 text-slate-100',
-    ghost: 'hover:bg-slate-800 text-slate-300',
+    default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
+    destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+    outline: 'border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground',
+    ghost: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
   }[variant];
   return <button className={cn('rounded-md px-3 py-2 text-sm font-medium disabled:opacity-40', styles, className)} {...props} />;
 }
 
+const fieldClass = 'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30';
+
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn('w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-500', className)} {...props} />;
+  return <input className={cn(fieldClass, className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={cn('w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-500', className)} {...props} />;
+  return <textarea className={cn(fieldClass, className)} {...props} />;
 }
 
 type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
@@ -36,7 +38,7 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
 
 export function Select({ className, options, ...props }: SelectProps) {
   return (
-    <select className={cn('w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-500', className)} {...props}>
+    <select className={cn(fieldClass, className)} {...props}>
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -44,8 +46,8 @@ export function Select({ className, options, ...props }: SelectProps) {
 
 export function Card({ title, children, className }: { title?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={cn('rounded-xl border border-slate-800 bg-slate-900/60 p-4', className)}>
-      {title && <h2 className="mb-3 text-sm font-semibold text-slate-200">{title}</h2>}
+    <section className={cn('rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm', className)}>
+      {title && <h2 className="mb-3 text-sm font-semibold">{title}</h2>}
       {children}
     </section>
   );
@@ -53,28 +55,28 @@ export function Card({ title, children, className }: { title?: string; children:
 
 export function Badge({ children, tone = 'slate' }: { children: ReactNode; tone?: 'slate' | 'green' | 'red' | 'amber' }) {
   const styles = {
-    slate: 'bg-slate-700 text-slate-200',
-    green: 'bg-emerald-700 text-emerald-50',
-    red: 'bg-red-700 text-red-50',
-    amber: 'bg-amber-700 text-amber-50',
+    slate: 'bg-muted text-muted-foreground',
+    green: 'bg-primary text-primary-foreground',
+    red: 'bg-destructive text-destructive-foreground',
+    amber: 'bg-accent text-accent-foreground',
   }[tone];
   return <span className={cn('rounded-full px-2 py-1 text-xs font-medium', styles)}>{children}</span>;
 }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <label className="block space-y-1 text-xs text-slate-400">{label}{children}</label>;
+  return <label className="block space-y-1 text-xs text-muted-foreground">{label}{children}</label>;
 }
 
 export function Tabs({ tabs, value, onChange }: { tabs: { id: string; label: string }[]; value: string; onChange: (id: string) => void }) {
   return (
-    <div className="flex gap-1 border-b border-slate-800 px-6">
+    <div className="flex gap-1 border-b border-border bg-background px-6">
       {tabs.map((t) => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
           className={cn(
             'border-b-2 px-4 py-3 text-sm font-medium',
-            value === t.id ? 'border-indigo-500 text-indigo-300' : 'border-transparent text-slate-400 hover:text-slate-200',
+            value === t.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground',
           )}
         >
           {t.label}

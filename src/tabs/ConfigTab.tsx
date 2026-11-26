@@ -66,7 +66,7 @@ export default function ConfigTab() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Configuration</h1>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">{message}</span>
+          <span className="text-xs text-muted-foreground">{message}</span>
           <Button onClick={() => void save()}>Save settings</Button>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function ConfigTab() {
               onChange={(e) => set('number_api_header', e.target.value)}
               placeholder='mauthapi="your-token"'
             />
-            <p className="mt-1 text-xs text-slate-500">The getnum API rejects requests without this header. Click Save settings after changing it.</p>
+            <p className="mt-1 text-xs text-muted-foreground">The getnum API rejects requests without this header. Click Save settings after changing it.</p>
           </Field>
         </Card>
 
@@ -140,7 +140,7 @@ export default function ConfigTab() {
             }).then((r) => setMessage(`Number: ${r.phone} (${r.range})`)).catch((e) => setMessage(String(e)))}>
               Test getnum
             </Button>
-            <span className="text-xs text-slate-500">Uses the values currently in the form — no need to save first.</span>
+            <span className="text-xs text-muted-foreground">Uses the values currently in the form — no need to save first.</span>
           </div>
         </Card>
       </div>

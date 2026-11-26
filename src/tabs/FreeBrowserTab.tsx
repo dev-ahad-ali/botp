@@ -25,7 +25,7 @@ export default function FreeBrowserTab() {
 
   return (
     <div className="h-[calc(100%-1.5rem)]">
-      <div ref={barRef} className="flex h-[120px] shrink-0 flex-col justify-center gap-2 border-b border-slate-800">
+      <div ref={barRef} className="flex h-[120px] shrink-0 flex-col justify-center gap-2 border-b border-border">
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => void api.freeBrowser.back()}>←</Button>
           <Button variant="outline" onClick={() => void api.freeBrowser.forward()}>→</Button>
@@ -33,7 +33,7 @@ export default function FreeBrowserTab() {
           <Input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && go()} placeholder="https://" />
           <Button onClick={go}>Go</Button>
         </div>
-        <p className="text-xs text-slate-500">The page renders below this bar in a WebContentsView.</p>
+        <p className="text-xs text-muted-foreground">The page renders below this bar in a WebContentsView.</p>
       </div>
     </div>
   );

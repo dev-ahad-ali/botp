@@ -15,7 +15,7 @@ const tabs = [
 export default function App() {
   const [tab, setTab] = useState('config');
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background text-foreground">
       <Tabs tabs={tabs} value={tab} onChange={setTab} />
       <main className="min-h-0 flex-1 overflow-auto p-6">
         {tab === 'config' && <ConfigTab />}

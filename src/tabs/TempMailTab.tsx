@@ -43,13 +43,13 @@ export default function TempMailTab() {
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">Temp Mail</h1>
         <Badge>{service}</Badge>
-        <span className="text-xs text-slate-500">{url}</span>
-        <span className="ml-auto text-xs text-slate-400">{message}</span>
+        <span className="text-xs text-muted-foreground">{url}</span>
+        <span className="ml-auto text-xs text-muted-foreground">{message}</span>
       </div>
 
       <Card title="Current address">
         <div className="flex flex-wrap items-center gap-3">
-          <code className="rounded bg-slate-950 px-3 py-2 text-sm text-emerald-300">{address || '—'}</code>
+          <code className="rounded bg-background px-3 py-2 text-sm text-primary">{address || '—'}</code>
           <Button disabled={busy} onClick={() => void run(async () => setMessage(`Copied: ${await api.tempMail.copy()}`))}>Copy email</Button>
           <Button variant="outline" disabled={busy} onClick={() => void run(async () => setAddress(await api.tempMail.regenerate()))}>New email</Button>
           <Button variant="outline" disabled={busy} onClick={() => void run(async () => {
@@ -62,24 +62,24 @@ export default function TempMailTab() {
             setCode(found.code);
           })}>Wait for code</Button>
         </div>
-        <p className="mt-3 text-xs text-slate-500">The real site is open in a separate Playwright Chromium window. Selectors can be tuned in the temp-mail adapter.</p>
+        <p className="mt-3 text-xs text-muted-foreground">The real site is open in a separate Playwright Chromium window. Selectors can be tuned in the temp-mail adapter.</p>
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_240px]">
         <Card title="Inbox">
           <div className="space-y-2">
-            {messages.length === 0 && <p className="text-sm text-slate-500">No messages yet.</p>}
+            {messages.length === 0 && <p className="text-sm text-muted-foreground">No messages yet.</p>}
             {messages.map((m, i) => (
-              <div key={i} className="rounded-md border border-slate-800 p-3">
+              <div key={i} className="rounded-md border border-border p-3">
                 <p className="text-sm font-medium">{m.subject}</p>
-                <p className="mt-1 text-xs text-slate-400">{m.preview}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{m.preview}</p>
               </div>
             ))}
           </div>
         </Card>
 
         <Card title="Verification code">
-          <p className="font-mono text-2xl text-emerald-300">{code || '—'}</p>
+          <p className="font-mono text-2xl text-primary">{code || '—'}</p>
         </Card>
       </div>
     </div>
