@@ -33,7 +33,17 @@ function current() {
 export async function openTempMail(config: TempMailProviderConfig) {
   if (!config.url) throw new Error(`${config.name}: no URL configured`);
   const ctx = await ensureContext();
-  if (page && !page.isClosed()) await page.close().catch(() => undefined);
+
+  // Reuse the live page so opening the Temp Mail tab during a run cannot
+  // replace the page the automation is polling.
+  if (isOpen() && provider?.url === config.url) {
+    const { adapter } = current();
+    const address = await adapter.copyAddress().catch(() => adapter.readAddress());
+    await page?.bringToFront();
+    return { address, service: config.name, url: config.url };
+  }
+
+  if (isOpen()) await page?.close().catch(() => undefined);
 
   resetStop();
   provider = config;
