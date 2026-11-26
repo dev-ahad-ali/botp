@@ -10,7 +10,7 @@ export default function AutomationTab() {
   const [current, setCurrent] = useState<Current | null>(null);
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [attempt, setAttempt] = useState(0);
-  const [tempMail, setTempMail] = useState('Package pool (automatic)');
+  const [tempMail, setTempMail] = useState('Selected temp-mail site');
   const [rangeLabels, setRangeLabels] = useState<Record<number, string>>({});
 
   const refreshRuns = useCallback(() => {
@@ -21,7 +21,7 @@ export default function AutomationTab() {
     refreshRuns();
     void Promise.all([api.config.get(), api.providers.list(), api.ranges.list()]).then(([cfg, providers, ranges]) => {
       const found = providers.find((p) => String(p.id) === cfg.selected_tempmail_id);
-      setTempMail(found?.name ?? 'Package pool (automatic)');
+      setTempMail(found?.name ?? 'First enabled site');
       setRangeLabels(Object.fromEntries(ranges.map((r) => [r.id, r.display])));
     }).catch(() => undefined);
 
@@ -39,6 +39,8 @@ export default function AutomationTab() {
         setCurrent(null);
         refreshRuns();
       }
+      if (e.type === 'temp:open') setTempMail(e.service);
+      if (e.type === 'temp:address') setCurrent((c) => ({ ...c, email: e.address }));
     });
     return off;
   }, [refreshRuns]);
@@ -57,7 +59,7 @@ export default function AutomationTab() {
         <Card title="Current run">
           <dl className="space-y-2 text-sm">
             <div><dt className="text-slate-500">Range</dt><dd>{current?.range ?? '—'}</dd></div>
-            <div><dt className="text-slate-500">Package</dt><dd>{current?.pkg ?? '—'}</dd></div>
+            <div><dt className="text-slate-500">Adapter</dt><dd>{current?.pkg ?? '—'}</dd></div>
             <div><dt className="text-slate-500">Phone</dt><dd>{current?.phone ?? '—'}</dd></div>
             <div><dt className="text-slate-500">Email</dt><dd className="break-all">{current?.email ?? '—'}</dd></div>
           </dl>

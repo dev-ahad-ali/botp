@@ -9,6 +9,7 @@ export default function ConfigTab() {
   const [services, setServices] = useState<Service[]>([]);
   const [providerFilter, setProviderFilter] = useState('');
   const [newProvider, setNewProvider] = useState('');
+  const [newProviderUrl, setNewProviderUrl] = useState('');
   const [newRange, setNewRange] = useState('');
   const [message, setMessage] = useState('');
 
@@ -17,7 +18,7 @@ export default function ConfigTab() {
       api.config.get(), api.providers.list(), api.ranges.list(), api.services.list(),
     ]);
     setDraft(config);
-    setProviders(p.filter((x) => x.enabled));
+    setProviders(p.filter((x) => x.enabled && x.url));
     setRanges(r.filter((x) => x.enabled));
     setServices(s);
   };
@@ -26,7 +27,8 @@ export default function ConfigTab() {
 
   const visibleProviders = useMemo(() => {
     const q = providerFilter.toLowerCase();
-    const found = providers.filter((p) => p.name.toLowerCase().includes(q) || p.domain.toLowerCase().includes(q));
+    const found = providers.filter((p) =>
+      p.name.toLowerCase().includes(q) || p.domain.toLowerCase().includes(q) || p.url.toLowerCase().includes(q));
     const selected = providers.find((p) => String(p.id) === draft.selected_tempmail_id);
     return selected && !found.some((p) => p.id === selected.id) ? [selected, ...found] : found;
   }, [providers, providerFilter, draft.selected_tempmail_id]);
@@ -41,9 +43,14 @@ export default function ConfigTab() {
   };
 
   const addProvider = async () => {
-    if (!newProvider.trim()) return;
-    await api.providers.add({ name: newProvider.trim() });
+    if (!newProvider.trim() || !newProviderUrl.trim()) return;
+    await api.providers.add({
+      name: newProvider.trim(),
+      url: newProviderUrl.trim(),
+      adapterKey: 'generic',
+    });
     setNewProvider('');
+    setNewProviderUrl('');
     await load();
   };
 
@@ -75,20 +82,21 @@ export default function ConfigTab() {
           </Field>
         </Card>
 
-        <Card title="Temp mail (cosmetic label)">
-          <Field label="Search providers">
-            <Input value={providerFilter} onChange={(e) => setProviderFilter(e.target.value)} placeholder="mailnesia" />
+        <Card title="Temp mail website">
+          <Field label="Search sites">
+            <Input value={providerFilter} onChange={(e) => setProviderFilter(e.target.value)} placeholder="temp-mail" />
           </Field>
           <Field label="Selected site">
             <Select
               value={draft.selected_tempmail_id ?? ''}
               onChange={(e) => set('selected_tempmail_id', e.target.value)}
-              options={[{ value: '', label: 'Package pool (automatic)' }, ...visibleProviders.map((p) => ({ value: String(p.id), label: p.domain }))]}
+              options={[{ value: '', label: 'First enabled site' }, ...visibleProviders.map((p) => ({ value: String(p.id), label: p.name }))]}
             />
           </Field>
-          <div className="mt-3 flex gap-2">
-            <Input value={newProvider} onChange={(e) => setNewProvider(e.target.value)} placeholder="Add site name" />
-            <Button variant="outline" onClick={() => void addProvider()}>Add</Button>
+          <div className="mt-3 space-y-2">
+            <Input value={newProvider} onChange={(e) => setNewProvider(e.target.value)} placeholder="Site name" />
+            <Input value={newProviderUrl} onChange={(e) => setNewProviderUrl(e.target.value)} placeholder="https://temp-mail.org/en/" />
+            <Button variant="outline" onClick={() => void addProvider()}>Add site</Button>
           </div>
         </Card>
 
@@ -117,8 +125,8 @@ export default function ConfigTab() {
 
         <Card title="Smoke tests" className="md:col-span-2">
           <div className="flex flex-wrap items-center gap-3">
-            <Button variant="outline" onClick={() => void api.smoke.inbox().then((r) => setMessage(`Inbox: ${r.address} (${r.pkg})`)).catch((e) => setMessage(String(e)))}>
-              Test inbox
+            <Button variant="outline" onClick={() => void api.tempMail.open().then((r) => setMessage(`Opened ${r.service}: ${r.address}`)).catch((e) => setMessage(String(e)))}>
+              Open temp mail
             </Button>
             <Button variant="outline" onClick={() => void api.smoke.number().then((r) => setMessage(`Number: ${r.phone} (${r.range})`)).catch((e) => setMessage(String(e)))}>
               Test getnum
