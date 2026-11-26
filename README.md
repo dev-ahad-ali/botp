@@ -19,7 +19,8 @@ npm run dev
 - The selected temp-mail site in Configuration is a real website URL. On Start, the app opens that site in Playwright, copies the generated address from it, and reads the inbox from that same page.
 - The Temp Mail tab lets you open/refresh the site, copy or regenerate the address, inspect messages, and wait for a verification code manually.
 - Site-specific selectors live in `server/tempMail/generic.ts` and `server/tempMail/adapters.ts`. They are best-effort and meant for live tuning.
-- Number API response parsing supports common shapes (`number`, `num`, `data.number`, `phone`, or a raw string). Adjust `server/numbers/client.ts` when the real shape is confirmed.
+- The number API requires a `mauthapi` header. Enter it in Configuration as `mauthapi="token"` and click **Save settings**; without it, the smoke test returns `401 missing mauthapi header`.
+- Number parsing supports the observed response shape (`data.full_number`, `data.no_plus_number`, `data.national_number`) plus common flat fields.
 - Twilio selectors in `server/automation/services/twilio.ts` are best-effort placeholders for live tuning.
 - SMS verification is intentionally out of scope for this prototype; the flow stops after phone submission.
 

@@ -362,37 +362,32 @@ export async function closeAll() { /* close browser */ }
 
 ### 7.3 Number API Client (`server/numbers/client.ts`)
 
+The API requires a `mauthapi` header. The setting `number_api_header` accepts `mauthapi="token"`, `mauthapi=token`, `mauthapi: token`, or a bare token. A missing header produces `HTTP 401: missing mauthapi header`.
+
 ```ts
-export async function getNumber(cfg: {
-  url: string; headerRaw: string; rid: string;
+export async function getNumber({ url, headerRaw, rid }: {
+  url: string; headerRaw?: string; rid: string;
 }): Promise<string> {
-  // headerRaw e.g.: mauthapi="abc123"
-  const [hName, hVal] = parseHeader(cfg.headerRaw);
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const header = parseHeader(headerRaw);
+  if (header) headers[header[0]] = header[1];
 
-  const res = await fetch(cfg.url, {
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', [hName]: hVal },
-    body: JSON.stringify({ rid: cfg.rid }),
+    headers,
+    body: JSON.stringify({ rid }),
   });
-  if (!res.ok) throw new Error(`getnum HTTP ${res.status}`);
-  const data = await res.json();
+  if (!res.ok) throw new Error(`getnum HTTP ${res.status}: ${await errorMessage(res)}`);
 
-  // The exact response shape is unknown; support common shapes:
-  const number =
-    data.number ?? data.num ?? data.data?.number ?? data.phone ??
-    (typeof data === 'string' ? data : null);
+  const data = await res.json();
+  // Real response: { meta, data: { full_number, national_number, ... }, message, rid }
+  const number = extractNumber(data);
   if (!number) throw new Error(`getnum: unrecognized response ${JSON.stringify(data)}`);
   return String(number);
 }
-
-function parseHeader(raw: string): [string, string] {
-  const m = raw.match(/^\s*([^=]+?)\s*=\s*"?(.*?)"?\s*$/);
-  if (!m) throw new Error('Invalid header format (expected key="value")');
-  return [m[1].trim(), m[2].trim()];
-}
 ```
 
-> **Assumption to verify against the real API:** the response returns a field containing the number. Update `getNumber` once observed. Also, `rid` is sent as the **prefix** (trailing `X`s stripped) per your instruction.
+`extractNumber()` prefers `data.full_number`, then `data.no_plus_number`, `data.national_number`, and common flat fields. `rid` is sent as the range **prefix** (trailing `X`s stripped).
 
 ### 7.4 Random Generators (`server/generators.ts`)
 
@@ -757,7 +752,7 @@ Sections:
 |---------|----------|
 | **Target service** | `<Select>` from `services.list` (Twilio only for now) |
 | **Temp mail website** | Searchable `<Select>` from `providers.list` filtered to rows with a URL; "Add site" form for name + URL; "Open temp mail" smoke test |
-| **Number API** | `<Input>` for URL, `<Input>` for header (`mauthapi="…"`), "Test getnum" smoke test |
+| **Number API** | `<Input>` for URL, `<Input>` for required `mauthapi="…"` header, "Test getnum" smoke test |
 | **Range** | `<Select>` with "Rotate all" + individual ranges; "Add range" form (accepts `99277XXX`, stores `display` and derived `prefix`) |
 
 On save: `api.config.set('selected_service', …)` etc. Store `selected_range_id` and `selected_tempmail_id` as strings (`''` means default/rotate-all).
@@ -857,7 +852,7 @@ Failures in tests 8–10 are expected on first run and mean selector tuning, not
 - **Twilio selectors** are placeholders; expect to iterate live.
 - **SMS verification**: Twilio's final step sends an SMS to the number. If a receive-SMS endpoint exists, add `server/numbers/sms.ts` and wire it into `RunContext`. Without it, the flow stops at phone submission.
 - **Playwright Chromium runs in a separate OS window** — not embedded. Intentional for the prototype.
-- **Response shape of `getnum`** is assumed; adjust `getNumber` once observed.
+- **`getnum` requires a valid `mauthapi` header**; the app cannot supply it automatically. Enter it in Configuration and click Save settings.
 - Old decorative provider rows remain in SQLite but are disabled and hidden from the UI.
 
 ---

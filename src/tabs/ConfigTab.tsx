@@ -104,8 +104,13 @@ export default function ConfigTab() {
           <Field label="URL">
             <Input value={draft.number_api_url ?? ''} onChange={(e) => set('number_api_url', e.target.value)} />
           </Field>
-          <Field label="Auth header (optional, e.g. mauthapi=&quot;token&quot;)">
-            <Input value={draft.number_api_header ?? ''} onChange={(e) => set('number_api_header', e.target.value)} />
+          <Field label="Auth header (required, e.g. mauthapi=&quot;token&quot;)">
+            <Input
+              value={draft.number_api_header ?? ''}
+              onChange={(e) => set('number_api_header', e.target.value)}
+              placeholder='mauthapi="your-token"'
+            />
+            <p className="mt-1 text-xs text-slate-500">The getnum API rejects requests without this header. Click Save settings after changing it.</p>
           </Field>
         </Card>
 
