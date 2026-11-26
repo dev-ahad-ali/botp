@@ -14,7 +14,7 @@ The app is a local desktop tool with **five tabs**:
 
 | # | Tab | Purpose |
 |---|-----|---------|
-| 1 | **Configuration** | Pick one of the listed temp-mail websites by URL, configure the number API (URL + auth header), manage ranges, select the target service (Twilio first) |
+| 1 | **Configuration** | Pick one of the 200 seeded temp-mail websites by URL (or add your own), configure the number API (URL + auth header), manage ranges, select the target service (Twilio first) |
 | 2 | **Automation** | Control panel: Start / Stop, live status, step log, per-run stats. Playwright drives a separate Chromium window only for the Twilio signup flow |
 | 3 | **Temp Mail** | Inbox control panel: current address, copy/regenerate, message list, and wait-for-code |
 | 4 | **Temp Mail Site** | The real temp-mail website embedded in the app via `WebContentsView` |
@@ -218,28 +218,87 @@ await prisma.setting.createMany({
 
 ### 6.3 Temp Mail Providers — real websites only
 
-The old domain list from `Temp mail provider list.txt` is retained but disabled (`url = ''`). Only entries with a real URL can be selected. The seed inserts three ready-made sites:
+The old decorative domain rows are disabled (`url = ''`). The seed now inserts the full user-supplied site list below. Each domain becomes a `TempMailProvider` with `url = https://<domain>/`, `adapterKey = generic`, and `isBuiltin = true`. Only the first site is enabled by default; every site with a URL is still selectable in Configuration.
 
 ```ts
-const sites = [
-  { name: 'Temp Mail', domain: 'temp-mail.org', url: 'https://temp-mail.org/en/', adapterKey: 'tempmail-org' },
-  { name: 'Temp Mail IO', domain: 'temp-mail.io', url: 'https://temp-mail.io/en/', adapterKey: 'generic' },
-  { name: '1SecMail', domain: '1secmail.com', url: 'https://www.1secmail.com/', adapterKey: 'generic' },
+const TEMP_MAIL_SITE_SEED = [
+  '10minutemail.pro','1secmail.com','1tempsms.com','33mail.co',
+  '5minutemail.com','adguardtemp.com','alias.email','anonaddy.net',
+  'anonymail.io','anonyops.com','anymail.pw','armyspy.com',
+  'binnedmail.com','blockimail.com','bouncemail.com','burner.email',
+  'byom.de','canarymail.com','catch-all.email','cloaked.email',
+  'cowabunga.email','crocovo.net','cryptclear.com','cthash.com',
+  'daddymail.com','dayrep.com','deadfake.com','desu-mail.com',
+  'disposable-address.com','disposableemail.com','disposableinbox.net','dontregret.com',
+  'duckmail.org','e4ward.com','emailfake.com','emailgenerator.org',
+  'emailisvalid.com','emailsac.com','emailsecure.com','emailsucks.net',
+  'emailtmp.com','emailu.com','fake-mail.org','fakemailgenerator.com',
+  'fastmail.com','forwardmail.net','get1mail.com','getdispostable.com',
+  'giga4u.com','gmx-free.com','goemail.io','grandemail.com',
+  'harakiri-mail.com','hey.ninja','hide-mail.com','hotfake.com',
+  'iheartspam.org','incognitomail.net','inboxbear.com','incognitomail.io',
+  'instant-mail.de','ip4.tinychat.com','jetable.net','kickassfacts.com',
+  'klickemail.com','kurze.link','lifeguardhq.com','mail-berry.com',
+  'mail.acrivia.com','mail.tm-en.com','mail2tor.com','mailcv.com',
+  'maildebris.com','maildrop.net','mailfreeonline.com','mailguard.me',
+  'mailinator.net','mailismagic.com','mailnesia.com','mailsac.com',
+  'mailsi.ru','mailtemporaire.com','mailtrash.net','manysms.com',
+  'meowmail.com','mexem.com','minutely.com','misemail.com',
+  'mobiweb.cz','mohmal.com','moment.im','monkeymail.net',
+  'mrandmrsmith.com','mydispostable.com','mymailbox.online','mytemp.email',
+  'neomailbox.com','neotxt.net','no-spam.ws','notmyemail.com',
+  'nowmyemail.com','nukemail.com','onewaymail.com','onlinesmsbox.com',
+  'opentemporarymail.com','ownmail.net','papermail.io','passmail.net',
+  'petitmail.net','planet-n.com','pookmail.com','postale.io',
+  'privacy.net','protonalias.com','quickinbox.net','random-mail.org',
+  'rcpt.at','realfakeemail.com','recyclemail.com','redditsms.com',
+  'refmail.com','rhylemc.com','roketmail.org','safe-mail.net',
+  'safemail.io','selfdestructemail.com','send-free-sms.com','shademail.com',
+  'shitmail.org','short-term.email','simplemail.io','slopsbox.com',
+  'smailpro.net','spam-me.com','spam4.me','spamgourmet.com',
+  'spammotel.com','spybox.de','startfresh.io','stayanonymous.net',
+  'stripmyemail.com','temporary-address.com','temporaryinbox.com','tempemail.biz',
+  'tempemail.co','tempemail.id','tempemail.lol','tempemail.net',
+  'tempemail.org','tempmail.com','tempmail.net','tempmailbox.com',
+  'tempomail.com','tempsy.com','tempumail.net','textguard.com',
+  'the-one-hand.com','throwaway.email','throwawaymail.net','tmailor.net',
+  'trash-mail.com','trashmail.net','truemail.io','tryemailaddress.com',
+  'tubemail.com','uglymail.com','verytemp.com','vippemail.com',
+  'webcontactinfo.com','webmail.ms','whatismyip.com','whoemail.com',
+  'whyspam.com','yopmail.net','zerospam.email','zippymail.com',
+  '1pad.de','2ndemail.com','365temp.com','4mail.pw',
+  '5ymail.com','6paq.com','7mail.io','9xemail.com',
+  'a1.net','abcemail.biz','abuse.net','accessyour.email.com',
+  'actionemail.net','adcomail.com','aftermail.com','aliaspost.com',
+  'all2easy.com','amilegit.com','anon-email.net','anondotmail.com',
+  'avoidspam.com','b1gmai1.com','bagmail.com','bigfoot.com',
 ];
 
-await prisma.tempMailProvider.updateMany({
-  where: { url: '' },
-  data: { enabled: false },
-});
+const domains = seedArray('TEMP_MAIL_SITE_SEED');
+const sites = domains.map((domain, i) => ({
+  name: domain,
+  domain,
+  url: `https://${domain}/`,
+  adapterKey: 'generic',
+  enabled: i === 0,
+  isBuiltin: true,
+  sortOrder: i,
+}));
 
-await Promise.all(sites.map((data, i) => prisma.tempMailProvider.upsert({
+// Replace only seeded built-ins; user-added sites are left untouched.
+await prisma.tempMailProvider.deleteMany({
+  where: { isBuiltin: true, domain: { notIn: domains } },
+});
+await prisma.tempMailProvider.updateMany({ where: { url: '' }, data: { enabled: false } });
+
+await Promise.all(sites.map((data) => prisma.tempMailProvider.upsert({
   where: { domain: data.domain },
-  create: { ...data, enabled: i === 0, isBuiltin: true, sortOrder: i },
-  update: { ...data, enabled: i === 0, sortOrder: i },
+  create: data,
+  update: data,
 })));
 ```
 
-> Only the first site is enabled by default, but Configuration uses a single dropdown containing **all** rows that have a URL. Choose one and click **Open site** to persist it as the selected site and load it in the embedded tab. New sites are added by URL alone; `adapterKey` defaults to `generic`, which uses the shared selector list in `electron/tempMailView.ts`.
+> Configuration uses a single **Selected site** dropdown containing all rows with a URL. Choose one and click **Open site** to persist it as the selected site and load it in the embedded tab. The automation engine always uses the saved selection. New sites can still be added by URL alone; `adapterKey` defaults to `generic`, which uses the shared selector list in `electron/tempMailView.ts`.
 
 ### 6.4 Ranges — real list with prefixes
 

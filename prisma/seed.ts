@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Keep the prototype seed list in one place: the implementation spec.
+// Keep the prototype seed lists in one place: the implementation spec.
 const spec = readFileSync(path.resolve('setps.md'), 'utf8');
 const seedArray = (name: string) => {
   const block = spec.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`))?.[1];
@@ -28,19 +28,37 @@ async function main() {
     update: { name: 'Twilio', enabled: true },
   });
 
-  // Old decorative domains are kept but disabled: automation now uses real sites.
+  const domains = seedArray('TEMP_MAIL_SITE_SEED');
+  const sites = domains.map((domain, i) => ({
+    name: domain,
+    domain,
+    url: `https://${domain}/`,
+    adapterKey: 'generic',
+    enabled: i === 0,
+    isBuiltin: true,
+    sortOrder: i,
+  }));
+
+  // Replace only seeded built-ins; user-added sites are left untouched.
+  await prisma.tempMailProvider.deleteMany({
+    where: { isBuiltin: true, domain: { notIn: domains } },
+  });
   await prisma.tempMailProvider.updateMany({ where: { url: '' }, data: { enabled: false } });
 
-  const services = [
-    { name: 'Temp Mail', domain: 'temp-mail.org', url: 'https://temp-mail.org/en/', adapterKey: 'tempmail-org' },
-    { name: 'Temp Mail IO', domain: 'temp-mail.io', url: 'https://temp-mail.io/en/', adapterKey: 'generic' },
-    { name: '1SecMail', domain: '1secmail.com', url: 'https://www.1secmail.com/', adapterKey: 'generic' },
-  ];
-  await Promise.all(services.map((data, i) => prisma.tempMailProvider.upsert({
+  await Promise.all(sites.map((data) => prisma.tempMailProvider.upsert({
     where: { domain: data.domain },
-    create: { ...data, enabled: i === 0, isBuiltin: true, sortOrder: i },
-    update: { ...data, enabled: i === 0, sortOrder: i },
+    create: data,
+    update: data,
   })));
+
+  // A previously selected built-in may have been removed above.
+  const selected = await prisma.setting.findUnique({ where: { key: 'selected_tempmail_id' } });
+  if (selected?.value) {
+    const exists = await prisma.tempMailProvider.findUnique({ where: { id: Number(selected.value) } });
+    if (!exists) {
+      await prisma.setting.update({ where: { key: 'selected_tempmail_id' }, data: { value: '' } });
+    }
+  }
 
   const ranges = seedArray('RANGE_SEED');
   await Promise.all(ranges.map((display, i) => {
@@ -48,7 +66,7 @@ async function main() {
     return prisma.range.upsert({ where: { display }, create: data, update: data });
   }));
 
-  console.log(`Seeded ${services.length} mail sites and ${ranges.length} ranges`);
+  console.log(`Seeded ${sites.length} mail sites and ${ranges.length} ranges`);
 }
 
 main()

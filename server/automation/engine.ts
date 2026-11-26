@@ -31,8 +31,9 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
     const rotation = selected.length ? selected : ranges;
 
     const providerId = cfg.selected_tempmail_id ? Number(cfg.selected_tempmail_id) : null;
-    const provider = providerId
-      ? await getProvider(providerId)
+    const byId = providerId ? await getProvider(providerId) : null;
+    const provider = byId?.url
+      ? byId
       : await prisma.tempMailProvider.findFirst({ where: { enabled: true, url: { not: '' } }, orderBy: { sortOrder: 'asc' } });
     if (!provider?.url) throw new Error('Select a temp-mail website in Configuration');
 

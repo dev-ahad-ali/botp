@@ -23,8 +23,9 @@ const emitTemp = (event: TempMailEvent) => win?.webContents.send('tempMail:event
 async function selectedProvider(id?: number) {
   const cfg = await getConfig();
   const providerId = id ?? (cfg.selected_tempmail_id ? Number(cfg.selected_tempmail_id) : null);
-  const provider = providerId
-    ? await dbOps.getProvider(providerId)
+  const byId = providerId ? await dbOps.getProvider(providerId) : null;
+  const provider = byId?.url
+    ? byId
     : await prisma.tempMailProvider.findFirst({ where: { enabled: true, url: { not: '' } }, orderBy: { sortOrder: 'asc' } });
   if (!provider?.url) throw new Error('Select a temp-mail website in Configuration');
   return provider;
