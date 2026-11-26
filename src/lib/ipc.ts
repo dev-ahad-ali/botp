@@ -1,5 +1,12 @@
 export type Provider = {
-  id: number; name: string; domain: string; enabled: boolean; isBuiltin: boolean; sortOrder: number;
+  id: number;
+  name: string;
+  domain: string;
+  url: string;
+  adapterKey: string;
+  enabled: boolean;
+  isBuiltin: boolean;
+  sortOrder: number;
 };
 export type Range = { id: number; display: string; prefix: string; enabled: boolean; sortOrder: number };
 export type Service = { id: number; key: string; name: string; enabled: boolean };
@@ -14,12 +21,19 @@ export type RunRow = {
   logs: { level: string; message: string; createdAt: string | Date }[];
 };
 
+export type TempMailMessage = { subject: string; preview: string; body?: string; code?: string | null };
+export type TempMailEvent =
+  | { type: 'temp:open'; service: string; url: string }
+  | { type: 'temp:address'; address: string }
+  | { type: 'temp:code'; code: string };
+
 export type AutomationEvent =
   | { type: 'status'; running: boolean }
   | { type: 'log'; runId: number; message: string; data?: unknown }
   | { type: 'run:start'; runId: number; range: string; pkg: string }
   | { type: 'run:info'; runId: number; phone?: string; email?: string; range?: string }
-  | { type: 'run:done'; runId: number; status: 'success' | 'failed' | 'stopped'; error?: string };
+  | { type: 'run:done'; runId: number; status: 'success' | 'failed' | 'stopped'; error?: string }
+  | TempMailEvent;
 
 export type Api = {
   config: {
@@ -28,7 +42,7 @@ export type Api = {
   };
   providers: {
     list: () => Promise<Provider[]>;
-    add: (p: { name: string; domain?: string }) => Promise<Provider>;
+    add: (p: { name: string; domain?: string; url?: string; adapterKey?: string }) => Promise<Provider>;
     setEnabled: (id: number, enabled: boolean) => Promise<Provider>;
   };
   ranges: {
@@ -38,9 +52,15 @@ export type Api = {
   };
   services: { list: () => Promise<Service[]> };
   runs: { list: (limit?: number) => Promise<RunRow[]> };
-  smoke: {
-    inbox: () => Promise<{ pkg: string; address: string }>;
-    number: () => Promise<{ phone: string; range: string }>;
+  smoke: { number: () => Promise<{ phone: string; range: string }> };
+  tempMail: {
+    open: (providerId?: number) => Promise<{ address: string; service: string; url: string }>;
+    refresh: () => Promise<{ address: string; messages: TempMailMessage[] }>;
+    copy: () => Promise<string>;
+    regenerate: () => Promise<string>;
+    waitForCode: (timeoutMs?: number) => Promise<{ code: string; message: TempMailMessage }>;
+    close: () => Promise<void>;
+    onEvent: (cb: (e: TempMailEvent) => void) => () => void;
   };
   automation: {
     start: () => Promise<void>;

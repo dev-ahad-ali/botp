@@ -1,10 +1,12 @@
 import { app, BrowserWindow, WebContentsView, ipcMain } from 'electron';
 import path from 'node:path';
 import { startAutomation, stopAutomation } from '../server/automation/engine';
+import type { TempMailEvent } from '../server/automation/types';
 import { getConfig, setConfig } from '../server/config';
 import * as dbOps from '../server/dbOps';
-import { smokeTestInbox } from '../server/mailPool/pool';
+import { prisma } from '../server/db';
 import { getNumber } from '../server/numbers/client';
+import * as tempMail from '../server/tempMail/session';
 
 let win: BrowserWindow | null = null;
 let freeView: WebContentsView | null = null;
@@ -14,6 +16,18 @@ function updateFreeBounds() {
   if (!freeView || !win) return;
   const [width, height] = win.getContentSize();
   freeView.setBounds({ x: 0, y: freeTop, width, height: Math.max(height - freeTop, 0) });
+}
+
+const emitTemp = (event: TempMailEvent) => win?.webContents.send('tempMail:event', event);
+
+async function selectedProvider(id?: number) {
+  const cfg = await getConfig();
+  const providerId = id ?? (cfg.selected_tempmail_id ? Number(cfg.selected_tempmail_id) : null);
+  const provider = providerId
+    ? await dbOps.getProvider(providerId)
+    : await prisma.tempMailProvider.findFirst({ where: { enabled: true, url: { not: '' } }, orderBy: { sortOrder: 'asc' } });
+  if (!provider?.url) throw new Error('Select a temp-mail website in Configuration');
+  return provider;
 }
 
 function createWindow() {
@@ -38,7 +52,7 @@ function registerIpc() {
   ipcMain.handle('config:set', (_e, key: string, value: string) => setConfig(key, value));
 
   ipcMain.handle('providers:list', () => dbOps.listProviders());
-  ipcMain.handle('providers:add', (_e, p: { name: string; domain?: string }) => dbOps.addProvider(p));
+  ipcMain.handle('providers:add', (_e, p: Parameters<typeof dbOps.addProvider>[0]) => dbOps.addProvider(p));
   ipcMain.handle('providers:setEnabled', (_e, id: number, enabled: boolean) => dbOps.setProviderEnabled(id, enabled));
 
   ipcMain.handle('ranges:list', () => dbOps.listRanges());
@@ -48,7 +62,6 @@ function registerIpc() {
   ipcMain.handle('services:list', () => dbOps.listServices());
   ipcMain.handle('runs:list', (_e, limit?: number) => dbOps.listRuns(limit ?? 20));
 
-  ipcMain.handle('smoke:inbox', () => smokeTestInbox());
   ipcMain.handle('smoke:number', async () => {
     const cfg = await getConfig();
     const ranges = await dbOps.listRanges();
@@ -58,9 +71,29 @@ function registerIpc() {
     return { phone, range: range.display };
   });
 
+  ipcMain.handle('tempMail:open', async (_e, id?: number) => {
+    const provider = await selectedProvider(id);
+    const result = await tempMail.openTempMail(provider);
+    emitTemp({ type: 'temp:open', service: provider.name, url: provider.url });
+    emitTemp({ type: 'temp:address', address: result.address });
+    return result;
+  });
+  ipcMain.handle('tempMail:refresh', () => tempMail.refresh());
+  ipcMain.handle('tempMail:copy', () => tempMail.copyAddress());
+  ipcMain.handle('tempMail:regenerate', () => tempMail.regenerate());
+  ipcMain.handle('tempMail:waitForCode', async (_e, timeoutMs?: number) => {
+    const found = await tempMail.waitForCode(timeoutMs ?? 180_000);
+    emitTemp({ type: 'temp:code', code: found.code });
+    return found;
+  });
+  ipcMain.handle('tempMail:close', () => tempMail.closeTempMail());
+
   ipcMain.handle('automation:start', () => {
     if (!win) return;
-    void startAutomation((evt) => win?.webContents.send('automation:event', evt));
+    void startAutomation((evt) => {
+      win?.webContents.send('automation:event', evt);
+      if (evt.type === 'temp:open' || evt.type === 'temp:address' || evt.type === 'temp:code') emitTemp(evt);
+    });
   });
   ipcMain.handle('automation:stop', () => stopAutomation());
 

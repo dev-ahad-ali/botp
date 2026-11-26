@@ -1,15 +1,14 @@
-import { chromium, type Browser } from 'playwright';
 import { prisma } from '../db';
 import { getConfig } from '../config';
+import { getProvider } from '../dbOps';
 import { randomPassword, randomFirstName, randomLastName } from '../generators';
-import { pickPackage, reportPackageResult } from '../mailPool/pool';
 import { getNumber } from '../numbers/client';
+import * as tempMail from '../tempMail/session';
 import { SERVICES } from './registry';
 import type { AutomationEvent } from './types';
 
 let running = false;
 let shouldStop = false;
-let browser: Browser | null = null;
 let signalStop: () => void = () => undefined;
 
 export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
@@ -34,13 +33,26 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
     const rotation = selected.length ? selected : ranges;
 
     const providerId = cfg.selected_tempmail_id ? Number(cfg.selected_tempmail_id) : null;
-    browser = await chromium.launch({ headless: false });
+    const provider = providerId
+      ? await getProvider(providerId)
+      : await prisma.tempMailProvider.findFirst({ where: { enabled: true, url: { not: '' } }, orderBy: { sortOrder: 'asc' } });
+    if (!provider?.url) throw new Error('Select a temp-mail website in Configuration');
+
+    const opened = await tempMail.openTempMail(provider);
+    emit({ type: 'temp:open', service: provider.name, url: provider.url });
+    emit({ type: 'temp:address', address: opened.address });
 
     let attempt = 0;
+    let address = opened.address;
     while (!shouldStop) {
       const range = rotation[attempt++ % rotation.length];
+      if (attempt > 1) {
+        address = await tempMail.regenerate();
+        emit({ type: 'temp:address', address });
+      }
+
       const run = await prisma.run.create({
-        data: { serviceKey: service.key, rangeId: range.id, providerId, status: 'running' },
+        data: { serviceKey: service.key, rangeId: range.id, providerId: provider.id, status: 'running' },
       });
 
       const log = async (message: string, data?: unknown) => {
@@ -50,42 +62,35 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
         emit({ type: 'log', runId: run.id, message, data });
       };
 
-      const pkg = pickPackage();
-      let inbox: { address: string; session: unknown } | null = null;
-      let page: Awaited<ReturnType<Browser['newPage']>> | null = null;
-      let reported = false;
-
-      emit({ type: 'run:start', runId: run.id, range: range.display, pkg: pkg.key });
+      let page: Awaited<ReturnType<typeof tempMail.newAutomationPage>> | null = null;
+      emit({ type: 'run:start', runId: run.id, range: range.display, pkg: provider.adapterKey });
+      await log(`temp-mail site: ${provider.name} (${address})`);
 
       try {
         const phone = await getNumber({ url: cfg.number_api_url, headerRaw: cfg.number_api_header, rid: range.prefix });
         await log(`phone fetched: ${phone}`);
+        emit({ type: 'run:info', runId: run.id, phone, email: address, range: range.display });
 
-        inbox = await pkg.createInbox();
-        await log(`inbox created: ${inbox.address}`);
-        emit({ type: 'run:info', runId: run.id, phone, email: inbox.address, range: range.display });
-
-        page = await browser.newPage();
+        page = await tempMail.newAutomationPage();
         await service.run({
           page,
-          email: inbox.address,
+          email: address,
           password: randomPassword(16),
           firstName: randomFirstName(),
           lastName: randomLastName(),
           phone,
           rangeDisplay: range.display,
           getOtp: async () => {
-            const otp = await Promise.race([pkg.waitForOtp(inbox!.session, 180_000), stopped]);
-            if (!otp) throw new Error(shouldStop ? 'Stopped' : 'OTP timeout');
-            return otp;
+            const found = await tempMail.waitForCode(180_000, stopped);
+            emit({ type: 'temp:code', code: found.code });
+            await log(`verification code: ${found.code}`);
+            return found.code;
           },
           log,
           stop: () => shouldStop,
         });
 
         await prisma.run.update({ where: { id: run.id }, data: { status: 'success', endedAt: new Date() } });
-        reportPackageResult(pkg.key, true);
-        reported = true;
         emit({ type: 'run:done', runId: run.id, status: 'success' });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -94,21 +99,16 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
           where: { id: run.id },
           data: { status, endedAt: new Date(), error: message },
         });
-        reportPackageResult(pkg.key, !shouldStop);
-        reported = true;
         emit({ type: 'run:done', runId: run.id, status, error: message });
       } finally {
-        if (!reported) reportPackageResult(pkg.key, true);
         if (page) await page.close().catch(() => undefined);
-        if (inbox) await pkg.dispose(inbox.session).catch(() => undefined);
       }
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     emit({ type: 'log', runId: 0, message: `automation error: ${message}` });
   } finally {
-    await browser?.close().catch(() => undefined);
-    browser = null;
+    await tempMail.closeAll();
     running = false;
     emit({ type: 'status', running: false });
   }
@@ -118,5 +118,6 @@ export function stopAutomation() {
   if (!running) return;
   shouldStop = true;
   signalStop();
-  void browser?.close().catch(() => undefined);
+  tempMail.stopWaits();
+  void tempMail.closeAll();
 }
