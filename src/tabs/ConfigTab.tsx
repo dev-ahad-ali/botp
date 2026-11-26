@@ -43,9 +43,9 @@ export default function ConfigTab({ onOpenSite }: Props) {
     } catch (e) { setMessage(String(e)); }
   };
 
-  const useProvider = (id: number) => set('selected_tempmail_id', String(id));
-
-  const openProvider = async (id: number) => {
+  const openSelectedProvider = async () => {
+    const id = Number(draft.selected_tempmail_id || providers[0]?.id || 0);
+    if (!id) { setMessage('No temp-mail websites configured'); return; }
     try {
       await api.config.set('selected_tempmail_id', String(id));
       await api.providers.setEnabled(id, true);
@@ -84,29 +84,28 @@ export default function ConfigTab({ onOpenSite }: Props) {
           </Field>
         </Card>
 
-        <Card title="Temp mail websites">
-          <p className="mb-3 text-xs text-muted-foreground">
-            All configured sites are listed with their full URL. Click <strong>Open</strong> to load the selected one inside the app.
-          </p>
-          <div className="max-h-56 space-y-2 overflow-auto pr-1">
-            {providers.length === 0 && <p className="text-xs text-muted-foreground">No temp-mail websites configured.</p>}
-            {providers.map((p) => {
-              const selected = String(p.id) === draft.selected_tempmail_id;
-              return (
-                <div
-                  key={p.id}
-                  className={`flex items-center gap-2 rounded-md border px-3 py-2 ${selected ? 'border-primary bg-accent/30' : 'border-border'}`}
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{p.name}</div>
-                    <code className="block truncate text-xs text-muted-foreground">{p.url}</code>
-                  </div>
-                  <Button variant="outline" onClick={() => useProvider(p.id)}>Use</Button>
-                  <Button onClick={() => void openProvider(p.id)}>Open</Button>
-                </div>
-              );
-            })}
+        <Card title="Temp mail website">
+          <Field label="Selected site">
+            <Select
+              value={draft.selected_tempmail_id ?? ''}
+              onChange={(e) => set('selected_tempmail_id', e.target.value)}
+              options={[
+                { value: '', label: 'First configured site' },
+                ...providers.map((p) => ({ value: String(p.id), label: `${p.name} — ${p.url}` })),
+              ]}
+            />
+          </Field>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button onClick={() => void openSelectedProvider()}>Open site</Button>
+            <Button variant="outline" onClick={() => void api.tempSite.open()
+              .then((r) => setMessage(`Loaded ${r.service}: ${r.address}`))
+              .catch((e) => setMessage(String(e)))}>
+              Load selected site
+            </Button>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Every configured URL appears in the dropdown. <strong>Open site</strong> saves the choice and switches to the embedded tab.
+          </p>
           <div className="mt-3 flex gap-2">
             <Input
               value={newProviderUrl}

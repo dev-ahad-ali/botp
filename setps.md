@@ -2,6 +2,7 @@
 
 **Version:** 0.1 (Prototype)
 **Stack:** Electron · React · shadcn/ui · Playwright · SQLite (Prisma)
+**Theme:** shadcn dark tokens by default (`<html class="dark">` in `src/index.html`)
 **First service:** Twilio (modular — more services later)
 **Goal:** A working prototype base that demonstrates the full loop end-to-end. Twilio selectors will be tuned after live testing; this doc focuses on the parts we already know work.
 
@@ -238,7 +239,7 @@ await Promise.all(sites.map((data, i) => prisma.tempMailProvider.upsert({
 })));
 ```
 
-> Only the first site is enabled by default, but Configuration lists **all** rows that have a URL. Click **Open** on any row to persist it as the selected site and load it in the embedded tab. New sites are added by URL alone; `adapterKey` defaults to `generic`, which uses the shared selector list in `electron/tempMailView.ts`.
+> Only the first site is enabled by default, but Configuration uses a single dropdown containing **all** rows that have a URL. Choose one and click **Open site** to persist it as the selected site and load it in the embedded tab. New sites are added by URL alone; `adapterKey` defaults to `generic`, which uses the shared selector list in `electron/tempMailView.ts`.
 
 ### 6.4 Ranges — real list with prefixes
 
@@ -744,7 +745,7 @@ Wrap in `<Tabs>` in `App.tsx`. The **Temp Mail Site** and **Free Browser** tabs 
 | Section | Controls |
 |---------|----------|
 | **Target service** | `<Select>` from `services.list` (Twilio only for now) |
-| **Temp mail websites** | A list of **all** configured rows with their full URLs; **Use** selects, **Open** persists and switches to the site tab; URL-only **Add site** form. No name or search inputs |
+| **Temp mail website** | A **Selected site** dropdown like the range dropdown; every option shows its full URL. **Open site** persists the choice and switches to the embedded tab; URL-only **Add site** form. No name or search inputs |
 | **Number API** | `<Input>` for URL, `<Input>` for required `mauthapi="…"` header, "Test getnum" smoke test |
 | **Range** | `<Select>` with "Rotate all" + individual ranges; "Add range" form (accepts `99277XXX`, stores `display` and derived `prefix`) |
 
@@ -823,7 +824,7 @@ Follow in order. Each step ends with a concrete verification.
 | # | Test | Expected |
 |---|------|----------|
 | 1 | Config persists across restart | ✔ |
-| 2 | Add temp-mail website with URL → appears in the full URL list | ✔ |
+| 2 | Add temp-mail website with URL → appears in the site dropdown with its full URL | ✔ |
 | 3 | Add range `99277XXX` → row stored with `prefix = "99277"` | ✔ |
 | 4 | Single range selected → every request uses that `prefix` | ✔ |
 | 5 | "Rotate all" selected → consecutive requests advance through ranges | ✔ |
