@@ -93,6 +93,7 @@ export type Api = {
     stop: () => Promise<void>;
     onEvent: (cb: (e: AutomationEvent) => void) => () => void;
   };
+  browser: { reset: () => Promise<void> };
   freeBrowser: {
     attach: (url: string, top?: number) => Promise<void>;
     setTop: (top: number) => Promise<void>;

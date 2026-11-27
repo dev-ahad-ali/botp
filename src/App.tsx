@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Badge, Button, Tabs } from './components/ui';
 import { api, type AutomationEvent } from './lib/ipc';
 import { useAppStore } from './store/appStore';
@@ -25,6 +25,17 @@ export default function App() {
   const setTab = useAppStore((s) => s.setTab);
   const running = useAppStore((s) => s.running);
   const stage = useAppStore((s) => s.stage);
+  const [resetting, setResetting] = useState(false);
+
+  const resetBrowser = async () => {
+    setResetting(true);
+    try {
+      await api.browser.reset();
+      useAppStore.getState().resetFlow();
+    } finally {
+      setResetting(false);
+    }
+  };
 
   useEffect(() => api.automation.onEvent((e: AutomationEvent) => {
     const s = useAppStore.getState();
@@ -47,8 +58,11 @@ export default function App() {
     <div className="flex h-full flex-col bg-background text-foreground">
       <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2">
         <h1 className="mr-2 text-sm font-semibold">OTP Automation</h1>
-        <Button className="px-3 py-1 text-xs" onClick={() => void api.automation.start()} disabled={running}>Start</Button>
+        <Button className="px-3 py-1 text-xs" onClick={() => void api.automation.start()} disabled={running || resetting}>Start</Button>
         <Button className="px-3 py-1 text-xs" variant="destructive" onClick={() => void api.automation.stop()} disabled={!running}>Stop</Button>
+        <Button className="px-3 py-1 text-xs" variant="outline" onClick={() => void resetBrowser()} disabled={resetting}>
+          {resetting ? 'Resetting…' : 'Reset Browser'}
+        </Button>
         <Badge tone={running ? 'green' : 'slate'}>{running ? 'running' : 'idle'}</Badge>
         {stage !== 'idle' && <Badge tone="amber">{stage}</Badge>}
       </header>

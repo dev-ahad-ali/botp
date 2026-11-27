@@ -11,6 +11,7 @@ import type { AutomationEvent, AutomationService, ServiceView } from './types';
 let running = false;
 let shouldStop = false;
 let stopSignal = makeStopSignal();
+let stopWaiters: Array<() => void> = [];
 
 function makeStopSignal() {
   let resolve!: () => void;
@@ -175,12 +176,16 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
     running = false;
     emit({ type: 'stage', stage: 'idle' });
     emit({ type: 'status', running: false });
+    for (const resolve of stopWaiters) resolve();
+    stopWaiters = [];
   }
 }
 
-export function stopAutomation() {
-  if (!running) return;
+/** Resolves only after the run has actually unwound, so callers can safely reset the views. */
+export function stopAutomation(): Promise<void> {
+  if (!running) return Promise.resolve();
   shouldStop = true;
   stopSignal.resolve();
   tempMail.stopWaits();
+  return new Promise((resolve) => { stopWaiters.push(resolve); });
 }

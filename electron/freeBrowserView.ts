@@ -6,6 +6,7 @@ let view: WebContentsView | null = null;
 let attached = false;
 let top = 190;
 let home = 'https://www.google.com';
+let sessionId = 0;
 
 export function setMainWindow(window: BrowserWindow) {
   win = window;
@@ -13,6 +14,10 @@ export function setMainWindow(window: BrowserWindow) {
 
 export function getUrl() {
   return view?.webContents.getURL() || '';
+}
+
+export function getHomeUrl() {
+  return home;
 }
 
 export function updateBounds() {
@@ -23,7 +28,8 @@ export function updateBounds() {
 
 async function ensureView() {
   if (!view) {
-    view = new WebContentsView({ webPreferences: { sandbox: true } });
+    // A fresh in-memory partition per reset behaves like a brand-new browser profile.
+    view = new WebContentsView({ webPreferences: { sandbox: true, partition: `automation-browser-${sessionId}` } });
     view.webContents.on('did-navigate', (_e, url) => win?.webContents.send('freeBrowser:url', url));
     view.webContents.on('did-navigate-in-page', (_e, url) => win?.webContents.send('freeBrowser:url', url));
   }
@@ -58,6 +64,20 @@ export function detach() {
     win.contentView.removeChildView(view);
     attached = false;
   }
+}
+
+export function isAttached() {
+  return attached;
+}
+
+/** Destroys the current view and its session; the next attach gets an empty browser profile. */
+export async function resetSession() {
+  if (view && win && attached) win.contentView.removeChildView(view);
+  attached = false;
+  const old = view;
+  view = null;
+  sessionId += 1;
+  old?.webContents.close();
 }
 
 export async function navigate(url: string) {

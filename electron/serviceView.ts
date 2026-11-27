@@ -7,6 +7,7 @@ let attached = false;
 let top = 120;
 let siteUrl = '';
 let startUrl = '';
+let sessionId = 0;
 
 export function setMainWindow(window: BrowserWindow) {
   win = window;
@@ -28,7 +29,8 @@ export function updateBounds() {
 
 async function ensureView() {
   if (!view) {
-    view = new WebContentsView({ webPreferences: { sandbox: true } });
+    // A fresh in-memory partition per reset behaves like a brand-new browser profile.
+    view = new WebContentsView({ webPreferences: { sandbox: true, partition: `automation-browser-${sessionId}` } });
     const track = (_e: Electron.Event, url: string) => {
       siteUrl = url;
       win?.webContents.send('serviceSite:url', url);
@@ -70,6 +72,21 @@ export function detach() {
     win.contentView.removeChildView(view);
     attached = false;
   }
+}
+
+export function isAttached() {
+  return attached;
+}
+
+/** Destroys the current view and its session; the next attach gets an empty browser profile. */
+export async function resetSession() {
+  if (view && win && attached) win.contentView.removeChildView(view);
+  attached = false;
+  const old = view;
+  view = null;
+  siteUrl = '';
+  sessionId += 1;
+  old?.webContents.close();
 }
 
 export async function navigate(url: string) {

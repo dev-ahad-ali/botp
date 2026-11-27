@@ -71,6 +71,7 @@ const api: Api = {
       return () => ipcRenderer.removeListener('automation:event', listener);
     },
   },
+  browser: { reset: () => ipcRenderer.invoke('browser:reset') },
   freeBrowser: {
     attach: (url, top) => ipcRenderer.invoke('freeBrowser:attach', url, top),
     setTop: (top) => ipcRenderer.invoke('freeBrowser:setTop', top),

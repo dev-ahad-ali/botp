@@ -140,6 +140,25 @@ function registerIpc() {
   });
   ipcMain.handle('automation:stop', () => stopAutomation());
 
+  // Full browser reset: stop the run, throw away every embedded view/session, then
+  // reopen the pages that were visible. New views use empty in-memory partitions.
+  ipcMain.handle('browser:reset', async () => {
+    await stopAutomation();
+    const hadService = serviceView.isAttached();
+    const hadTemp = tempView.isAttached();
+    const hadFree = freeBrowser.isAttached();
+    await Promise.all([
+      serviceView.resetSession(),
+      tempView.resetSession(),
+      freeBrowser.resetSession(),
+    ]);
+    const serviceUrl = serviceView.getStartUrl();
+    const tempUrl = tempView.getHomeUrl();
+    if (hadService && serviceUrl) await serviceView.attach(serviceUrl);
+    if (hadTemp && tempUrl) await tempView.attach(tempUrl);
+    if (hadFree) await freeBrowser.attach(freeBrowser.getHomeUrl());
+  });
+
   ipcMain.handle('freeBrowser:attach', (_e, url: string, top?: number) => freeBrowser.attach(url, top));
   ipcMain.handle('freeBrowser:setTop', (_e, top: number) => freeBrowser.setTop(top));
   ipcMain.handle('freeBrowser:navigate', (_e, url: string) => freeBrowser.navigate(url));

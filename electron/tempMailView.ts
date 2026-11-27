@@ -64,6 +64,7 @@ let inboxUrl = '';
 let homeUrl = '';
 let stopSignal = createStopSignal();
 let stopRequested = false;
+let sessionId = 0;
 
 export function setMainWindow(window: BrowserWindow) {
   win = window;
@@ -93,7 +94,8 @@ export function updateBounds() {
 
 async function ensureView(): Promise<WebContentsView> {
   if (!view) {
-    view = new WebContentsView();
+    // A fresh in-memory partition per reset behaves like a brand-new browser profile.
+    view = new WebContentsView({ webPreferences: { partition: `automation-browser-${sessionId}` } });
     // Block clicks on ads/other links inside the inbox; only home and opened messages stay loaded.
     view.webContents.on('will-navigate', (event, url) => {
       if (!isAllowedTempUrl(url)) event.preventDefault();
@@ -331,6 +333,24 @@ export function detach() {
     win.contentView.removeChildView(view);
     attached = false;
   }
+}
+
+export function isAttached() {
+  return attached;
+}
+
+/** Destroys the current view and its session; the next attach gets an empty browser profile. */
+export async function resetSession() {
+  if (view && win && attached) win.contentView.removeChildView(view);
+  attached = false;
+  stopWaits();
+  const old = view;
+  view = null;
+  siteUrl = '';
+  inboxUrl = homeUrl;
+  sessionId += 1;
+  old?.webContents.close();
+  resetStop();
 }
 
 export async function navigate(url: string) {
