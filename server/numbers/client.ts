@@ -48,7 +48,7 @@ function parseNumberInfo(data: unknown): NumberInfo {
   const nestedCountry = (payload.country ?? root.country ?? {}) as Record<string, any>;
 
   const full = pick(payload, ['full_number', 'fullNumber', 'phone', 'number']) || pick(root, ['full_number', 'fullNumber', 'phone', 'number']);
-  const national = pick(payload, ['no_plus_number', 'national_number', 'nationalNumber', 'number', 'phone']) || pick(root, ['no_plus_number', 'national_number', 'nationalNumber']);
+  const national = pick(payload, ['national_number', 'nationalNumber', 'no_plus_number', 'number', 'phone']) || pick(root, ['national_number', 'nationalNumber', 'no_plus_number']);
   const country = pick(payload, ['country_name', 'countryName', 'country']) || pick(nestedCountry, ['name', 'country_name', 'countryName']) || pick(root, ['country_name', 'countryName']);
   const countryCode = pick(payload, ['country_code', 'countryCode', 'iso', 'iso_code', 'alpha2', 'cc']) || pick(nestedCountry, ['code', 'country_code', 'iso', 'alpha2']) || pick(root, ['country_code', 'iso', 'iso_code']);
   const dialCode = pick(payload, ['dial_code', 'dialCode', 'calling_code', 'country_calling_code', 'prefix']) || pick(nestedCountry, ['dial_code', 'calling_code', 'code']) || pick(root, ['dial_code', 'calling_code']);
