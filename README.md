@@ -5,8 +5,7 @@ A local Electron desktop tool with five tabs: **Configuration**, **Automation**,
 ## Setup
 
 ```bash
-npm install
-node node_modules/electron/install.js   # only if electron's binary was skipped
+npm install                             # postinstall also downloads Electron's binary
 npm run db:setup                        # migrate + seed SQLite
 npm run dev
 ```
