@@ -106,11 +106,12 @@ const FILL_PHONE = `(arg) => {
   return { filled, submitted: !!button };
 }`;
 
-async function waitForStage(view: ServiceView, stage: 'signup' | 'email' | 'phone', timeoutMs = 45_000) {
+async function waitForStage(view: ServiceView, stage: 'signup' | 'email' | 'phone', stop: () => boolean, timeoutMs = 45_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    if (stop()) throw new Error('Stopped');
     if (await view.evaluate<boolean>(AT_STAGE, stage)) return;
-    await sleep(500);
+    await sleep(250);
   }
   throw new Error(`Twilio: ${stage} stage not reached`);
 }
@@ -122,22 +123,29 @@ export const twilioService: AutomationService = {
 
   async run(ctx) {
     const { view, email, password, firstName, lastName, number, getCode, log, stop } = ctx;
+    const fields = { firstName, lastName, email, password };
 
     await view.goto(this.startUrl);
-    await waitForStage(view, 'signup');
-    const signup = await view.evaluate<Record<string, boolean>>(FILL_SIGNUP, { firstName, lastName, email, password });
+    await waitForStage(view, 'signup', stop);
+    let signup = await view.evaluate<Record<string, boolean>>(FILL_SIGNUP, fields);
+    // React can mount the inputs just after our first pass; retry once before giving up.
+    if (!signup.firstName || !signup.lastName || !signup.email || !signup.password) {
+      await sleep(500);
+      signup = await view.evaluate<Record<string, boolean>>(FILL_SIGNUP, fields);
+    }
     if (!signup.submitted) throw new Error('Twilio: signup submit button not found');
     await log('signup form submitted', signup);
 
-    await waitForStage(view, 'email');
+    await waitForStage(view, 'email', stop);
     if (stop()) return;
     await log('waiting for email verification code');
     const code = await getCode();
+    if (stop()) return;
     const verify = await view.evaluate<Record<string, boolean>>(FILL_CODE, { code });
     if (!verify.submitted) throw new Error('Twilio: verify button not found');
     await log(`email code submitted: ${code}`);
 
-    await waitForStage(view, 'phone');
+    await waitForStage(view, 'phone', stop);
     if (stop()) return;
     const options = await view.evaluate<string[]>(COUNTRY_OPTIONS);
     const selectedCountry = await view.evaluate<string>(SELECT_COUNTRY, {

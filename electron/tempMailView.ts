@@ -44,6 +44,7 @@ const SELECTORS = {
   ],
   messageLink: ['a.viewLink[data-mail-id]', '.viewLink[data-mail-id]', 'a[href*="/view/"]'],
   delete: ['#click-to-delete', 'button.click-to-delete', 'a.click-to-delete', 'button[title*="delete" i]'],
+  change: ['#click-to-change', 'a.click-to-change', 'a[href="/en/change"]', 'a[title*="change" i]'],
 };
 
 type StopSignal = { promise: Promise<void>; resolve: () => void; triggered: boolean };
@@ -61,19 +62,26 @@ let top = 120;
 let siteUrl = '';
 let inboxUrl = '';
 let stopSignal = createStopSignal();
+let stopRequested = false;
 
 export function setMainWindow(window: BrowserWindow) {
   win = window;
 }
 
-/** Clears a consumed stop signal so a later manual wait can run after Stop. */
+/** Clears a consumed stop signal so the next run starts with a fresh wait. */
 export function resetStop() {
-  if (stopSignal.triggered) stopSignal = createStopSignal();
+  stopRequested = false;
+  stopSignal = createStopSignal();
 }
 
 export function stopWaits() {
+  stopRequested = true;
   stopSignal.triggered = true;
   stopSignal.resolve();
+}
+
+export function isStopped() {
+  return stopRequested;
 }
 
 export function updateBounds() {
@@ -121,6 +129,18 @@ const READ_ADDRESS = `(arg) => {
   return ((document.body.innerText || '').match(/${EMAIL_RE.source}/i) || [''])[0];
 }`;
 
+/** Reads only the address field, so stale addresses in page text/messages cannot be mistaken for the new one. */
+const READ_INPUT_ADDRESS = `(arg) => {
+  for (const selector of ['input#mail', ...arg.selectors.address]) {
+    for (const el of document.querySelectorAll(selector)) {
+      const text = ((el.value || el.textContent || '') + '').trim();
+      const match = text.match(/${EMAIL_RE.source}/i);
+      if (match) return match[0];
+    }
+  }
+  return '';
+}`;
+
 const CLICK_ACTION = `(arg) => {
   const visible = ${FIND_VISIBLE};
   const el = visible(arg.selectors);
@@ -136,6 +156,19 @@ const CLICK_ACTION = `(arg) => {
     }
   }
   return false;
+}`;
+
+const CLICK_BY_TEXT = `(arg) => {
+  for (const el of document.querySelectorAll('button, a, [role="button"]')) {
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    const text = ((el.innerText || el.textContent || '') + '').toLowerCase();
+    if (arg.text.some((needle) => text.includes(needle))) {
+      el.click();
+      return ((el.innerText || el.textContent || '') + '').trim();
+    }
+  }
+  return '';
 }`;
 
 const LIST_MESSAGES = `(arg) => {
@@ -220,7 +253,6 @@ export function getUrl() {
 }
 
 export async function openSite(url: string) {
-  resetStop();
   if (!url) throw new Error('Temp mail URL is not configured');
   const current = await ensureView();
   if (siteUrl !== url) {
@@ -264,6 +296,54 @@ export function reload() { view?.webContents.reload(); }
 
 export async function readAddress() {
   return (await run<string>(READ_ADDRESS, { selectors: SELECTORS })).trim();
+}
+
+export async function readInputAddress() {
+  return (await run<string>(READ_INPUT_ADDRESS, { selectors: SELECTORS })).trim();
+}
+
+/**
+ * Deletes the current temp-mail address and polls until a genuinely new one appears.
+ * temp-mail.org needs a moment after the delete/reload before the new address is in the DOM.
+ */
+export async function freshAddress(previous = '', timeoutMs = 30_000) {
+  if (stopRequested) throw new Error('Stopped');
+  await openSite(inboxUrl || siteUrl);
+  const current = await readInputAddress().catch(() => '');
+  // The page itself may already have changed the address (e.g. after a reload).
+  if (current && current !== previous) return current;
+
+  const clickedDelete = await run<boolean>(CLICK_ACTION, {
+    selectors: SELECTORS.delete,
+    text: ['delete this address', 'delete'],
+  }).catch(() => false);
+  if (!clickedDelete) {
+    await run<boolean>(CLICK_ACTION, {
+      selectors: SELECTORS.change,
+      text: ['change e-mail address', 'change'],
+    }).catch(() => false);
+  }
+  await sleep(300);
+  await run<string>(CLICK_BY_TEXT, {
+    text: ['yes', 'confirm', 'ok'],
+  }).catch(() => '');
+
+  const deadline = Date.now() + timeoutMs;
+  let triedChange = false;
+  while (Date.now() < deadline) {
+    if (stopRequested) throw new Error('Stopped');
+    const next = await readInputAddress().catch(() => '');
+    if (next && next !== previous && next !== current) return next;
+    if (!triedChange && Date.now() > deadline - timeoutMs + 8_000) {
+      triedChange = true;
+      await run<boolean>(CLICK_ACTION, {
+        selectors: SELECTORS.change,
+        text: ['change e-mail address', 'change'],
+      }).catch(() => false);
+    }
+    await sleep(500);
+  }
+  throw new Error('Temp mail: timed out waiting for a new email address');
 }
 
 export async function copyAddress() {
@@ -315,33 +395,22 @@ async function findCode() {
   return null;
 }
 
-/** Clicks temp-mail.org's Delete button and reads the newly generated address. */
+/** Clicks temp-mail.org's Delete button and waits until a new address is available. */
 export async function deleteAddress() {
-  await openSite(inboxUrl || siteUrl);
-  const clicked = await run<boolean>(CLICK_ACTION, {
-    selectors: SELECTORS.delete,
-    text: ['delete this address', 'delete'],
-  }).catch(() => false);
-  if (!clicked) reload();
-  await sleep(300);
-  await run<boolean>(CLICK_ACTION, {
-    selectors: SELECTORS.delete,
-    text: ['yes', 'confirm', 'delete this address', 'delete'],
-  }).catch(() => false);
-  await sleep(900);
-  await openSite(inboxUrl || siteUrl);
-  return readAddress();
+  const previous = await readInputAddress().catch(() => '');
+  return freshAddress(previous);
 }
 
 /** Polls the inbox, opens the Twilio verification mail, reads its code, then returns to the inbox. */
 export async function waitForTwilioCode(timeoutMs = 180_000) {
-  resetStop();
+  if (stopRequested) throw new Error('Stopped');
   const signal = stopSignal;
   const current = await ensureView();
   const inbox = inboxUrl || siteUrl;
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
+    if (stopRequested) throw new Error('Stopped');
     const found = await Promise.race([
       run<{ href: string; id: string; preview: string } | null>(FIND_TWILIO_MESSAGE).catch(() => null),
       signal.promise.then(() => STOP),
@@ -365,10 +434,11 @@ export async function waitForTwilioCode(timeoutMs = 180_000) {
 }
 
 export async function waitForCode(timeoutMs = 180_000) {
-  resetStop();
+  if (stopRequested) throw new Error('Stopped');
   const signal = stopSignal;
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
+    if (stopRequested) throw new Error('Stopped');
     const found = await Promise.race([
       findCode().catch(() => null),
       signal.promise.then(() => STOP),

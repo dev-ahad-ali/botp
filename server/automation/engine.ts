@@ -10,15 +10,37 @@ import type { AutomationEvent, ServiceView } from './types';
 
 let running = false;
 let shouldStop = false;
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+let stopSignal = makeStopSignal();
+
+function makeStopSignal() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((r) => { resolve = r; });
+  return { promise, resolve };
+}
+
+/** Sleep that is interrupted immediately by Stop. */
+function wait(ms: number) {
+  if (shouldStop) return Promise.resolve();
+  return Promise.race([new Promise<void>((resolve) => setTimeout(resolve, ms)), stopSignal.promise]);
+}
+
+/** Rejects as soon as Stop is pressed, so a slow API call cannot swallow the stop request. */
+function stoppable<T>(work: Promise<T>): Promise<T> {
+  const stopped = stopSignal.promise.then(() => { throw new Error('Stopped'); });
+  void stopped.catch(() => undefined);
+  return Promise.race([work, stopped]);
+}
 
 export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
   if (running) return;
   running = true;
   shouldStop = false;
+  stopSignal = makeStopSignal();
+  tempMail.resetStop();
 
   const emit = (e: AutomationEvent) => onEvent(e);
   emit({ type: 'status', running: true });
+  emit({ type: 'stage', stage: 'signup' });
 
   try {
     const cfg = await getConfig();
@@ -38,6 +60,7 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
       ? byId
       : await prisma.tempMailProvider.findFirst({ where: { enabled: true, url: { not: '' } }, orderBy: { sortOrder: 'asc' } });
     if (!provider?.url) throw new Error('Select a temp-mail website in Configuration');
+    if (shouldStop) throw new Error('Stopped');
 
     serviceView.rememberStartUrl(service.startUrl);
     const view: ServiceView = {
@@ -46,19 +69,24 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
       url: () => serviceView.getUrl(),
     };
 
-    const opened = await tempMail.openTempMail(provider);
+    // Start clean: reload the service form and throw away the address left over from the previous run.
+    await stoppable(serviceView.reset());
+    if (shouldStop) throw new Error('Stopped');
+    const opened = await stoppable(tempMail.openTempMail(provider));
     emit({ type: 'temp:open', service: provider.name, url: provider.url });
-    emit({ type: 'temp:address', address: opened.address });
+    let address = await stoppable(tempMail.freshAddress(opened.address));
+    emit({ type: 'temp:address', address });
     emit({ type: 'focus', tab: 'tempsite' });
+    if (shouldStop) throw new Error('Stopped');
 
-    let address = opened.address;
     let attempt = 0;
     while (!shouldStop) {
       const range = rotation[attempt++ % rotation.length];
       if (attempt > 1) {
-        address = await tempMail.deleteAddress();
-        emit({ type: 'temp:address', address });
         emit({ type: 'focus', tab: 'tempsite' });
+        address = await stoppable(tempMail.freshAddress(address));
+        emit({ type: 'temp:address', address });
+        if (shouldStop) break;
       }
 
       emit({ type: 'focus', tab: 'service' });
@@ -78,7 +106,8 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
       await log(`temp-mail site: ${provider.name} (${address})`);
 
       try {
-        const number = await getNumber({ url: cfg.number_api_url, headerRaw: cfg.number_api_header, rid: range.prefix });
+        const number = await stoppable(getNumber({ url: cfg.number_api_url, headerRaw: cfg.number_api_header, rid: range.prefix }));
+        if (shouldStop) throw new Error('Stopped');
         await log(`phone fetched: ${number.phone}`, { country: number.country, countryCode: number.countryCode, dialCode: number.dialCode });
         emit({ type: 'run:info', runId: run.id, phone: number.phone, email: address, range: range.display });
 
@@ -94,6 +123,7 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
             emit({ type: 'stage', stage: 'email-code' });
             emit({ type: 'focus', tab: 'tempsite' });
             const found = await tempMail.waitForTwilioCode(180_000);
+            if (shouldStop) throw new Error('Stopped');
             emit({ type: 'temp:code', code: found.code });
             await log(`verification code: ${found.code}`);
             emit({ type: 'focus', tab: 'service' });
@@ -103,12 +133,13 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
           stop: () => shouldStop,
         });
 
+        if (shouldStop) throw new Error('Stopped');
         await prisma.run.update({ where: { id: run.id }, data: { status: 'success', endedAt: new Date() } });
         emit({ type: 'run:done', runId: run.id, status: 'success' });
         emit({ type: 'stage', stage: 'done' });
         if (!shouldStop) {
-          await serviceView.reset();
-          await sleep(1500);
+          await stoppable(serviceView.reset());
+          await wait(1500);
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -124,8 +155,10 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
     const message = err instanceof Error ? err.message : String(err);
     emit({ type: 'log', runId: 0, message: `automation error: ${message}` });
   } finally {
+    await serviceView.reset().catch(() => undefined);
     tempMail.closeAll();
     running = false;
+    emit({ type: 'stage', stage: 'idle' });
     emit({ type: 'status', running: false });
   }
 }
@@ -133,5 +166,6 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
 export function stopAutomation() {
   if (!running) return;
   shouldStop = true;
+  stopSignal.resolve();
   tempMail.stopWaits();
 }

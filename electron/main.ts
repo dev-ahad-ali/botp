@@ -122,10 +122,14 @@ function registerIpc() {
   ipcMain.handle('tempSite:address', () => tempView.readAddress());
   ipcMain.handle('tempSite:copy', () => tempView.copyAddress());
   ipcMain.handle('tempSite:regenerate', () => tempView.regenerate());
-  ipcMain.handle('tempSite:delete', () => tempView.deleteAddress());
+  ipcMain.handle('tempSite:delete', () => {
+    tempView.resetStop();
+    return tempView.deleteAddress();
+  });
   ipcMain.handle('tempSite:messages', () => tempView.listMessages());
   ipcMain.handle('tempSite:openMessage', (_e, index: number) => tempView.openMessage(index));
   ipcMain.handle('tempSite:waitForCode', async (_e, timeoutMs?: number) => {
+    tempView.resetStop();
     const found = await tempView.waitForCode(timeoutMs ?? 180_000);
     emitTemp({ type: 'temp:code', code: found.code });
     return found;

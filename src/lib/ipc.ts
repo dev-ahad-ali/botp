@@ -29,7 +29,7 @@ export type TempMailEvent =
 
 export type AutomationEvent =
   | { type: 'status'; running: boolean }
-  | { type: 'stage'; stage: 'signup' | 'email-code' | 'phone' | 'done' }
+  | { type: 'stage'; stage: 'idle' | 'signup' | 'email-code' | 'phone' | 'done' }
   | { type: 'focus'; tab: 'service' | 'tempsite' }
   | { type: 'log'; runId: number; message: string; data?: unknown }
   | { type: 'run:start'; runId: number; range: string; pkg: string }

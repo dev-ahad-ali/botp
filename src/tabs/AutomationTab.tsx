@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Badge, Button, Card } from '../components/ui';
 import { api, type AutomationEvent, type RunRow } from '../lib/ipc';
+import { useAppStore } from '../store/appStore';
 
 type Current = { range?: string; pkg?: string; phone?: string; email?: string };
 
 export default function AutomationTab() {
-  const [running, setRunning] = useState(false);
+  const running = useAppStore((s) => s.running);
   const [logs, setLogs] = useState<string[]>([]);
   const [current, setCurrent] = useState<Current | null>(null);
   const [runs, setRuns] = useState<RunRow[]>([]);
@@ -26,7 +27,6 @@ export default function AutomationTab() {
     }).catch(() => undefined);
 
     const off = api.automation.onEvent((e: AutomationEvent) => {
-      if (e.type === 'status') setRunning(e.running);
       if (e.type === 'log') setLogs((l) => [...l.slice(-199), e.message]);
       if (e.type === 'run:start') {
         setCurrent({ range: e.range, pkg: e.pkg });
