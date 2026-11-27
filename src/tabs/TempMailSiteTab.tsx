@@ -3,9 +3,10 @@ import { Badge, Button, Field, Input, Select } from '../components/ui';
 import { api, type Provider } from '../lib/ipc';
 import { useAppStore } from '../store/appStore';
 
-export default function TempMailSiteTab() {
+export default function TempMailSiteTab({ active }: { active: boolean }) {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [message, setMessage] = useState('');
+  const homeRef = useRef('');
   const url = useAppStore((s) => s.tempUrl);
   const email = useAppStore((s) => s.email);
   const code = useAppStore((s) => s.code);
@@ -13,7 +14,7 @@ export default function TempMailSiteTab() {
   const setEmail = useAppStore((s) => s.setEmail);
   const setCode = useAppStore((s) => s.setCode);
   const barRef = useRef<HTMLDivElement>(null);
-  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
+  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom || 190);
 
   useEffect(() => {
     let alive = true;
@@ -24,23 +25,18 @@ export default function TempMailSiteTab() {
       if (e.type === 'temp:code') setCode(e.code);
     });
 
-    const boot = async () => {
-      const [cfg, list] = await Promise.all([api.config.get(), api.providers.list()]);
+    void Promise.all([api.config.get(), api.providers.list()]).then(([cfg, list]) => {
       const sites = list.filter((p) => p.url);
       if (alive) setProviders(sites);
       const chosen = sites.find((p) => String(p.id) === cfg.selected_tempmail_id) ?? sites.find((p) => p.enabled) ?? sites[0];
-      if (!chosen) throw new Error('No temp-mail websites configured');
-      if (!alive) return;
-      const next = useAppStore.getState().tempUrl || chosen.url;
-      await api.tempSite.attach(next, top());
-      if (!alive) return;
-      setUrl(next);
-      const current = await api.tempSite.address().catch(() => '');
-      if (alive) setEmail(current);
-    };
-    void boot().catch((e) => { if (alive) setMessage(String(e)); });
+      if (!chosen || !alive) return;
+      homeRef.current = chosen.url;
+      if (!useAppStore.getState().tempUrl) setUrl(chosen.url);
+    }).catch((e) => { if (alive) setMessage(String(e)); });
 
-    const onResize = () => void api.tempSite.setTop(top());
+    const onResize = () => {
+      if (useAppStore.getState().tab === 'tempsite') void api.tempSite.setTop(top());
+    };
     window.addEventListener('resize', onResize);
     return () => {
       alive = false;
@@ -51,10 +47,14 @@ export default function TempMailSiteTab() {
     };
   }, [setCode, setEmail, setUrl]);
 
-  const go = (next = url) => {
-    if (!next.trim()) return;
-    void api.tempSite.navigate(next).then(() => setUrl(next)).catch((e) => setMessage(String(e)));
-  };
+  useEffect(() => {
+    if (active) {
+      const next = useAppStore.getState().tempUrl || homeRef.current;
+      if (next) void api.tempSite.attach(next, top()).catch(() => undefined);
+    } else {
+      void api.tempSite.detach();
+    }
+  }, [active]);
 
   const openProvider = async (id: number) => {
     const provider = providers.find((p) => p.id === id);
@@ -62,6 +62,7 @@ export default function TempMailSiteTab() {
     try {
       await api.config.set('selected_tempmail_id', String(id));
       await api.providers.setEnabled(id, true);
+      homeRef.current = provider.url;
       await api.tempSite.attach(provider.url, top());
       setUrl(provider.url);
       setEmail(await api.tempSite.address().catch(() => ''));
@@ -84,20 +85,11 @@ export default function TempMailSiteTab() {
           />
           <span className="ml-auto text-xs text-muted-foreground">{message}</span>
         </div>
-
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => void api.tempSite.back()}>←</Button>
-          <Button variant="outline" onClick={() => void api.tempSite.forward()}>→</Button>
-          <Button variant="outline" onClick={() => void api.tempSite.reload()}>Reload</Button>
-          <Input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && go()}
-            placeholder="https://"
-          />
-          <Button onClick={() => go()}>Go</Button>
+          <Input value={url} readOnly placeholder="https://temp-mail.org/en/" />
+          <Button variant="outline" onClick={() => void api.tempSite.reload()}>Reload inbox</Button>
         </div>
-
+        <p className="text-xs text-muted-foreground">Navigation is limited to the configured inbox and verification messages opened by the automation.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Field label="Extracted email">
             <Input value={email} readOnly placeholder="—" />

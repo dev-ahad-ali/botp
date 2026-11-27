@@ -3,7 +3,7 @@ import { Badge, Button, Input } from '../components/ui';
 import { api } from '../lib/ipc';
 import { useAppStore } from '../store/appStore';
 
-export default function ServiceTab() {
+export default function ServiceTab({ active }: { active: boolean }) {
   const [message, setMessage] = useState('');
   const service = useAppStore((s) => s.service);
   const url = useAppStore((s) => s.serviceUrl);
@@ -11,23 +11,20 @@ export default function ServiceTab() {
   const setService = useAppStore((s) => s.setService);
   const setUrl = useAppStore((s) => s.setServiceUrl);
   const barRef = useRef<HTMLDivElement>(null);
-  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
+  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom || 190);
 
   useEffect(() => {
     let alive = true;
     const offUrl = api.serviceSite.onUrl((next) => { if (alive) setUrl(next); });
-
-    const boot = async () => {
-      const info = await api.serviceSite.resolve();
+    void api.serviceSite.resolve().then((info) => {
       if (!alive) return;
       setService(info.service);
-      const next = info.url || useAppStore.getState().serviceUrl;
-      setUrl(next);
-      await api.serviceSite.attach(next, top());
-    };
-    void boot().catch((e) => { if (alive) setMessage(String(e)); });
+      setUrl(info.url || useAppStore.getState().serviceUrl);
+    }).catch((e) => { if (alive) setMessage(String(e)); });
 
-    const onResize = () => void api.serviceSite.setTop(top());
+    const onResize = () => {
+      if (useAppStore.getState().tab === 'service') void api.serviceSite.setTop(top());
+    };
     window.addEventListener('resize', onResize);
     return () => {
       alive = false;
@@ -37,10 +34,13 @@ export default function ServiceTab() {
     };
   }, [setService, setUrl]);
 
-  const go = (next = url) => {
-    if (!next.trim()) return;
-    void api.serviceSite.navigate(next).then(() => setUrl(next)).catch((e) => setMessage(String(e)));
-  };
+  useEffect(() => {
+    if (active) {
+      void api.serviceSite.attach(useAppStore.getState().serviceUrl, top()).catch(() => undefined);
+    } else {
+      void api.serviceSite.detach();
+    }
+  }, [active]);
 
   return (
     <div className="h-[calc(100%-1.5rem)]">
@@ -51,21 +51,13 @@ export default function ServiceTab() {
           {stage !== 'idle' && <Badge tone="amber">{stage}</Badge>}
           <span className="ml-auto text-xs text-muted-foreground">{message}</span>
         </div>
-
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => void api.serviceSite.back()}>←</Button>
-          <Button variant="outline" onClick={() => void api.serviceSite.forward()}>→</Button>
+          <Input value={url} readOnly placeholder="https://www.twilio.com/try-twilio" />
           <Button variant="outline" onClick={() => void api.serviceSite.reload()}>Reload</Button>
-          <Input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && go()}
-            placeholder="https://"
-          />
-          <Button onClick={() => go()}>Go</Button>
+          <Button variant="outline" onClick={() => void api.serviceSite.reset().catch((e) => setMessage(String(e)))}>Reset to signup</Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          The selected service is embedded here. Navigation state is kept in the app store and main process, so switching tabs does not restart the flow.
+          The page stays mounted between tabs. After each phone submission the engine returns here and waits for the stage-1 form before starting again.
         </p>
       </div>
     </div>

@@ -16,7 +16,11 @@ export function getUrl() {
   return siteUrl;
 }
 
-function updateBounds() {
+export function getStartUrl() {
+  return startUrl;
+}
+
+export function updateBounds() {
   if (!view || !win) return;
   const [width, height] = win.getContentSize();
   view.setBounds({ x: 0, y: top, width, height: Math.max(height - top, 0) });
@@ -69,6 +73,9 @@ export function detach() {
 }
 
 export async function navigate(url: string) {
+  // Manual navigation stays on the configured service entry page; the adapter may still
+  // move through its own internal pages while the automation is running.
+  if (startUrl && url !== startUrl) throw new Error('Service: only the configured start URL is allowed');
   await openSite(url);
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Badge, Button, Tabs } from './components/ui';
 import { api, type AutomationEvent } from './lib/ipc';
 import { useAppStore } from './store/appStore';
@@ -15,6 +15,10 @@ const tabs = [
   { id: 'tempsite', label: 'Temp Mail Site' },
   { id: 'browser', label: 'Free Browser' },
 ];
+
+function Pane({ active, children }: { active: boolean; children: ReactNode }) {
+  return <div className="h-full overflow-auto" hidden={!active}>{children}</div>;
+}
 
 export default function App() {
   const tab = useAppStore((s) => s.tab);
@@ -49,12 +53,12 @@ export default function App() {
         {stage !== 'idle' && <Badge tone="amber">{stage}</Badge>}
       </header>
       <Tabs tabs={tabs} value={tab} onChange={setTab} />
-      <main className="min-h-0 flex-1 overflow-auto p-6">
-        {tab === 'config' && <ConfigTab onOpenSite={() => setTab('tempsite')} />}
-        {tab === 'automation' && <AutomationTab />}
-        {tab === 'service' && <ServiceTab />}
-        {tab === 'tempsite' && <TempMailSiteTab />}
-        {tab === 'browser' && <FreeBrowserTab />}
+      <main className="min-h-0 flex-1 overflow-hidden p-6">
+        <Pane active={tab === 'config'}><ConfigTab onOpenSite={() => setTab('tempsite')} /></Pane>
+        <Pane active={tab === 'automation'}><AutomationTab /></Pane>
+        <Pane active={tab === 'service'}><ServiceTab active={tab === 'service'} /></Pane>
+        <Pane active={tab === 'tempsite'}><TempMailSiteTab active={tab === 'tempsite'} /></Pane>
+        <Pane active={tab === 'browser'}><FreeBrowserTab active={tab === 'browser'} /></Pane>
       </main>
     </div>
   );

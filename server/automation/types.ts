@@ -39,5 +39,7 @@ export interface AutomationService {
   key: string;
   name: string;
   startUrl: string;
+  /** Optional hook used after a reset to confirm the form is ready before the next run. */
+  waitForStart?(view: ServiceView, stop: () => boolean, timeoutMs?: number): Promise<void>;
   run(ctx: RunContext): Promise<void>;
 }

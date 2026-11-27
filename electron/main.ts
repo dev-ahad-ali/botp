@@ -1,4 +1,4 @@
-import { app, BrowserWindow, WebContentsView, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { startAutomation, stopAutomation } from '../server/automation/engine';
 import { SERVICES } from '../server/automation/registry';
@@ -7,25 +7,20 @@ import { getConfig, setConfig } from '../server/config';
 import * as dbOps from '../server/dbOps';
 import { prisma } from '../server/db';
 import { getNumber } from '../server/numbers/client';
+import * as freeBrowser from './freeBrowserView';
 import * as serviceView from './serviceView';
 import * as tempView from './tempMailView';
 
 let win: BrowserWindow | null = null;
-let freeView: WebContentsView | null = null;
-let freeTop = 120;
-
-function updateFreeBounds() {
-  if (!freeView || !win) return;
-  const [width, height] = win.getContentSize();
-  freeView.setBounds({ x: 0, y: freeTop, width, height: Math.max(height - freeTop, 0) });
-}
 
 async function selectedService() {
   const [cfg, services] = await Promise.all([getConfig(), dbOps.listServices()]);
   const key = cfg.selected_service || services[0]?.key;
   const service = services.find((s) => s.key === key) ?? services[0];
   if (!service) throw new Error('No services configured');
-  const startUrl = serviceView.getUrl() || SERVICES[service.key]?.startUrl;
+  // Always use the adapter's entry URL. A URL left over from a finished signup must never
+  // become the reset target for the next run.
+  const startUrl = SERVICES[service.key]?.startUrl || serviceView.getStartUrl();
   if (!startUrl) throw new Error(`No start URL configured for ${service.name}`);
   serviceView.rememberStartUrl(startUrl);
   return { service: service.name, url: startUrl, key: service.key };
@@ -59,8 +54,9 @@ function createWindow() {
   void win.loadURL(url);
   tempView.setMainWindow(win);
   serviceView.setMainWindow(win);
-  win.on('closed', () => { win = null; freeView = null; });
-  win.on('resize', () => { updateFreeBounds(); tempView.updateBounds(); });
+  freeBrowser.setMainWindow(win);
+  win.on('closed', () => { win = null; });
+  win.on('resize', () => { tempView.updateBounds(); serviceView.updateBounds(); freeBrowser.updateBounds(); });
 }
 
 function registerIpc() {
@@ -77,6 +73,7 @@ function registerIpc() {
 
   ipcMain.handle('services:list', () => dbOps.listServices());
   ipcMain.handle('serviceSite:resolve', () => selectedService());
+  ipcMain.handle('serviceSite:reset', () => serviceView.reset());
   ipcMain.handle('serviceSite:attach', (_e, url: string, top?: number) => serviceView.attach(url, top));
   ipcMain.handle('serviceSite:setTop', (_e, top: number) => serviceView.setTop(top));
   ipcMain.handle('serviceSite:navigate', (_e, url: string) => serviceView.navigate(url));
@@ -103,6 +100,7 @@ function registerIpc() {
 
   ipcMain.handle('tempSite:open', async (_e, id?: number) => {
     const provider = await selectedProvider(id);
+    tempView.setHomeUrl(provider.url);
     await tempView.openSite(provider.url);
     const address = await tempView.copyAddress().catch(() => tempView.readAddress());
     emitTemp({ type: 'temp:open', service: provider.name, url: provider.url });
@@ -116,8 +114,6 @@ function registerIpc() {
   ipcMain.handle('tempSite:setTop', (_e, top: number) => tempView.setTop(top));
   ipcMain.handle('tempSite:navigate', (_e, url: string) => tempView.navigate(url));
   ipcMain.handle('tempSite:detach', () => tempView.detach());
-  ipcMain.handle('tempSite:back', () => tempView.back());
-  ipcMain.handle('tempSite:forward', () => tempView.forward());
   ipcMain.handle('tempSite:reload', () => tempView.reload());
   ipcMain.handle('tempSite:address', () => tempView.readAddress());
   ipcMain.handle('tempSite:copy', () => tempView.copyAddress());
@@ -144,31 +140,13 @@ function registerIpc() {
   });
   ipcMain.handle('automation:stop', () => stopAutomation());
 
-  ipcMain.handle('freeBrowser:attach', async (_e, url: string, top?: number) => {
-    if (!win) return;
-    if (!freeView) {
-      freeView = new WebContentsView({ webPreferences: { sandbox: true } });
-      win.contentView.addChildView(freeView);
-      freeView.webContents.on('did-navigate', (_wc, next) => win?.webContents.send('freeBrowser:url', next));
-    }
-    if (top !== undefined) freeTop = top;
-    updateFreeBounds();
-    if (url) await freeView.webContents.loadURL(url);
-  });
-  ipcMain.handle('freeBrowser:setTop', (_e, top: number) => {
-    freeTop = top;
-    updateFreeBounds();
-  });
-  ipcMain.handle('freeBrowser:navigate', (_e, url: string) => freeView?.webContents.loadURL(url));
-  ipcMain.handle('freeBrowser:detach', () => {
-    if (freeView && win) {
-      win.contentView.removeChildView(freeView);
-      freeView = null;
-    }
-  });
-  ipcMain.handle('freeBrowser:back', () => { if (freeView?.webContents.canGoBack()) freeView.webContents.goBack(); });
-  ipcMain.handle('freeBrowser:forward', () => { if (freeView?.webContents.canGoForward()) freeView.webContents.goForward(); });
-  ipcMain.handle('freeBrowser:reload', () => freeView?.webContents.reload());
+  ipcMain.handle('freeBrowser:attach', (_e, url: string, top?: number) => freeBrowser.attach(url, top));
+  ipcMain.handle('freeBrowser:setTop', (_e, top: number) => freeBrowser.setTop(top));
+  ipcMain.handle('freeBrowser:navigate', (_e, url: string) => freeBrowser.navigate(url));
+  ipcMain.handle('freeBrowser:detach', () => freeBrowser.detach());
+  ipcMain.handle('freeBrowser:back', () => freeBrowser.back());
+  ipcMain.handle('freeBrowser:forward', () => freeBrowser.forward());
+  ipcMain.handle('freeBrowser:reload', () => freeBrowser.reload());
 }
 
 app.whenReady().then(() => {

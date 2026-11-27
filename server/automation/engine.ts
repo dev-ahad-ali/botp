@@ -6,7 +6,7 @@ import { getNumber } from '../numbers/client';
 import * as tempMail from '../tempMail/session';
 import * as serviceView from '../../electron/serviceView';
 import { SERVICES } from './registry';
-import type { AutomationEvent, ServiceView } from './types';
+import type { AutomationEvent, AutomationService, ServiceView } from './types';
 
 let running = false;
 let shouldStop = false;
@@ -29,6 +29,14 @@ function stoppable<T>(work: Promise<T>): Promise<T> {
   const stopped = stopSignal.promise.then(() => { throw new Error('Stopped'); });
   void stopped.catch(() => undefined);
   return Promise.race([work, stopped]);
+}
+
+/** Returns the service view to its configured start URL and waits for the stage-1 form. */
+async function resetService(service: AutomationService, view: ServiceView) {
+  await stoppable(serviceView.reset());
+  await wait(400);
+  if (shouldStop) throw new Error('Stopped');
+  await service.waitForStart?.(view, () => shouldStop, 30_000);
 }
 
 export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
@@ -70,7 +78,7 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
     };
 
     // Start clean: reload the service form and throw away the address left over from the previous run.
-    await stoppable(serviceView.reset());
+    await resetService(service, view);
     if (shouldStop) throw new Error('Stopped');
     const opened = await stoppable(tempMail.openTempMail(provider));
     emit({ type: 'temp:open', service: provider.name, url: provider.url });
@@ -122,7 +130,7 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
           getCode: async () => {
             emit({ type: 'stage', stage: 'email-code' });
             emit({ type: 'focus', tab: 'tempsite' });
-            const found = await tempMail.waitForTwilioCode(180_000);
+            const found = await stoppable(tempMail.waitForTwilioCode(180_000));
             if (shouldStop) throw new Error('Stopped');
             emit({ type: 'temp:code', code: found.code });
             await log(`verification code: ${found.code}`);
@@ -138,8 +146,15 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
         emit({ type: 'run:done', runId: run.id, status: 'success' });
         emit({ type: 'stage', stage: 'done' });
         if (!shouldStop) {
-          await stoppable(serviceView.reset());
-          await wait(1500);
+          try {
+            await resetService(service, view);
+            await log('service reset to signup form');
+            await wait(500);
+          } catch (err) {
+            if (shouldStop) break;
+            const message = err instanceof Error ? err.message : String(err);
+            await log(`service reset failed: ${message}`);
+          }
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

@@ -2,6 +2,7 @@ import * as tempSite from '../../electron/tempMailView';
 import type { TempMailMessage, TempMailProviderConfig } from './types';
 
 export async function openTempMail(config: TempMailProviderConfig) {
+  tempSite.setHomeUrl(config.url);
   await tempSite.openSite(config.url);
   const address = await tempSite.copyAddress().catch(() => tempSite.readAddress());
   return { address, service: config.name, url: config.url };

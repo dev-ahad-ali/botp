@@ -19,6 +19,7 @@ const api: Api = {
   services: { list: () => ipcRenderer.invoke('services:list') },
   serviceSite: {
     resolve: () => ipcRenderer.invoke('serviceSite:resolve'),
+    reset: () => ipcRenderer.invoke('serviceSite:reset'),
     attach: (url, top) => ipcRenderer.invoke('serviceSite:attach', url, top),
     setTop: (top) => ipcRenderer.invoke('serviceSite:setTop', top),
     navigate: (url) => ipcRenderer.invoke('serviceSite:navigate', url),
@@ -47,8 +48,6 @@ const api: Api = {
     setTop: (top) => ipcRenderer.invoke('tempSite:setTop', top),
     navigate: (url) => ipcRenderer.invoke('tempSite:navigate', url),
     detach: () => ipcRenderer.invoke('tempSite:detach'),
-    back: () => ipcRenderer.invoke('tempSite:back'),
-    forward: () => ipcRenderer.invoke('tempSite:forward'),
     reload: () => ipcRenderer.invoke('tempSite:reload'),
     address: () => ipcRenderer.invoke('tempSite:address'),
     copy: () => ipcRenderer.invoke('tempSite:copy'),

@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Input } from '../components/ui';
 import { api } from '../lib/ipc';
+import { useAppStore } from '../store/appStore';
 
-export default function FreeBrowserTab() {
+export default function FreeBrowserTab({ active }: { active: boolean }) {
   const [url, setUrl] = useState('https://www.google.com');
   const urlRef = useRef(url);
   const barRef = useRef<HTMLDivElement>(null);
   urlRef.current = url;
-  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
+  const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom || 190);
 
   useEffect(() => {
-    void api.freeBrowser.attach(urlRef.current, top());
     const off = api.freeBrowser.onUrl(setUrl);
-    const onResize = () => void api.freeBrowser.setTop(top());
+    const onResize = () => {
+      if (useAppStore.getState().tab === 'browser') void api.freeBrowser.setTop(top());
+    };
     window.addEventListener('resize', onResize);
     return () => {
       off();
@@ -20,6 +22,11 @@ export default function FreeBrowserTab() {
       void api.freeBrowser.detach();
     };
   }, []);
+
+  useEffect(() => {
+    if (active) void api.freeBrowser.attach(urlRef.current, top()).catch(() => undefined);
+    else void api.freeBrowser.detach();
+  }, [active]);
 
   const go = () => void api.freeBrowser.navigate(url);
 
@@ -31,9 +38,9 @@ export default function FreeBrowserTab() {
           <Button variant="outline" onClick={() => void api.freeBrowser.forward()}>→</Button>
           <Button variant="outline" onClick={() => void api.freeBrowser.reload()}>Reload</Button>
           <Input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && go()} placeholder="https://" />
-          <Button onClick={go}>Go</Button>
+          <Button onClick={() => go()}>Go</Button>
         </div>
-        <p className="text-xs text-muted-foreground">The page renders below this bar in a WebContentsView.</p>
+        <p className="text-xs text-muted-foreground">The page stays loaded when you switch tabs.</p>
       </div>
     </div>
   );

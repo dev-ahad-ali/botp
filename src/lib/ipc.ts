@@ -55,6 +55,7 @@ export type Api = {
   services: { list: () => Promise<Service[]> };
   serviceSite: {
     resolve: () => Promise<{ service: string; url: string; key: string }>;
+    reset: () => Promise<void>;
     attach: (url: string, top?: number) => Promise<void>;
     setTop: (top: number) => Promise<void>;
     navigate: (url: string) => Promise<void>;
@@ -77,8 +78,6 @@ export type Api = {
     setTop: (top: number) => Promise<void>;
     navigate: (url: string) => Promise<void>;
     detach: () => Promise<void>;
-    back: () => Promise<void>;
-    forward: () => Promise<void>;
     reload: () => Promise<void>;
     address: () => Promise<string>;
     copy: () => Promise<string>;

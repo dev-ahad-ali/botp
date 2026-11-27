@@ -61,6 +61,7 @@ let attached = false;
 let top = 120;
 let siteUrl = '';
 let inboxUrl = '';
+let homeUrl = '';
 let stopSignal = createStopSignal();
 let stopRequested = false;
 
@@ -93,6 +94,11 @@ export function updateBounds() {
 async function ensureView(): Promise<WebContentsView> {
   if (!view) {
     view = new WebContentsView();
+    // Block clicks on ads/other links inside the inbox; only home and opened messages stay loaded.
+    view.webContents.on('will-navigate', (event, url) => {
+      if (!isAllowedTempUrl(url)) event.preventDefault();
+    });
+    view.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     view.webContents.on('did-navigate', (_e, url) => {
       siteUrl = url;
       win?.webContents.send('tempSite:url', url);
@@ -252,19 +258,48 @@ export function getUrl() {
   return siteUrl;
 }
 
+/** The configured inbox URL. All resets go here; the only other allowed page is an opened message. */
+export function setHomeUrl(url: string) {
+  homeUrl = url;
+  inboxUrl = url;
+}
+
+export function getHomeUrl() {
+  return homeUrl;
+}
+
+/** Only the configured inbox and its opened-message links may be loaded. */
+function isAllowedTempUrl(url: string) {
+  if (!homeUrl) return true;
+  try {
+    const target = new URL(url);
+    const home = new URL(homeUrl);
+    if (target.origin !== home.origin) return false;
+    const path = target.pathname.replace(/\/+$/, '') || '/';
+    const homePath = home.pathname.replace(/\/+$/, '') || '/';
+    return path === homePath || /\/view\/[^/]+/.test(target.pathname);
+  } catch {
+    return false;
+  }
+}
+
 export async function openSite(url: string) {
   if (!url) throw new Error('Temp mail URL is not configured');
+  if (!isAllowedTempUrl(url)) throw new Error('Temp mail: only the inbox and opened messages are allowed');
   const current = await ensureView();
   if (siteUrl !== url) {
     await current.webContents.loadURL(url);
     siteUrl = url;
-    if (!/\/view\//.test(url)) inboxUrl = url;
+    if (!/\/view\//.test(url)) {
+      inboxUrl = url;
+      if (!homeUrl) homeUrl = url;
+    }
   }
   return current;
 }
 
 export async function attach(url?: string, nextTop?: number) {
-  const current = await openSite(url || siteUrl);
+  const current = await openSite(url || siteUrl || homeUrl);
   if (nextTop !== undefined) top = nextTop;
   if (win && !attached) {
     win.contentView.addChildView(current);
@@ -286,13 +321,15 @@ export function detach() {
 }
 
 export async function navigate(url: string) {
-  const current = await openSite(url);
-  return current;
+  return openSite(url);
 }
 
-export function back() { void view?.webContents.goBack(); }
-export function forward() { void view?.webContents.goForward(); }
-export function reload() { view?.webContents.reload(); }
+// History buttons are intentionally not wired to the temp-mail view: going back could
+// restore a blocked page. The inbox is always reached through openSite(home).
+export function reload() {
+  if (homeUrl) void openSite(homeUrl);
+  else view?.webContents.reload();
+}
 
 export async function readAddress() {
   return (await run<string>(READ_ADDRESS, { selectors: SELECTORS })).trim();
@@ -308,40 +345,36 @@ export async function readInputAddress() {
  */
 export async function freshAddress(previous = '', timeoutMs = 30_000) {
   if (stopRequested) throw new Error('Stopped');
-  await openSite(inboxUrl || siteUrl);
-  const current = await readInputAddress().catch(() => '');
-  // The page itself may already have changed the address (e.g. after a reload).
-  if (current && current !== previous) return current;
+  const started = Date.now();
+  const home = homeUrl || inboxUrl || siteUrl;
+  await openSite(home);
+  await sleep(400);
 
-  const clickedDelete = await run<boolean>(CLICK_ACTION, {
-    selectors: SELECTORS.delete,
+  const before = await readInputAddress().catch(() => '');
+  const baseline = previous || before;
+  // A reload can already have generated a new address before we click Delete.
+  if (baseline && before && before !== baseline) return before;
+
+  // temp-mail.org's Delete button clears the inbox and generates a new address in one click.
+  let clicked = await run<boolean>(CLICK_ACTION, {
+    selectors: ['#click-to-delete', ...SELECTORS.delete],
     text: ['delete this address', 'delete'],
   }).catch(() => false);
-  if (!clickedDelete) {
-    await run<boolean>(CLICK_ACTION, {
-      selectors: SELECTORS.change,
-      text: ['change e-mail address', 'change'],
+  if (!clicked) {
+    await sleep(400);
+    clicked = await run<boolean>(CLICK_ACTION, {
+      selectors: ['#click-to-delete', ...SELECTORS.delete],
+      text: ['delete this address', 'delete'],
     }).catch(() => false);
   }
-  await sleep(300);
-  await run<string>(CLICK_BY_TEXT, {
-    text: ['yes', 'confirm', 'ok'],
-  }).catch(() => '');
+  if (!clicked) await openSite(home);
+  await sleep(500);
 
-  const deadline = Date.now() + timeoutMs;
-  let triedChange = false;
-  while (Date.now() < deadline) {
+  while (Date.now() - started < timeoutMs) {
     if (stopRequested) throw new Error('Stopped');
     const next = await readInputAddress().catch(() => '');
-    if (next && next !== previous && next !== current) return next;
-    if (!triedChange && Date.now() > deadline - timeoutMs + 8_000) {
-      triedChange = true;
-      await run<boolean>(CLICK_ACTION, {
-        selectors: SELECTORS.change,
-        text: ['change e-mail address', 'change'],
-      }).catch(() => false);
-    }
-    await sleep(500);
+    if (next && next !== baseline) return next;
+    await sleep(400);
   }
   throw new Error('Temp mail: timed out waiting for a new email address');
 }
@@ -397,16 +430,14 @@ async function findCode() {
 
 /** Clicks temp-mail.org's Delete button and waits until a new address is available. */
 export async function deleteAddress() {
-  const previous = await readInputAddress().catch(() => '');
-  return freshAddress(previous);
+  return freshAddress();
 }
 
 /** Polls the inbox, opens the Twilio verification mail, reads its code, then returns to the inbox. */
 export async function waitForTwilioCode(timeoutMs = 180_000) {
   if (stopRequested) throw new Error('Stopped');
   const signal = stopSignal;
-  const current = await ensureView();
-  const inbox = inboxUrl || siteUrl;
+  const inbox = homeUrl || inboxUrl || siteUrl;
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
@@ -418,12 +449,11 @@ export async function waitForTwilioCode(timeoutMs = 180_000) {
     if (found && 'stopped' in found) throw new Error('Stopped');
 
     if (found?.href) {
-      await current.webContents.loadURL(found.href);
-      siteUrl = found.href;
+      await openSite(found.href);
       await sleep(700);
       const code = await run<string>(READ_CODE_FROM_MESSAGE).catch(() => '');
-      await current.webContents.loadURL(inbox);
-      siteUrl = inbox;
+      await openSite(inbox);
+      await sleep(400);
       if (code) {
         return { code, message: { subject: 'Verify your Email', preview: found.preview, body: '' } };
       }
