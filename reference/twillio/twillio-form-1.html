@@ -1,0 +1,1169 @@
+<html lang="en"><head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="ulp-version" content="1.147.0">
+
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="shortcut icon" href="https://assets.twilio.com/public_assets/console-js/2.12.0/images/favicons/Twilio_64.png">
+    <link rel="stylesheet" href="https://cdn.auth0.com/ulp/react-components/1.224.0/css/main_wcag_compliant.cdn.min.css">
+    <style id="custom-styles-container">
+      :root, .af-custom-form-container .af-form {
+          --primary-color: #006dfa;
+        }
+:root, .af-custom-form-container .af-form {
+          --button-font-color: #ffffff;
+        }
+:root {
+          --secondary-button-border-color: #8891aa;
+          --social-button-border-color: #8891aa;
+          --radio-button-border-color: #8891aa;
+        }
+:root {
+          --secondary-button-text-color: #121c2d;
+        }
+:root {
+          --link-color: #0263e0;
+        }
+:root {
+          --title-font-color: #121c2d;
+        }
+:root {
+          --font-default-color: #121c2d;
+        }
+:root {
+          --widget-background-color: #ffffff;
+        }
+:root {
+          --box-border-color: #e1e3ea;
+        }
+:root {
+          --font-light-color: #606b85;
+        }
+:root {
+          --input-text-color: #121c2d;
+        }
+:root {
+          --input-border-color: #8891aa;
+          --border-default-color: #8891aa;
+        }
+:root {
+          --input-background-color: #ffffff;
+        }
+:root {
+          --icon-default-color: #606b85;
+        }
+:root {
+          --error-color: #c72323;
+          --error-text-color: #ffffff;
+        }
+:root {
+          --success-color: #0b602d;
+        }
+:root {
+          --base-focus-color: #006dfa;
+          --transparency-focus-color: rgba(0,109,250, 0.15);
+        }
+:root {
+          --base-hover-color: #030b5d;
+          --transparency-hover-color: rgba(3,11,93, var(--hover-transparency-value));
+        }
+:root {
+          --ulp-captcha-widget-theme: light;
+        }
+@font-face {
+          font-family: 'ULP Custom';
+          font-style: normal;
+          font-weight: var(--font-default-weight);
+          src: local('ULP Custom'), url('https://assets.twilio.com/public_assets/paste-fonts/1.5.0/TwilioSansText-Regular.woff2') format('woff');
+        }
+
+        body {
+          --font-family: 'ULP Custom', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
+        }
+html, :root {
+          font-size: 100%;
+          --default-font-size: 1rem;
+          --small-font-size: 0.75rem;
+          --title-font-size: 1.5rem;
+          --lg-font-size: 1rem;
+          --xl-font-size: 1.25rem;
+          --spacing: 0.5rem;
+        }
+        .af-custom-form-container .af-form {
+          font-size: 1rem;
+        }
+body {
+          --title-font-size: 1.5rem;
+          --title-font-weight: var(--font-bold-weight);
+        }
+.c0e74ced5 {
+          font-size: 0.875rem;
+          font-weight: var(--font-default-weight);
+        }
+.ca431c0f1 {
+          font-size: 0.875rem;
+          font-weight: var(--font-default-weight);
+        }
+        .ulp-passkey-benefit-heading {
+          font-size: 1.025rem;
+        }
+.c5900ab5b, .c9c1d4a0c {
+          font-size: 1rem;
+          font-weight: var(--font-default-weight);
+        }
+body {
+          --ulp-label-font-size: 1rem;
+          --ulp-label-font-weight: var(--font-default-weight);
+        }
+.c1ee30889, .c6017cfca, [id^='ulp-container-'] a {
+          font-size: 1rem;
+          font-weight: var(--font-default-weight) !important;
+        }
+.c6017cfca, .c1ee30889 {
+            text-decoration: underline;
+          }
+:root {
+          --button-border-width: 1px;
+          --social-button-border-width: 1px;
+          --radio-border-width: 1px;
+        }
+body {
+          --button-border-radius: 10px;
+          --radio-border-radius: 10px;
+        }
+
+:root {
+          --input-border-width: 1px;
+        }
+body {
+          --input-border-radius: 4px;
+        }
+
+        .af-custom-form-container .af-form {
+          --border-radius: 4px;
+        }
+
+:root {
+          --border-radius-outer: 24px;
+        }
+:root {
+          --box-border-width: 0px;
+        }
+
+
+          body {
+            --logo-alignment: 0 auto;
+          }
+
+
+          .c9691010b {
+            content: url('https://assets.twilio.com/public_assets/ui-assets/0.0.32/img/logos/twilio-login-logo.svg');
+          }
+
+body {
+          --logo-height: 28px;
+        }
+        .c9691010b {
+          height: var(--logo-height);
+        }
+
+
+          body {
+            --header-alignment: center;
+          }
+
+
+.c9df967db {
+          --page-background-alignment: center;
+        }
+body {
+          --page-background-color: #ffffff;
+        }
+
+
+    </style>
+    <style>
+    /* By default, hide features for javascript-disabled browsing */
+    /* We use !important to override any css with higher specificity */
+    /* It is also overriden by the styles in <noscript> in the header file */
+    .no-js {
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      height: 1px;
+      overflow: hidden;
+      position: absolute;
+      white-space: nowrap;
+      width: 1px;
+    }
+  </style>
+  <noscript>
+    <style>
+      /* We use !important to override the default for js enabled */
+      /* If the display should be other than block, it should be defined specifically here */
+      .js-required { display: none !important; }
+      .no-js {
+        clip: auto;
+        clip-path: none;
+        height: auto;
+        overflow: auto;
+        position: static;
+        white-space: normal;
+        width: 100%;
+      }
+      .no-js-container {
+        width: var(--prompt-width);
+      }
+    </style>
+  </noscript>
+    <script type="text/javascript" async="" src="https://cdn.segment.com/analytics.js/v1/czYIqC3pFEu0I6xaEnei7ElGtkxqce5T/analytics.min.js"></script><script src="https://cdn.auth0.com/ulp/react-components/1.224.0/js/libphonenumber-js-bundle.js" defer=""></script>
+
+
+    <script>
+        // Block iframing - prevent clickjacking attacks
+        (function() {
+            if (window.opener) {
+                window.opener = null;
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --prompt-width: 608px;
+        }
+        label[for=terms-of-service] {
+            font-size: 0.8rem;
+            line-height: normal;
+        }
+        label[for=terms-of-service] a {
+            font-size: 0.8rem;
+            padding: 0;
+            text-decoration: underline;
+            line-height: normal;
+        }
+        label[for=marketing-consent] {
+            font-size: 0.8rem;
+            line-height: normal;
+        }
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer a {
+            text-decoration: underline;
+            font-size: 14px;
+            color: #7FACFA;
+        }
+        /* Signup page footer (ID-40243) */
+        .footer.signup-footer {
+            position: relative;
+            left: auto;
+            right: auto;
+            bottom: 70px;
+            width: 100%;
+            margin-top: 30px;
+        }
+        .separator {
+            font-size: 14px;
+            margin: 0 4px;
+            display: inline;
+            vertical-align: middle;
+            color: #A5B0C4;
+        }
+        .rights {
+            margin-top: 8px;
+            color: #A5B0C4;
+        }
+        .container {
+            display: flex;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+
+                justify-content: center; /* Center marketing + form group horizontally (signup only) */
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
+
+        }
+        .auth-widget-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 60%;
+            box-sizing: border-box;
+
+                padding-bottom: 0; /* Signup pages use an inline footer (signup-footer), not the absolute one */
+
+        }
+
+        /* Signup page: limit form width for proper centering with marketing */
+        ._hide-prompt-logo .auth-widget-container {
+            width: auto;
+            max-width: 608px;
+            margin-right: 80px; /* Balance right spacing */
+            padding-bottom: 0; /* No extra padding needed - footer is relative */
+        }
+        /* Remove extra height from Auth0 widget on signup page - fix 30px gap */
+        ._hide-prompt-logo .auth-widget-container > main {
+            min-height: auto !important;
+            height: auto !important;
+        }
+
+        .reset-mfa-container {
+            position: absolute;
+            padding: 20px;
+            color: #A5B0C4;
+        }
+
+          .outline-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+          }
+
+          .outline-list li {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 500;
+          }
+
+          .outline-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 4px;
+            flex-shrink: 0;
+            stroke: #58637A;
+            fill: none;
+          }
+
+          .checklist {
+            list-style: none;
+            align-self: flex-start;
+            padding: 0;
+            margin: 0;
+          }
+
+          .checklist li {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 500;
+          }
+
+          .check-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 4px;
+            flex-shrink: 0;
+          }
+
+          header{
+            padding: 40px 20px 20px 20px !important;
+          }
+
+          button[data-provider="google"] {
+            justify-content: center;
+            padding: 0
+          }
+
+          button[data-provider="samlp"] {
+            justify-content: center;
+          }
+
+        @media screen and (max-height: 899px) {
+            .reset-mfa-container-mobile {
+                padding-bottom: 20px;
+                font-size: 16px;
+                width: 100%;
+                text-align: center;
+                color: #A5B0C4;
+            }
+
+            .reset-mfa-container-mobile a {
+                font-size: 16px;
+            }
+
+            .reset-mfa-container {
+                display: none;
+            }
+        }
+
+        @media screen and (min-height: 900px) {
+            .reset-mfa-container {
+                bottom: 12vh;
+            }
+
+            .reset-mfa-container-mobile {
+                display: none;
+            }
+            .reset-mfa-container a {
+                color: #7FACFA;
+            }
+        }
+
+        @media screen and (min-height: 950px) {
+            .reset-mfa-container {
+                bottom: 16vh;
+            }
+        }
+
+        @media screen and (min-height: 1000px) {
+            .reset-mfa-container {
+                bottom: 20vh;
+            }
+        }
+
+        @media screen and (min-height: 1200px) {
+            .reset-mfa-container {
+                bottom: 25vh;
+            }
+        }
+
+        @media screen and (min-height: 1500px) {
+            .reset-mfa-container {
+                bottom: 30vh;
+            }
+        }
+
+        /* Small height screens - allow scroll (ID-41024) */
+        @media screen and (max-height: 700px) {
+            .container {
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
+                flex-direction: column;
+                align-items: center;
+            }
+            .footer {
+                position: relative;
+                bottom: auto;
+                margin-top: 20px;
+                padding: 20px 0;
+            }
+            .auth-widget-container {
+                padding-bottom: 0;
+                padding-top: 20px;
+                width: 90%;
+            }
+            /* Preserve side-by-side layout for signup page */
+            ._hide-prompt-logo .container {
+                flex-direction: row;
+            }
+        }
+
+        /* Small width screens (mobile) - allow scroll (ID-41024) */
+        @media screen and (max-width: 600px) {
+            .container {
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
+                flex-direction: column;
+                align-items: center;
+            }
+            .footer {
+                position: relative;
+                bottom: auto;
+                margin-top: 20px;
+                padding: 20px 0;
+            }
+            .footer.signup-footer{
+                bottom: 20px;
+            }
+            .auth-widget-container {
+                padding-bottom: 0;
+                padding-top: 20px;
+                width: 90%;
+            }
+            /* Preserve side-by-side layout for signup page */
+            ._hide-prompt-logo .container {
+                flex-direction: row;
+            }
+        }
+
+        .product {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        .product-icon {
+            width: 130px;
+            height: 50px;
+        }
+        .product-icon img {
+            width: 130px;
+            height: 50px;
+        }
+        .product-description {
+            width: 310px;
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        p.product-description-text {
+            font-family: "Twilio Sans Text", serif;
+            font-size: 14px;
+        }
+        .signup-banner {
+            font-weight: 500;
+            margin-bottom: 40px;
+        }
+        .signup-banner img{
+            width:40px;
+            height:40px;
+        }
+        .banner-text {
+            margin-top: 60px;
+            line-height: 1.6;
+        }
+        .signup-marketing{
+            margin-bottom: 16px;
+            line-height: 1.6;
+            width: 100%;
+        }
+        .signup-marketing-text {
+            font-weight: 600;
+            line-height: 1.6;
+            font-size: 24px
+        }
+        p.banner-text {
+            font-family: "Twilio Sans Text", serif;
+        }
+        .marketing-copy-container {
+            position: relative;
+            width: auto;
+            max-width: 577px;
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh; /* Exactly viewport height - content centered in viewport */
+            margin-left: 80px; /* Balance left spacing */
+            margin-right: 212px; /* Fixed gap between marketing and form */
+            box-sizing: border-box;
+            align-self: flex-start; /* Don't stretch with taller form */
+        }
+        .marketing-copy {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 0;
+            text-align: left;
+            max-width: 577px;
+        }
+        .trial-disclaimer{
+            font-size: 14px;
+            color: #A5B0C4;
+            text-align: left;
+            max-width: 577px;
+        }
+        /* Ensure background covers full page even when scrollable (ID-40243) */
+        html, body {
+            background-color: #02102c;
+        }
+        #auth0-bg {
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 15% 85%, #0d3366 0%, transparent 40%),
+                        radial-gradient(circle at 85% 15%, #0d3366 0%, transparent 40%),
+                        linear-gradient(135deg, #010a1a 0%, #02102c 30%, #061a3d 60%, #0a2a5c 100%);
+        }
+        #auth0-bg svg {
+            display: block; /* Removes unwanted whitespace */
+        }
+
+        @media (max-width: 1020px) {
+            .marketing-copy-container {
+                display: none;
+            }
+            /* Reset form styles when marketing is hidden */
+            ._hide-prompt-logo .auth-widget-container {
+                width: 60%;
+                max-width: none;
+                margin-right: 0;
+                padding-bottom: 0;
+            }
+        }
+
+        /* Better responsiveness for marketing copy on medium screens */
+        @media screen and (max-width: 1400px) and (min-width: 1021px) {
+            .marketing-copy-container {
+                margin-left: 40px; /* Reduce left margin */
+                margin-right: 80px; /* Reduce gap on medium screens */
+            }
+            ._hide-prompt-logo .auth-widget-container {
+                margin-right: 40px; /* Reduce right margin */
+            }
+            .signup-marketing-text {
+                font-size: 20px;
+            }
+            .product-description {
+                width: 280px;
+            }
+        }
+
+        /* Small height screens - prevent marketing from going above form top (ID-41024) */
+        @media screen and (max-height: 800px) and (min-width: 1021px) {
+            .marketing-copy-container {
+                height: auto;
+                min-height: 100vh;
+                justify-content: flex-start;
+                padding-top: 100px; /* Align with form top */
+            }
+        }
+
+        /* Adjust marketing copy for shorter screens */
+        @media screen and (max-height: 750px) and (min-width: 1021px) {
+            .product {
+                margin-bottom: 15px;
+            }
+            .checklist li, .outline-list li {
+                margin-bottom: 8px;
+            }
+        }
+
+    </style>
+
+        <title>Twilio | Try Twilio Free</title>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if("one-twilio" === "one-twilio"){
+                const favicon = document.createElement('link');
+                favicon.rel = 'icon';
+                favicon.type = 'image/x-icon';
+                favicon.href = 'https://assets.twilio.com/public_assets/ui-assets/0.0.35/img/auth0/favicon.ico';
+                document.head.appendChild(favicon);
+            }
+        });
+    </script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            window.dataLayer.push(arguments)
+        };
+    </script>
+    <!-- Initialize GA with client_id and session_id -->
+    <script>
+        if (window.location.pathname === '/u/signup') {
+            const clientId  = "";
+            const sessionId = "";
+            const gaTrackingId = "";
+
+            if(clientId && gaTrackingId){
+                gtag('config', gaTrackingId, {
+                    'client_id': clientId,
+                    'session_id': sessionId,
+                    'cookie_domain': 'twilio.com'
+                });
+            }
+        }
+    </script>
+    <script>
+      const segmentKey = "czYIqC3pFEu0I6xaEnei7ElGtkxqce5T";
+      const appSource = "one-twilio";
+      const anonymousId = "";
+      const isInvitation = false;
+      const countryCode = "BD" || null;
+      function getEmailDomain(email) {
+          if (typeof email !== 'string') return undefined;
+          const atIndex = email.lastIndexOf('@');
+          return atIndex > -1 ? email.slice(atIndex + 1).trim().toLowerCase() || undefined : undefined;
+      }
+      !function(segmentKey){
+          if (segmentKey && segmentKey.length > 0) {
+              var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){if(window.analytics.initialized)return window.analytics[e].apply(window.analytics,arguments);var i=Array.prototype.slice.call(arguments);i.unshift(e);analytics.push(i);return analytics}};for(var i=0;i<analytics.methods.length;i++){var key=analytics.methods[i];analytics[key]=analytics.factory(key)}analytics.load=function(key,i){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._loadOptions=i};analytics._writeKey=segmentKey;;analytics.SNIPPET_VERSION="4.16.1";
+              analytics && anonymousId && analytics.setAnonymousId(anonymousId);
+              analytics && analytics.load(segmentKey);
+              analytics && analytics.page(
+                  undefined,
+                  undefined,
+                  {appSource: appSource, isInvitation: isInvitation}
+              );
+
+          }
+      }}(segmentKey);
+    </script>
+
+    <!-- CHEQ script -->
+    <script async="" src="https://euob.powerrobotflower.com/sxp/i/40532d5df9f288cf593998bcff0654c9.js" data-ch="cheq4ppc" class="ct_clicktrue_25118" data-jsonp="onCheqResponse">
+    </script>
+    <script>
+      const currentPath = window.location.pathname;
+      if (currentPath.includes('u/signup')) {
+        document.addEventListener('DOMContentLoaded', function () {
+          const submitButton = Array.from(document.querySelectorAll('button[type="submit"]'))
+              .find(btn => btn.value === 'default');
+
+          if (submitButton && !submitButton.hasAttribute('data-analytics-listener-attached')) {
+            submitButton.addEventListener('click', function (event) {
+              handleSignupAnalyticsTracking();
+            });
+            submitButton.setAttribute('data-analytics-listener-attached', 'true');
+          }
+
+          const googleSignUpButton = document.querySelector('button[data-provider="google"]');
+          if (googleSignUpButton && !googleSignUpButton.hasAttribute('data-analytics-listener-attached')) {
+              googleSignUpButton.addEventListener('click', handleGoogleSignUpSubmit);
+              googleSignUpButton.setAttribute('data-analytics-listener-attached', 'true');
+          }
+        });
+      }
+
+
+            function getSignupAnalyticsContext() {
+                const tosCheckbox = document.getElementById('terms-of-service');
+                const marketingConsentCheckbox = document.getElementById('marketing-consent');
+                const marketingConsentContainer = document.getElementById('marketing-consent-container');
+                const currentTimestamp = new Date().toISOString();
+
+                // Check if marketing consent checkbox was actually shown to the user
+                const isMarketingConsentVisible = marketingConsentContainer &&
+                    marketingConsentContainer.style.display !== 'none';
+
+                const context = {
+                    // Mandatory ToS checkbox (always present)
+                    tosAccepted: tosCheckbox ? tosCheckbox.checked : false,
+                    tosTimestamp: tosCheckbox && tosCheckbox.checked ? currentTimestamp : null,
+
+                    // Optional marketing consent checkbox (tri-state: true/false/null)
+                    // - true: checkbox shown and checked
+                    // - false: checkbox shown but not checked
+                    // - null: checkbox not shown (country doesn't require consent)
+                    marketingConsentAccepted: isMarketingConsentVisible
+                        ? (marketingConsentCheckbox?.checked || false)
+                        : null,
+                    marketingConsentTimestamp: isMarketingConsentVisible && marketingConsentCheckbox?.checked
+                        ? currentTimestamp
+                        : null,
+
+                    // Country code
+                    country: countryCode || null,
+
+                    // General timestamp for the event
+                    timestamp: currentTimestamp,
+                };
+
+                return context;
+            }
+
+      function handleSignupAnalyticsTracking() {
+        const isValid = ['first-name', 'last-name', 'password'].every(id => {
+          const el = document.getElementById(id);
+          return el && el.value.length >= 1;
+        });
+        if (isValid) {
+          const el = Array.from(document.getElementsByName('email')).find(el => el.type === 'text');
+          const eHawkTalon = document.getElementById('talon');
+          const stytchTelemetryId = document.getElementById('stytch-telemetry-id');
+          if (el && el.value.length >= 1) {
+            const emailDomain = getEmailDomain(el.value);
+            analytics && analytics.track(
+                "Auth0 Signup Submit",
+                                {
+                                    email: el.value,
+                                    email_domain: emailDomain,
+                                    appSource: appSource,
+                                    isInvitation: isInvitation,
+                                    hasTalon: !!eHawkTalon?.value,
+                                    hasStytchTelemetryId: !!stytchTelemetryId?.value,
+                                    ...getSignupAnalyticsContext()
+                                }
+            );
+          }
+        }}
+
+      function handleGoogleSignUpSubmit() {
+                analytics && analytics.track(
+                    "Google Signup Submit",
+                    {
+                        appSource: appSource,
+                        isInvitation: isInvitation,
+                        ...getSignupAnalyticsContext()
+                    }
+                );
+      }
+    </script>
+
+    <!-- GTM conversion script -->
+    <script>
+        if (currentPath.includes('u/signup')) {
+            document.addEventListener('DOMContentLoaded', function () {
+                const submitButton = Array.from(document.querySelectorAll('button[type="submit"]'))
+                .find(btn => btn.value === 'default');
+
+                if (submitButton) {
+                    // Google Ads conversion Action
+                    submitButton.addEventListener('click', function (event) {
+                        gtag('event', 'conversion', {
+                            'send_to': 'AW-923239173/7TeeCIzxgLQZEIWGnrgD',
+                            'page_path_url': 'u/signup',
+                            'product_name': 'Twilio Signup',
+                            'appSource': appSource
+                        });
+                        // DV360 Floodlight conversion Action
+                        gtag('event', 'conversion', {
+                            'allow_custom_scripts': true,
+                            'page_path_url': 'u/signup',
+                            'appSource': appSource,
+                            'send_to': 'DC-11875831/invmedia/twili000+unique'
+                        });
+                    });
+                }
+            });
+        }
+    </script><link rel="icon" type="image/x-icon" href="https://assets.twilio.com/public_assets/ui-assets/0.0.35/img/auth0/favicon.ico"></head>
+<body class="_widget-auto-layout  _hide-prompt-logo ">
+    <div class="container">
+
+
+
+        <div id="auth0-bg"></div>
+
+            <div class="marketing-copy-container">
+                <div class="marketing-copy">
+                    <div class="signup-banner">
+                        <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.32/packages/favicons/img/Twilio_57.png" alt="Sign-up Today">
+                    </div>
+
+                    <div class="product">
+                        <div class="signup-marketing">
+                             <p class="signup-marketing-text">Start your free trial today to test out the Twilio platform with no strings attached:</p>
+                        </div>
+                        <ul class="checklist">
+                            <li>
+                              <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.33/img/auth0/Tick.svg" alt="Tick Icon" class="check-icon">
+                              No credit card required
+                            </li>
+                            <li>
+                              <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.33/img/auth0/Tick.svg" alt="Tick Icon" class="check-icon">
+                              Free trials available
+                            </li>
+                            <li>
+                              <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.33/img/auth0/Tick.svg" alt="Tick Icon" class="check-icon">
+                              Access to all products across the Twilio platform
+                            </li>
+                          </ul>
+                    </div>
+
+                    <div class="product">
+                        <div class="signup-marketing">
+                             <p class="signup-marketing-text">Get up and running</p>
+                        </div>
+                        <ul class="outline-list">
+                            <li>
+                              <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.33/img/auth0/Tick.svg" alt="Tick Icon" class="outline-icon">
+                              Verify your email address &amp; phone number
+                            </li>
+                            <li>
+                              <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.33/img/auth0/Tick.svg" alt="Tick Icon" class="outline-icon">
+                              Tell us what you want to build first
+                            </li>
+                            <li>
+                              <img src="https://assets.twilio.com/public_assets/ui-assets/0.0.33/img/auth0/Tick.svg" alt="Tick Icon" class="outline-icon">
+                              Start building!
+                            </li>
+                          </ul>
+                    </div>
+                </div>
+                <div class="trial-disclaimer">
+                    *Free trials may be limited by time, features, and usage caps,<br>and are subject to change without notice.
+                </div>
+            </div>
+
+        <div class="auth-widget-container">
+            <link rel="preload" as="image" href="https://assets.twilio.com/public_assets/ui-assets/0.0.32/img/logos/twilio-login-logo.svg"><main class="_widget c517427d7"><section class="cb74a5b27 _prompt-box-outer cd01a8b0b"><div class="c4cd036e4 c61171857"><div class="c7a0d1ef0"><header class="cd16d1f0e cd1c7de70" id="screen-header" tabindex="-1"><div title="Twilio" id="custom-prompt-logo" style="width:auto !important;height:60px !important;position:static !important;margin:auto !important;padding:0 !important;background-color:transparent !important;background-position:center !important;background-size:contain !important;background-repeat:no-repeat !important"></div><img class="c9691010b ce80e8d2a" id="prompt-logo-center" src="https://assets.twilio.com/public_assets/ui-assets/0.0.32/img/logos/twilio-login-logo.svg" alt="Twilio"><h1 class="cdfab1d51 caadc1e55">Sign up for free</h1><div class="c0e74ced5 cc60965ce"><p class="cdc10897f c4cd21bcb">Start your free trial and unlock all Twilio products, including Twilio SendGrid and Twilio Segment.</p></div></header><div class="ca431c0f1 c41fea7cf"><form class="ccf381147 c288a14fb" data-form-primary="true" data-disable-html-validations="true" method="POST" novalidate=""><div id="ulp-error-announcer" class="screen-reader-only" aria-live="assertive" aria-atomic="true"></div><input type="hidden" name="state" value="hKFo2SBWSmJ0QmI0ZDBaaC16MjFsRWRWdVg5MHBFTXUtandqMaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIFNSZEZ2b2RBZFZGRFl6ajJVYjNsR1RRMTlodWRqU2VWo2NpZNkgYm1pSTNGWGZzSmxqUEk3UzBUeWl3Znp3S1JsTEFrVnc"><div id="ulp-container-form-content-start"><script>
+  function validateName(element, formSubmitted) {
+    if (!formSubmitted) {
+      return true;
+    }
+    const length = element.value.trim().length;
+    const valid = length >= 1 && length <= 64;
+    if (valid) {
+      sessionStorage.setItem('try-twilio#' + element.id, element.value);
+    }
+    return valid;
+  }
+</script>
+<div class="ulp-field c23b60020">
+  <label for="first-name">First name</label>
+  <input type="text" name="ulp-first-name" id="first-name" maxlength="64" required="">
+  <div class="ulp-error-info" data-ulp-validation-function="validateName" data-ulp-validation-event-listeners="blur,change,input,focus">
+    First name is required and must be up to 64 characters long
+  </div>
+</div>
+<div class="ulp-field c23b60020">
+  <label for="last-name">Last name</label>
+  <input type="text" name="ulp-last-name" id="last-name" maxlength="64" required="">
+  <div class="ulp-error-info" data-ulp-validation-function="validateName" data-ulp-validation-event-listeners="blur,change,input,focus">
+    Last name is required and must be up to 64 characters long
+  </div>
+</div>
+<script>
+  function tt_restore(id) {
+    const el = document.getElementById(id);
+    if (el && el.value.trim().length === 0) {
+      el.value = sessionStorage.getItem('try-twilio#' + id);
+    }
+  }
+  function tt_focus() {
+    const fn = document.getElementById("first-name");
+    if (fn && fn.value.trim().length === 0) {
+      fn.focus();
+    }
+  }
+  tt_restore('first-name');
+  tt_restore('last-name');
+  window.addEventListener('DOMContentLoaded', tt_focus, false);
+</script>
+</div><div class="c103013b6 c7ac6181d"><input type="hidden" name="passwordPolicy.isFlexible" value="false"><input type="hidden" name="strengthPolicy" value="excellent"><input type="hidden" name="complexityOptions.minLength" value="8"><div class="c103013b6 c951e1d50"><div class="c9653f887"><div class="input-wrapper _input-wrapper"><div class="c50d1bce1 c0d0ae1c1 text c10053b97 ulp-field c23b60020" data-action-text="" data-alternate-action-text=""><label id="email-label" class="cea96adc7 cd251e14b c12cee451" for="email">Email address <span class="required" aria-hidden="true">*</span></label><input class="input cac2a821f ce71d96a8" inputmode="email" id="email" type="text" aria-labelledby="email-label" aria-required="true" required="" autocomplete="email" autocapitalize="none" spellcheck="false" name="email" value=""></div><div id="error-cs-email-required" class="ulp-error-info aria-error-check" data-ulp-validation-function="ulpRequiredFunction" data-ulp-validation-event-listeners="blur,change,input,focus" data-ulp-validation-target="email" aria-live="polite" aria-atomic="true">Please enter an email address</div><div id="error-cs-email-invalid" class="ulp-error-info aria-error-check" data-ulp-validation-function="ulpEmailValidationFunction" data-ulp-validation-event-listeners="blur,change,input,focus" data-ulp-validation-target="email" aria-live="polite" aria-atomic="true">Email is not valid.</div></div><div class="input-wrapper _input-wrapper"><div class="c50d1bce1 c0d0ae1c1 password c9c4d0f1a ulp-field c23b60020" data-action-text="" data-alternate-action-text=""><label id="password-label" class="cea96adc7 cd251e14b cd839a4ed" for="password">Password <span class="required" aria-hidden="true">*</span></label><input class="input cac2a821f cd5ccc2a4" id="password" type="password" aria-labelledby="password-label" aria-required="true" required="" autocomplete="new-password" autocapitalize="none" spellcheck="false" name="password"><button type="button" role="switch" aria-checked="false" aria-label="Show password" class="c5900ab5b ulp-button-icon js-required ca4d4536b _button-icon" data-action="toggle"><span aria-hidden="true" class="password-icon-tooltip show-password-tooltip">Show password</span><span class="c64657379 password js-required" aria-hidden="true"></span></button></div><div id="error-cs-password-required" class="ulp-error-info aria-error-check" data-ulp-validation-function="ulpRequiredFunction" data-ulp-validation-event-listeners="blur,change,input,focus" data-ulp-validation-target="password" aria-live="polite" aria-atomic="true">Password is required</div><div id="error-cs-password-password-too-weak" class="ulp-error-info aria-error-check" data-ulp-validation-function="ulpPasswordPolicyFunction" data-ulp-validation-event-listeners="blur,change,input,focus" data-ulp-validation-target="password" aria-live="polite" aria-atomic="true">The password is too weak</div></div><div data-captcha-provider="auth0_v2" data-captcha-sitekey="0x4AAAAAACwSuI5jPtwnNwc5" data-captcha-lang="en" class="ulp-captcha-container"><div class="ulp-auth0-v2-captcha ulp-captcha" id="ulp-auth0-v2-captcha" tabindex="-1"><div><div></div></div></div><input type="hidden" name="captcha" value="1.S0qMrGwyOWx3AFJf2KPxfFJTgvzzAnYsbPgvbB2jXLA0F0stGU5p86jesx8VlhDBP0w86dNUOhyDS-qaQ3-9JNg4pi0RXRUN9YITi8X_aOKdWpfYzg0NcdM-F5xwySASbgUKFrH5NOVnJudjllm_CfSrDhQCb5VMqEtLJvvfu2bRWkqatPMJFTlw249UttH0Ie5SDnWSIugp2qNN0ySzXCkmfRlsdf6MapcLvizUFGUmov9RbUnmCToEcU0ZN_XEBWuxtRdy-wPB7p_JUnKD5GiHT2yj5AI3OMw3qjfa9rAmv5Ao5k7SQKzih-x3r4VNuEptxcvp5jbiPrwHJbtrmQIbgUsr2AqDAPv2CUcMJSPn8HO8ecG4JBJTdtM2xyd-MEKVCAdtjrdRQ4_GtePKyNncPcO_BZ3BkUejeYTAjR-GlUs51zFvJLskNcpfh5LLgLn933qpOsx9tOtQFd3tHmvdUr5Y5Pq4GxQ8M7N4J7tRRyBenjSDsArwPXeAO5h3LuaHKHEjE7DffJHhG_y4M_85B-0CDaFrx4btSoCqRm2ApBQEgvo6aP-8naoYbwufXP6cRRGPMWpSmwAoBtrEHNUYxPIu50uTZ0ftvuFvEK0B7Ll7jJzq5a7fPcrq3_qL.k08xZJugjOVj7v4DAvmOUQ.d21b4538d390a4c5d4fe837eff1482f363d49015e94ae05aa67adb772e6dc2e7"></div><span id="error-element-third-party-captcha" class="ulp-input-error-message ulp-captcha-client-error hide"><span class="ulp-input-error-icon" aria-hidden="true"></span>We couldn’t load the security challenge. Please try again. (Error code: #{errorCode})</span><div id="captcha-status" class="screen-reader-only" aria-live="assertive" role="alert" aria-atomic="true" tabindex="-1" data-captcha-expired-error="Verification expired. Please try again."></div></div></div><div id="password-security-popover" class="c338398d7 no-arrow c2e9a646f cd18f3e25 c2b62c881 c02bc9716 c747d9709 aria-error-check hide _hide" tabindex="-1" data-ulp-validation-target="password"><div class="c9c882397"><ul class="c63ea11e4"><li class="cc1bc7434 cbe2f57a0"><div class="c0db1c71b cc1bc7434"><span class="ca3dd0a6b">Your password must contain:</span><ul class="c3a57f6c2"><li class="cade67c9c c3af492d8" data-error-code="password-policy-length-at-least"><span class="ca3dd0a6b" aria-hidden="true">At least 8 characters</span><span class="screen-reader-only"><span class="c12575aa3">At least 8 characters: .</span><span class="c7ee9be46">At least 8 characters: .</span></span></li><li class="cade67c9c c3af492d8" data-error-code="password-policy-contains-at-least"><span class="ca3dd0a6b" aria-hidden="true">At least 3 of the following:</span><span class="screen-reader-only"><span class="c12575aa3">At least 3 of the following:: .</span><span class="c7ee9be46">At least 3 of the following:: .</span></span><div><ul><li class="cade67c9c c3af492d8" data-error-code="password-policy-lower-case"><span class="ca3dd0a6b" aria-hidden="true">Lower case letters (a-z)</span><span class="screen-reader-only"><span class="c12575aa3">Lower case letters (a-z): .</span><span class="c7ee9be46">Lower case letters (a-z): .</span></span></li><li class="cade67c9c c3af492d8" data-error-code="password-policy-upper-case"><span class="ca3dd0a6b" aria-hidden="true">Upper case letters (A-Z)</span><span class="screen-reader-only"><span class="c12575aa3">Upper case letters (A-Z): .</span><span class="c7ee9be46">Upper case letters (A-Z): .</span></span></li><li class="cade67c9c c3af492d8" data-error-code="password-policy-numbers"><span class="ca3dd0a6b" aria-hidden="true">Numbers (0-9)</span><span class="screen-reader-only"><span class="c12575aa3">Numbers (0-9): .</span><span class="c7ee9be46">Numbers (0-9): .</span></span></li><li class="cade67c9c c3af492d8" data-error-code="password-policy-special-characters"><span class="ca3dd0a6b" aria-hidden="true">Special characters (e.g. !@#$%^&amp;*)</span><span class="screen-reader-only"><span class="c12575aa3">Special characters (e.g. !@#$%^&amp;*): .</span><span class="c7ee9be46">Special characters (e.g. !@#$%^&amp;*): .</span></span></li></ul></div></li><li class="cade67c9c c3af492d8" data-error-code="password-policy-identical-chars"><span class="ca3dd0a6b" aria-hidden="true">No more than 2 identical characters in a row</span><span class="screen-reader-only"><span class="c12575aa3">No more than 2 identical characters in a row: .</span><span class="c7ee9be46">No more than 2 identical characters in a row: .</span></span></li></ul></div></li></ul></div></div></div><div id="custom-field-1"></div><div id="ulp-container-form-content-end"><script>
+  function validateTOS(element, formSubmitted) {
+    if (!formSubmitted) {
+      return true;
+    }
+
+    const valid = element ? element.checked: true;
+    if (valid && element) {
+      sessionStorage.setItem('try-twilio#' + element.id, element.checked);
+    }
+    return valid;
+  }
+</script>
+<div class="ulp-field" style="padding-top: 5px">
+    <input type="checkbox" name="ulp-terms-of-service" id="terms-of-service" required="">
+    <label for="terms-of-service" id="tos-label">
+      By clicking Continue, you agree to the <a href="https://www.twilio.com/en-us/legal/tos" target="_blank" style="text-decoration: none;">Twilio Terms of Service</a>
+      and the <a href="https://www.twilio.com/en-us/legal/privacy" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">Twilio Privacy Notice</a>.
+      If you are in the EEA or UK, you have read and agree to the <a href="https://www.twilio.com/en-us/legal/service-country-specific-terms/eu-eecc-waiver" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">Electronic Communications Code Disclosures</a>,  if applicable.
+    </label>
+    <div class="ulp-error-info" data-ulp-validation-function="validateTOS" data-ulp-validation-event-listeners="change,input,focus">
+        You must accept the Terms of Service to create a Twilio Account
+    </div>
+</div>
+<input type="hidden" name="ulp-terms-of-service-shown" value="true">
+<script>
+  const tosCheckbox = document.getElementById('terms-of-service');
+  if (tosCheckbox){
+    tosCheckbox.checked = "true" === sessionStorage.getItem('try-twilio#terms-of-service');
+  }
+</script>
+<script>
+  function validateMarketingConsent(element, formSubmitted) {
+    // Marketing consent is optional, so always return true
+    if (element && element.checked) {
+      sessionStorage.setItem('try-twilio#' + element.id, element.checked);
+    }
+
+    return true;
+  }
+</script>
+<div class="ulp-field" style="padding-top: 5px; display: block;" id="marketing-consent-container">
+    <input type="checkbox" name="ulp-marketing-consent" id="marketing-consent">
+    <label for="marketing-consent">
+      Stay updated - Send me exclusive offers, product news, and relevant updates. I agree to receive these communications via email and digital channels.
+    </label>
+    <div class="ulp-info" data-ulp-validation-function="validateMarketingConsent" data-ulp-validation-event-listeners="change,input,focus">
+    </div>
+    <!-- Hidden field to track if checkbox was shown (tri-state logic) -->
+    <input type="hidden" name="ulp-marketing-consent-shown" id="marketing-consent-shown" value="true">
+</div>
+<script>
+  // Restore checkbox state from session storage
+  const marketingConsentCheckbox = document.getElementById('marketing-consent');
+  if (marketingConsentCheckbox){
+    marketingConsentCheckbox.checked = "true" === sessionStorage.getItem('try-twilio#marketing-consent');
+  }
+</script>
+
+<script>
+
+  // List of countries where marketing consent checkbox is shown
+  // Per marketing team requirements - ISO 3166-1 alpha-2 codes
+  const MARKETING_CONSENT_COUNTRIES = [
+    'AT','DE','CH','AU','BE','BR','CA','CN','IN','ID',
+    'IL','IT','JP','NL','NZ','PH','PL','ES','BD','BY',
+    'BW','BG','CL','CO','CY','CZ','DK','EG','FI','FR',
+    'GI','GR','VA','KE','LI','LT','MY','MT','NP','NO',
+    'PT','RO','SM','SG','SK','ZA','TW','TH','TR','UA',
+    'VN','ZM',
+  ];
+
+  const marketingConsentSignupSource = "one-twilio";
+  const marketingConsentCountryCode = "BD" || null;
+
+
+  if (marketingConsentSignupSource === "one-twilio" &&
+      marketingConsentCountryCode &&
+      MARKETING_CONSENT_COUNTRIES.includes(marketingConsentCountryCode.toUpperCase())) {
+    document.addEventListener('DOMContentLoaded', function() {
+      const marketingConsentContainer = document.getElementById('marketing-consent-container');
+      const marketingConsentShownField = document.getElementById('marketing-consent-shown');
+      marketingConsentContainer.style.display = 'block';
+      // Mark that the checkbox was shown
+      marketingConsentShownField.value = 'true';
+    });
+  }
+</script>
+<div class="ulp-field">
+  <input type="hidden" name="ulp-talon" id="talon" value="{&quot;0&quot;:0,&quot;2&quot;:2462043651,&quot;3&quot;:&quot;0d6486b9a8f90fc9cc5371b64d3a8b5c&quot;,&quot;4&quot;:&quot;0d6486b9a8f90fc9cc5371b64d3a8b5c&quot;,&quot;5&quot;:1795760803278,&quot;6&quot;:1,&quot;7&quot;:0,&quot;8&quot;:4,&quot;9&quot;:0,&quot;version&quot;:&quot;6.0.4&quot;,&quot;i&quot;:&quot;&quot;,&quot;status&quot;:0,&quot;timestamp&quot;:&quot;Fri, 27 Nov 2026 06:26:43 GMT&quot;,&quot;a&quot;:{&quot;dst&quot;:false,&quot;tzo&quot;:-360,&quot;stzo&quot;:-360},&quot;b&quot;:&quot;en-US&quot;,&quot;c&quot;:309674235,&quot;d&quot;:&quot;en&quot;,&quot;e&quot;:&quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36&quot;}">
+</div>
+
+<script src="https://assets.twilio.com/public_assets/ui-assets/0.0.29/js/e-hawk/eHawkTalon.js" onerror="window.analytics&amp;&amp;window.analytics.track('Ehawk Error',{s:'signup'})"></script>
+
+<script>
+	// Function to set the talon value
+	async function execTalon() {
+    try {
+      // Generate the talon using eHawkTalon
+      await window.eHawkTalon();
+      const talonInput = document.getElementById('talon');
+
+      const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+          if (mutation.type === "attributes" && mutation.attributeName === "value") {
+            // Talon value has been set, disconnect the observer
+            observer.disconnect();
+          }
+        }
+      });
+      observer.observe(talonInput, { attributes: true });
+
+      // Add a timeout to ensure the process doesn't hang indefinitely
+      setTimeout(() => {
+        if (!talonInput.value) {
+          observer.disconnect();
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error("Error generating Talon value:", error);
+    }
+  }
+
+  // Call the function when the DOM is fully loaded
+  document.addEventListener("DOMContentLoaded", execTalon);
+</script>
+
+<div class="ulp-field">
+  <input type="hidden" name="ulp-stytch-telemetry-id" id="stytch-telemetry-id" value="5a5cc045-7849-4e0b-b8e4-55088e05b878">
+</div>
+
+<script src="https://assets.twilio.com/public_assets/ui-assets/0.0.43/js/auth0/client/runtime-utils.js" onerror="try{(function(s){var c=navigator.connection||{};window.analytics&amp;&amp;window.analytics.track('Stytch DFP Script Load Error',{appSource:'one-twilio',src:s,userAgent:navigator.userAgent,vendor:navigator.vendor,effectiveType:c.effectiveType,rtt:c.rtt})})(this.src)}catch(_){}"></script>
+
+<script>
+  try {
+  (function () {
+    const STYTCH_PUBLIC_TOKEN = "public-token-live-7e4d3d04-72f7-4d39-8bd2-b897a424fc0d";
+    const STYTCH_SUBMIT_URL="id.auth.twilio.com";
+    const MAX_POLL_ATTEMPTS=10,POLL_INTERVAL_MS=270000,MAX_RETRIES=2,RETRY_BASE_MS=5000;
+    let pollCount=0,pollStopped=false,idSetAt=0;
+    let _fr='unknown';const APP_SOURCE='one-twilio';
+    function _t(n, p) { window.analytics && window.analytics.track(n, Object.assign({appSource:APP_SOURCE,userAgent:navigator.userAgent,vendor:navigator.vendor},p)); }
+    function setTelemetryId(id) {
+      var el = document.getElementById('stytch-telemetry-id');
+      if (el) { el.value = id; idSetAt = Date.now(); }
+    }
+    function fetchTelemetryId() {
+      if (typeof GetTelemetryID !== 'function') { _fr = 'function_missing'; return Promise.resolve(null); }
+      _fr = 'pending';
+      return new Promise(function (resolve) { resolve(GetTelemetryID({ publicToken: STYTCH_PUBLIC_TOKEN, submitURL: STYTCH_SUBMIT_URL })); })
+        .then(function (id) { if (!id) { _fr = 'id_missing'; } return id || null; })
+        .catch(function () { _fr = 'fetch_error'; return null; });
+    }
+    function loadAndStoreDFP(attempt) {
+      attempt = attempt || 0;
+      return fetchTelemetryId().then(function (id) {
+        if (id) { setTelemetryId(id); return id; }
+        if (attempt >= MAX_RETRIES || _fr === 'function_missing') return null;
+        return new Promise(function (resolve) { setTimeout(resolve, RETRY_BASE_MS * Math.pow(2, attempt)); })
+          .then(function () { return loadAndStoreDFP(attempt + 1); });
+      });
+    }
+    function schedulePoll() {
+      setTimeout(function () {
+        pollCount++;
+        loadAndStoreDFP().then(function () {
+          if (pollCount < MAX_POLL_ATTEMPTS) schedulePoll(); else pollStopped = true;
+        });
+      }, POLL_INTERVAL_MS);
+    }
+    function init() {
+      loadAndStoreDFP().then(schedulePoll);
+      var inputEl = document.getElementById('stytch-telemetry-id');
+      var form = inputEl && inputEl.closest('form');
+      if (!form) {
+        _t('Stytch DFP Form Element Not Found', {});
+        return;
+      }
+      form.addEventListener('submit', function () {
+        if (inputEl.value) {
+          _t('Stytch Telemetry ID Present on Submit', { idAgeMins: Math.round((Date.now() - idSetAt) / 6000) / 10, pollCount: pollCount, pollStopped: pollStopped });
+          return;
+        }
+        _t('Stytch Telemetry ID Missing on Submit', { reason: _fr, pollCount: pollCount, pollStopped: pollStopped });
+      });
+    }
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+  })();
+  } catch(e){window.analytics&&window.analytics.track('Stytch DFP Error',{appSource:'one-twilio',error:e&&e.message,userAgent:navigator.userAgent,vendor:navigator.vendor});}
+</script>
+</div><div class="ca203512a"><button type="submit" value="default" class="c5900ab5b c564047a1 ca4d4536b c9269bb96 c25552668" data-action-button-primary="true" name="action" data-analytics-listener-attached="true">Continue</button></div></form><div class="ulp-alternate-action _alternate-action"><div id="ulp-container-form-footer-start"></div><p class="cdc10897f c4cd21bcb c10814c43">Already have an account? <a class="c6017cfca cd3cfae4f" href="https://auth.twilio.com/login">Login</a></p><div id="ulp-container-form-footer-end"></div></div><div class="c5bef9333 c6982596a"><span>Or</span></div><div class="cc14e8389 c36690d76"><div id="ulp-container-secondary-actions-start"></div><form data-provider="google" class="c9c1d4a0c c95bf208b cd352c124" data-form-secondary="true" method="post"><input type="hidden" name="state" value="hKFo2SBWSmJ0QmI0ZDBaaC16MjFsRWRWdVg5MHBFTXUtandqMaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIFNSZEZ2b2RBZFZGRFl6ajJVYjNsR1RRMTlodWRqU2VWo2NpZNkgYm1pSTNGWGZzSmxqUEk3UzBUeWl3Znp3S1JsTEFrVnc"><input type="hidden" name="connection" value="google-oauth2"><button type="submit" class="c837464f7 cd9aef2d7 c458f1348" data-provider="google" data-action-button-secondary="true" data-analytics-listener-attached="true"><span class="c0d94c7af cbc6eca94" data-provider="google"></span><span class="ce6a568ad">Sign up with Google</span></button></form><div id="ulp-container-secondary-actions-end"></div></div></div></div></div></section></main>
+<script id="client-scripts">
+window.ulpFlags = {"custom_prompts_passkeys":true,"ulp_field_validation_double_submit_fix":true,"ulp_captcha_double_submit_fix":true,"enable_ulp_wcag_compliance":true,"enable_ulp_rtl_support":false,"disable_ulp_form_submission_fix":false,"disable_back_button_block_submit_fix":false,"enable_ulp_separate_login_display":true,"enable_ulp_separate_signup_identifiers":true};!function(){function flags(){var e={};return e.exports=function(e,n){return"object"==typeof e.ulpFlags&&null!==e.ulpFlags?e.ulpFlags:{}},e.exports}function utils(){var e={};return e.exports=function(t,l){var r={},i={};function s(e,n){if(e.classList)return e.classList.add(n);var t=e.className.split(" ");-1===t.indexOf(n)&&(t.push(n),e.className=t.join(" "))}function a(e,n,t,r){return e.addEventListener(n,t,r)}function o(e){return"string"==typeof e}function u(e,n){return o(e)?l.querySelector(e):e.querySelector(n)}function c(e,n){var t=o(e)?l.querySelectorAll(e):e.querySelectorAll(n);return Array.prototype.slice.call(t)}function p(e,n){if(e.classList)return e.classList.remove(n);var t=e.className.split(" "),r=t.indexOf(n);-1!==r&&(t.splice(r,1),e.className=t.join(" "))}function d(e,n){return e.getAttribute(n)}function f(e,n,t){return e.setAttribute(n,t)}function h(e){return e.remove()}var e=["text","number","email","password","tel","url"],n="select,textarea,"+e.map(function(e){return'input[type="'+e+'"]'}).join(",");return{addClass:s,toggleClass:function(e,n,t){if(!0===t||!1===t)return r=e,i=n,!0!==t?p(r,i):s(r,i);var r,i;if(e.classList)return e.classList.toggle(n);var a=e.className.split(" "),o=a.indexOf(n);-1!==o?a.splice(o,1):a.push(n),e.className=a.join(" ")},hasClass:function(e,n){return e.classList?e.classList.contains(n):-1!==e.className.split(" ").indexOf(n)},addClickListener:function(e,n){return a(e,"click",n)},addEventListener:a,getAttribute:d,hasAttribute:function(e,n){return e.hasAttribute(n)},getElementById:function(e){return l.getElementById(e)},getParent:function(e){return e.parentNode},isString:o,loadScript:function(e,n){var t=l.createElement("script");for(var r in n)r.startsWith("data-")?t.dataset[r.replace("data-","")]=n[r]:t[r]=n[r];t.src=e,l.body.appendChild(t)},removeScript:function(e){l.querySelectorAll('script[src="'+e+'"]').forEach(function(e){e.remove()})},poll:function(e){var a=e.interval||2e3,n=e.url||t.location.href,o=e.condition||function(){return!0},s=e.onSuccess||function(){},u=e.onError||function(){};return setTimeout(function r(){if(l.hidden)return setTimeout(r,a);var i=new XMLHttpRequest;return i.open("GET",n),i.setRequestHeader("Accept","application/json"),i.onload=function(){if(200===i.status){var e="application/json"===i.getResponseHeader("Content-Type").split(";")[0]?JSON.parse(i.responseText):i.responseText;return o(e)?s():setTimeout(r,a)}if(429!==i.status)return u({status:i.status,responseText:i.responseText});var n=1e3*Number.parseInt(i.getResponseHeader("X-RateLimit-Reset")),t=n-(new Date).getTime();return setTimeout(r,a<t?t:a)},i.send()},a)},querySelector:u,querySelectorAll:c,removeClass:p,removeElement:h,setAttribute:f,removeAttribute:function(e,n){return e.removeAttribute(n)},swapAttributes:function(e,n,t){var r=d(e,n),i=d(e,t);f(e,t,r),f(e,n,i)},setGlobalFlag:function(e,n){r[e]=!!n},getGlobalFlag:function(e){return!!r[e]},setSubmittedForm:function(e,n){i[e]=n},getSubmittedForm:function(e){return i[e]},preventFormSubmit:function(e){e.stopPropagation(),e.preventDefault()},getUlpFields:function(e){var n=[];return c(e,'input[name^="ulp-"], textarea[name^="ulp-"], select[name^="ulp-"]').forEach(function(e){n.push({name:d(e,"name"),value:e.value})}),n},appendUlpFieldsToForm:function(t,e){e&&e.length&&(c(t,'input[type="hidden"][name^="ulp-"], textarea[name^="ulp-"], select[name^="ulp-"]').forEach(function(e){h(e)}),e.forEach(function(e){var n=l.createElement("input");f(n,"type","hidden"),f(n,"name",e.name),f(n,"value",e.value),t.appendChild(n)}))},matchMedia:function(e){return"function"==typeof t.matchMedia&&t.matchMedia(e).matches},dispatchEvent:function(e,n,t){var r;"function"!=typeof Event?(r=l.createEvent("Event")).initCustomEvent(n,t,!1):r=new Event(n,{bubbles:t}),e.dispatchEvent(r)},timeoutPromise:function(e,i){return new Promise(function(n,t){var r=setTimeout(function(){t(new Error("timeoutPromise: promise timed out"))},e);i.then(function(e){clearTimeout(r),n(e)},function(e){clearTimeout(r),t(e)})})},createMutationObserver:function(e){return"undefined"==typeof MutationObserver?null:new MutationObserver(e)},consoleWarn:function(){(console.warn||console.log).apply(console,arguments)},getConfigJson:function(e){try{var n=u(e);if(!n)return null;var t=n.value;return t?JSON.parse(t):null}catch(e){return null}},getCSSVariable:function(e){return getComputedStyle(l.documentElement).getPropertyValue(e)},removeAndTrimString:function(e,n){var t=new RegExp(n,"g"),r=e.replace(t,"");return r=r.replace(/\s+/g,"  ").trim()},htmlEncode:function(e){var n=l.createTextNode(e),t=l.createElement("span");return t.appendChild(n),t.innerHTML||""},cleanServerErrorMessage:function(e,n){0<e.length&&0<n.length&&n.forEach(function(e){h(e)})},arrayFrom:function(e){return Array.prototype.slice.call(e)},arrayIncludes:function(e,n){return-1!==e.indexOf(n)},stringStartsWith:function(e,n){return 0===e.indexOf(n)},stringEndsWith:function(e,n){return-1!==e.indexOf(n,e.length-n.length)},setTimeout:setTimeout,globalWindow:t,SUPPORTED_INPUT_TYPES:e,ELEMENT_TYPE_SELECTOR:n,RUN_INIT:!0}},e.exports}function validationFunctions(){var e={};function _(e){if(!("string"==typeof e||e instanceof String)){var n=typeof e;throw null===e?n="null":"object"===n&&(n=e.constructor.name),new TypeError("Expected a string but received a "+n)}}function g(e,n){var t,r;_(e),r="object"==typeof n?(t=n.min||0,n.max):(t=n,arguments[2]);var i=encodeURI(e).split(/%..|./).length-1;return t<=i&&(void 0===r||i<=r)}function b(e,n){for(var t in void 0===e&&(e={}),n)void 0===e[t]&&(e[t]=n[t]);return e}var w={require_tld:!0,allow_underscores:!1,allow_trailing_dot:!1,allow_numeric_tld:!1,allow_wildcard:!1,ignore_max_length:!1};var n="(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])",t="("+n+"[.]){3}"+n,r=new RegExp("^"+t+"$"),i="(?:[0-9a-fA-F]{1,4})",a=new RegExp("^((?:"+i+":){7}(?:"+i+"|:)|(?:"+i+":){6}(?:"+t+"|:"+i+"|:)|(?:"+i+":){5}(?::"+t+"|(:"+i+"){1,2}|:)|(?:"+i+":){4}(?:(:"+i+"){0,1}:"+t+"|(:"+i+"){1,3}|:)|(?:"+i+":){3}(?:(:"+i+"){0,2}:"+t+"|(:"+i+"){1,4}|:)|(?:"+i+":){2}(?:(:"+i+"){0,3}:"+t+"|(:"+i+"){1,5}|:)|(?:"+i+":){1}(?:(:"+i+"){0,4}:"+t+"|(:"+i+"){1,6}|:)|(?::((?::"+i+"){0,5}:"+t+"|(?::"+i+"){1,7}|:)))(%[0-9a-zA-Z-.:]{1,})?$");function y(e,n){return void 0===n&&(n=""),_(e),(n=String(n))?"4"===n?r.test(e):"6"===n&&a.test(e):y(e,4)||y(e,6)}var x={allow_display_name:!1,allow_underscores:!1,require_display_name:!1,allow_utf8_local_part:!0,require_tld:!0,blacklisted_chars:"",ignore_max_length:!1,host_blacklist:[],host_whitelist:[]},C=/^([^\x00-\x1F\x7F-\x9F\cX]+)</i,E=/^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~]+$/i,L=/^[a-z\d]+$/,A=/^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$/i,S=/^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A1-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i,N=/^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$/i,P=254;function s(e,n,t,r,i){if(_(e),e=e.trim(),(n=b(n,x)).require_display_name||n.allow_display_name){var a=e.match(C);if(a){var o=a[1];if(e=e.replace(o,"").replace(/(^<|>$)/g,""),i(o," ")&&(o=o.slice(0,-1)),!function(e){var n=e.replace(/^"(.+)"$/,"$1");if(!n.trim())return!1;if(/[\.";<>]/.test(n)){if(n===e)return!1;if(n.split('"').length!==n.split('\\"').length)return!1}return!0}(o))return!1}else if(n.require_display_name)return!1}if(!n.ignore_max_length&&e.length>P)return!1;var s=e.split("@"),u=s.pop(),l=u.toLowerCase();if(t(n.host_blacklist,l))return!1;if(0<n.host_whitelist.length&&!t(n.host_whitelist,l))return!1;var c=s.join("@");if(n.domain_specific_validation&&("gmail.com"===l||"googlemail.com"===l)){var p=(c=c.toLowerCase()).split("+")[0];if(!g(p.replace(/\./g,""),{min:6,max:30}))return!1;for(var d=p.split("."),f=0;f<d.length;f++)if(!L.test(d[f]))return!1}if(!(!1!==n.ignore_max_length||g(c,{max:64})&&g(u,{max:254})))return!1;if(!function(e,n){_(e),(n=b(n,w)).allow_trailing_dot&&"."===e[e.length-1]&&(e=e.substring(0,e.length-1)),!0===n.allow_wildcard&&0===e.indexOf("*.")&&(e=e.substring(2));var t=e.split("."),r=t[t.length-1];if(n.require_tld){if(t.length<2)return!1;if(!n.allow_numeric_tld&&!/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(r))return!1;if(/\s/.test(r))return!1}return!(!n.allow_numeric_tld&&/^\d+$/.test(r))&&t.every(function(e){return!(63<e.length&&!n.ignore_max_length||!/^[a-z_\u00a1-\uffff0-9-]+$/i.test(e)||/[\uff01-\uff5e]/.test(e)||/^-|-$/.test(e)||!n.allow_underscores&&/_/.test(e))})}(u,{require_tld:n.require_tld,ignore_max_length:n.ignore_max_length,allow_underscores:n.allow_underscores})){if(!n.allow_ip_domain)return!1;if(!y(u)){if(!r(u,"[")||!i(u,"]"))return!1;var h=u.slice(1,-1);if(0===h.length||!y(h))return!1}}if('"'===c[0])return c=c.slice(1,c.length-1),n.allow_utf8_local_part?N.test(c):A.test(c);for(var m=n.allow_utf8_local_part?S:E,v=(d=c.split("."),0);v<d.length;v++)if(!m.test(d[v]))return!1;return!n.blacklisted_chars||-1===c.search(new RegExp("["+n.blacklisted_chars+"]+","g"))}return e.exports=function(r,i,t,a,o){return{ulpRequiredFunction:function(e,n){return!n||!!e.value},ulpPasswordPolicyFunction:function(e,n){if(r&&r.ulpFlags&&r.ulpFlags.disable_ulp_form_submission_fix)return!0;if(!e||"password"!==e.name)return!0;if(!i.querySelector(".c338398d7.c02bc9716"))return!0;if(!e.value)return!0;var t=e.classList&&e.classList.contains("cc67b4263");return!n&&!t||!t},ulpEmailValidationFunction:function(e,n){return!n||!e.value||!!s(e.value,void 0,t,a,o)},ulpPatternCheckFunction:function(e,n){return!n||!e.value||function(e){if("password"===e.name)return!0;var n=e.getAttribute("pattern");return!n||null!==e.value.match(n)}(e)}}},e.exports}function passwordSheriffBundle(){var module={exports:function(){return function(t){var r={};function i(e){if(r[e])return r[e].exports;var n=r[e]={i:e,l:!1,exports:{}};return t[e].call(n.exports,n,n.exports,i),n.l=!0,n.exports}return i.m=t,i.c=r,i.d=function(e,n,t){i.o(e,n)||Object.defineProperty(e,n,{enumerable:!0,get:t})},i.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},i.t=function(n,e){if(1&e&&(n=i(n)),8&e)return n;if(4&e&&"object"==typeof n&&n&&n.__esModule)return n;var t=Object.create(null);if(i.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:n}),2&e&&"string"!=typeof n)for(var r in n)i.d(t,r,function(e){return n[e]}.bind(null,r));return t},i.n=function(e){var n=e&&e.__esModule?function(){return e.default}:function(){return e};return i.d(n,"a",n),n},i.o=function(e,n){return Object.prototype.hasOwnProperty.call(e,n)},i.p="",i(i.s="./src/index.js")}({"./src/index.js":function(module,exports,__webpack_require__){eval('\nvar charsets = __webpack_require__(/*! ./lib/rules/contains */ "./src/lib/rules/contains.js").charsets;\n\nvar upperCase         = charsets.upperCase;\nvar lowerCase         = charsets.lowerCase;\nvar numbers           = charsets.numbers;\nvar specialCharacters = charsets.specialCharacters;\n\nvar PasswordPolicy = __webpack_require__(/*! ./lib/policy */ "./src/lib/policy.js");\n\nvar none =  new PasswordPolicy({\n  length: { minLength: 1 }\n});\n\nvar low = new PasswordPolicy({\n  length: { minLength: 6 }\n});\n\nvar fair = new PasswordPolicy({\n  length: { minLength: 8 },\n  contains: {\n    expressions: [lowerCase, upperCase, numbers]\n  }\n});\n\nvar good = new PasswordPolicy({\n  length: { minLength: 8 },\n  containsAtLeast: {\n    atLeast: 3,\n    expressions: [lowerCase, upperCase, numbers, specialCharacters]\n  }\n});\n\nvar excellent = new PasswordPolicy({\n  length: { minLength: 10 },\n  containsAtLeast: {\n    atLeast: 3,\n    expressions: [lowerCase, upperCase, numbers, specialCharacters]\n  },\n  identicalChars: { max: 2 }\n});\n\nvar policiesByName = {\n  none:       none,\n  low:        low,\n  fair:       fair,\n  good:       good,\n  excellent:  excellent\n};\n\n/**\n * Creates a password policy.\n *\n * @param {String} policyName Name of policy to use.\n */\nmodule.exports = function (policyName) {\n  var policy = policiesByName[policyName] || policiesByName.none;\n\n  return {\n    /**\n     * Checks that a password meets this policy\n     *\n     * @method check\n     * @param {String} password\n     */\n    check: function (password) {\n      return policy.check(password);\n    },\n    /**\n     * @method assert\n     * Asserts that a passord meets this policy else throws an exception.\n     *\n     * @param {String} password\n     */\n    assert: function (password) {\n      return policy.assert(password);\n    },\n\n    missing: function (password) {\n      return policy.missing(password);\n    },\n\n    missingAsMarkdown: function (password) {\n      return policy.missingAsMarkdown(password);\n    },\n\n    explain: function () {\n      return policy.explain();\n    },\n\n    /**\n     * Friendly string representation of the policy\n     * @method toString\n     */\n    toString: function () {\n      return policy.toString();\n    }\n  };\n};\n\nmodule.exports.PasswordPolicy = PasswordPolicy;\n\nmodule.exports.charsets = charsets;\n\n// module.exports.rulesToApply = rulesToApply;\n\n\n//# sourceURL=webpack:///./src/index.js?')},"./src/lib/helper.js":function(module,exports,__webpack_require__){eval("var _ = {};\nvar root = typeof self == 'object' && self.self === self && self ||\n            typeof global == 'object' && global.global === global && global ||\n            this ||\n            {};\nvar nativeIsArray = Array.isArray;\nvar nativeKeys = Object.keys;\nvar ObjProto = Object.prototype;\nvar toString = ObjProto.toString;\n\nvar shallowProperty = function(key) {\n  return function(obj) {\n    return obj == null ? void 0 : obj[key];\n  };\n};\n\nvar MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;\nvar getLength = shallowProperty('length');\nvar isArrayLike = function(collection) {\n  var length = getLength(collection);\n  return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;\n};\n\n// Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.\nvar typeNames = ['Arguments', 'Function', 'String', 'Number'];\nfunction loopAsign(name) {\n  _['is' + name] = function(obj) {\n    return toString.call(obj) === '[object ' + name + ']';\n  };\n}\nfor (var a = 0; a < typeNames.length; a++) {\n  loopAsign(typeNames[a]);\n}\n\nvar nodelist = root.document && root.document.childNodes;\nif (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {\n  _.isFunction = function(obj) {\n    return typeof obj == 'function' || false;\n  };\n}\n\n_.identity = function(value) {\n  return value;\n};\n\n_.keys = function(obj) {\n  if (!_.isObject(obj)) return [];\n  if (nativeKeys) return nativeKeys(obj);\n  var keys = [];\n  for (var key in obj) keys.push(key);\n  return keys;\n};\n\n_.isObject = function(obj) {\n  var type = typeof obj;\n  return type === 'function' || type === 'object' && !!obj;\n};\n\n_.isArray = nativeIsArray || function(obj) {\n  return toString.call(obj) === '[object Array]';\n};\n\n_.isEmpty = function(obj) {\n  if (obj == null) return true;\n  if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length === 0;\n  return _.keys(obj).length === 0;\n};\n\n_.isNaN = function(obj) {\n  return _.isNumber(obj) && isNaN(obj);\n};\n\n// Code attribution\n// Inlined and modified from https://github.com/browserify/node-util/blob/e37ce41f4063bcd7bc27e01470d6654053bdcd14/util.js#L33-L69\n// Copyright Joyent, Inc. and other Node contributors.\n// Please see LICENSE for full copyright and license attribution.\nvar formatRegExp = /%[sdj%]/g;\n\n_.format = function (f) {\n  var i = 1;\n  var args = arguments;\n  var len = args.length;\n  var str = String(f).replace(formatRegExp, function(x) {\n    if (x === '%%') return '%';\n    if (i >= len) return x;\n    switch (x) {\n      case '%s':\n        return String(args[i++]);\n      case '%d':\n        return Number(args[i++]);\n      case '%j':\n        try {\n          return JSON.stringify(args[i++]);\n        } catch (_) {\n          return '[Circular]';\n        }\n      default:\n        return x;\n    }\n  });\n  for (var x = args[i]; i < len; x = args[++i]) {\n    if (x === null || !_.isObject(x)) {\n      str += ' ' + x;\n    } else if (x !== null) {\n      str += ' ' + JSON.stringify(x);\n    }\n  }\n  return str;\n}\n// End code attribution\n\nmodule.exports = _;\n\n//# sourceURL=webpack:///./src/lib/helper.js?")},"./src/lib/policy.js":function(module,exports,__webpack_require__){eval('var format = __webpack_require__(/*! ./helper */ "./src/lib/helper.js").format;\n\nvar PasswordPolicyError = __webpack_require__(/*! ./policy_error */ "./src/lib/policy_error.js");\n\nfunction isString(value) {\n  return typeof value === \'string\' || value instanceof String;\n}\n\nvar defaultRuleset = {\n  length:           __webpack_require__(/*! ./rules/length */ "./src/lib/rules/length.js"),\n  contains:         __webpack_require__(/*! ./rules/contains */ "./src/lib/rules/contains.js"),\n  containsAtLeast:  __webpack_require__(/*! ./rules/containsAtLeast */ "./src/lib/rules/containsAtLeast.js"),\n  identicalChars:   __webpack_require__(/*! ./rules/identicalChars */ "./src/lib/rules/identicalChars.js"),\n  sequentialChars:  __webpack_require__(/*! ./rules/sequentialChars */ "./src/lib/rules/sequentialChars.js"),\n  maxLength:        __webpack_require__(/*! ./rules/maxLength */ "./src/lib/rules/maxLength.js")\n};\n\nfunction flatDescriptions (descriptions, index) {\n  if (!descriptions.length) {\n    return \'\';\n  }\n\n  function flatSingleDescription (description, index) {\n    var spaces = (new Array(index+1)).join(\' \');\n    var result = spaces + \'* \';\n    if (description.format) {\n      result += format.apply(null, [description.message].concat(description.format));\n    } else {\n      result += description.message;\n    }\n\n    if (description.items) {\n      result += \'\\n\' + spaces + flatDescriptions(description.items, index + 1);\n    }\n    return result;\n  }\n\n  var firstDescription = flatSingleDescription(descriptions[0], index);\n\n  descriptions = descriptions.slice(1).reduce(function (result, description) {\n    result += \'\\n\' + flatSingleDescription(description, index);\n\n    return result;\n  }, firstDescription);\n\n  return descriptions;\n}\n\n/**\n * Creates a PasswordPolicy which is a set of rules.\n *\n * @class PasswordPolicy\n * @constructor\n */\nfunction PasswordPolicy(rules, ruleset) {\n  this.rules = rules;\n  this.ruleset = ruleset || defaultRuleset;\n\n  this._reduce(function (result, ruleOptions, rule) {\n    rule.validate(ruleOptions);\n  });\n}\n\nPasswordPolicy.prototype = {};\n\nPasswordPolicy.prototype._reduce = function (fn, value) {\n  var self = this;\n  return Object.keys(this.rules).reduce(function (result, ruleName) {\n    var ruleOptions = self.rules[ruleName];\n    var rule = self.ruleset[ruleName];\n\n    return fn(result, ruleOptions, rule);\n\n  }, value);\n};\n\nPasswordPolicy.prototype._applyRules = function (password) {\n  return this._reduce(function (result, ruleOptions, rule) {\n    // If previous result was false as this an &&, then nothing to do here!\n    if (!result) {\n      return false;\n    }\n\n    if (!rule) {\n      return false;\n    }\n\n    return rule.assert(ruleOptions, password);\n  }, true);\n};\n\nPasswordPolicy.prototype.missing = function (password) {\n  return this._reduce(function (result, ruleOptions, rule) {\n    var missingRule = rule.missing(ruleOptions, password);\n    result.rules.push(missingRule);\n    result.verified = result.verified && !!missingRule.verified;\n    return result;\n  }, {rules: [], verified: true});\n};\n\nPasswordPolicy.prototype.explain = function () {\n  return this._reduce(function (result, ruleOptions, rule) {\n    result.push(rule.explain(ruleOptions));\n    return result;\n  }, []);\n};\n\nPasswordPolicy.prototype.missingAsMarkdown = function (password) {\n  return flatDescriptions(this.missing(password), 1);\n};\n\nPasswordPolicy.prototype.toString = function () {\n  var descriptions = this.explain();\n  return flatDescriptions(descriptions, 0);\n};\n\nPasswordPolicy.prototype.check = function (password) {\n  if (!isString(password)) {\n    return false;\n  }\n\n  return this._applyRules(password);\n};\n\nPasswordPolicy.prototype.assert = function (password) {\n  if (!this.check(password)) {\n    throw new PasswordPolicyError(\'Password does not meet password policy\');\n  }\n};\n\nmodule.exports = PasswordPolicy;\n\n\n//# sourceURL=webpack:///./src/lib/policy.js?')},"./src/lib/policy_error.js":function(module,exports,__webpack_require__){eval("/**\n * Error thrown when asserting a policy against a password.\n *\n * @class PasswordPolicyError\n * @constructor\n *\n * @param {String} msg Descriptive message of the error\n */\nfunction PasswordPolicyError(msg) {\n  var err = Error.call(this, msg);\n  err.name = 'PasswordPolicyError';\n  return err;\n}\n\nmodule.exports = PasswordPolicyError;\n\n\n//# sourceURL=webpack:///./src/lib/policy_error.js?")},"./src/lib/rules/length.js":function(module,exports,__webpack_require__){eval("var _ = __webpack_require__(/*! ../helper */ \"./src/lib/helper.js\");\n\n/* A rule should contain explain and rule methods */\n// TODO explain explain\n// TODO explain missing\n// TODO explain assert\n\nfunction assert (options, password) {\n  return !!password && options.minLength <= password.length;\n}\n\nfunction explain(options) {\n  if (options.minLength === 1) {\n    return {\n      message: 'Non-empty password required',\n      code: 'nonEmpty'\n    };\n  }\n\n  return {\n    message: 'At least %d characters in length',\n    format: [options.minLength],\n    code: 'lengthAtLeast'\n  };\n}\n\nmodule.exports = {\n  validate: function (options) {\n    if (!_.isObject(options)) {\n      throw new Error('options should be an object');\n    }\n\n    if (!_.isNumber(options.minLength) || _.isNaN(options.minLength)) {\n      throw new Error('length expects minLength to be a non-zero number');\n    }\n\n    return true;\n  },\n  explain: explain,\n  missing: function (options, password) {\n    var explained = explain(options);\n    explained.verified = !!assert(options, password);\n    return explained;\n  },\n  assert: assert\n};\n\n\n//# sourceURL=webpack:///./src/lib/rules/length.js?")},"./src/lib/rules/contains.js":function(module,exports,__webpack_require__){eval("var _ = __webpack_require__(/*! ../helper */ \"./src/lib/helper.js\");\n\n/* OWASP Special Characters: https://www.owasp.org/index.php/Password_special_characters */\nvar specialCharacters = [' ', '!', '\"', '#', '\\\\$', '%', '&', '\\'', '\\\\(', '\\\\)', '\\\\*', '\\\\+', ',', '-', '\\\\.', '/', ':', ';', '<', '=', '>', '\\\\?', '@', '\\\\[', '\\\\\\\\', '\\\\]', '\\\\^', '_','`','{','\\\\|', '}','~'].join('|');\n\nvar specialCharactersRegexp = new RegExp(specialCharacters);\n\nmodule.exports = {\n  validate: function (options) {\n    if (!_.isObject(options)) {\n      throw new Error('options should be an object');\n    }\n\n    if (!_.isArray(options.expressions) || _.isEmpty(options.expressions)) {\n      throw new Error('contains expects expressions to be a non-empty array');\n    }\n\n    var ok = options.expressions.every(function (expression) {\n      return _.isFunction(expression.explain) && _.isFunction(expression.test);\n    });\n\n    if (!ok) {\n      throw new Error('contains expressions are invalid: An explain and a test function should be provided');\n    }\n    return true;\n  },\n  explain: function (options) {\n    return {\n      message: 'Should contain:',\n      code: 'shouldContain',\n      items: options.expressions.map(function (expression) {\n        return expression.explain();\n      })\n    };\n  },\n  missing: function (options, password) {\n    var expressions = options.expressions.map(function (expression) {\n      var explained = expression.explain();\n      explained.verified = expression.test(password);\n      return explained;\n    });\n\n    var verified = expressions.every(function (expression) {\n      return expression.verified;\n    });\n\n    return {\n      message: 'Should contain:',\n      code: 'shouldContain',\n      verified: verified,\n      items: expressions\n    };\n  },\n  assert: function (options, password) {\n    if (!password) {\n      return false;\n    }\n\n    return options.expressions.every(function (expression) {\n      var result = expression.test(password);\n      return result;\n    });\n  },\n  charsets: {\n    upperCase: {\n      explain: function () { return {\n        message: 'upper case letters (A-Z)',\n        code: 'upperCase'\n      }; },\n      test: function (password) { return /[A-Z]/.test(password); }\n    },\n    lowerCase: {\n      explain: function () { return {\n        message: 'lower case letters (a-z)',\n        code: 'lowerCase'\n      }; },\n      test: function (password) { return /[a-z]/.test(password); }\n    },\n    specialCharacters: {\n      explain: function () { return {\n        message: 'special characters (e.g. !@#$%^&*)',\n        code: 'specialCharacters'\n      }; },\n      test: function (password) { return specialCharactersRegexp.test(password); }\n    },\n    numbers: {\n      explain: function () { return {\n        message: 'numbers (i.e. 0-9)',\n        code: 'numbers'\n      }; },\n      test: function (password) { return /\\d/.test(password); }\n    }\n  }\n};\n\n\n//# sourceURL=webpack:///./src/lib/rules/contains.js?")},"./src/lib/rules/containsAtLeast.js":function(module,exports,__webpack_require__){eval("var _ = __webpack_require__(/*! ../helper */ \"./src/lib/helper.js\");\n\nvar contains = __webpack_require__(/*! ./contains */ \"./src/lib/rules/contains.js\");\n\nfunction createIntroMessage() {\n  return 'Contain at least %d of the following %d types of characters:';\n}\n\nmodule.exports = {\n  // TODO validate atLeast to be a number > 0 and expressions to be a list of at least 1\n  validate: function (options) {\n    if (!_.isObject(options)) {\n      throw new Error('options should be an object');\n    }\n\n    if (!_.isNumber(options.atLeast) || _.isNaN(options.atLeast) || options.atLeast < 1) {\n      throw new Error('atLeast should be a valid, non-NaN number, greater than 0');\n    }\n\n    if (!_.isArray(options.expressions) || _.isEmpty(options.expressions)) {\n      throw new Error('expressions should be an non-empty array');\n    }\n\n    if (options.expressions.length < options.atLeast) {\n      throw new Error('expressions length should be greater than atLeast');\n    }\n\n    var ok = options.expressions.every(function (expression) {\n      return _.isFunction(expression.explain) && _.isFunction(expression.test);\n    });\n\n    if (!ok) {\n      throw new Error('containsAtLeast expressions are invalid: An explain and a test function should be provided');\n    }\n\n    return true;\n  },\n  explain: function (options) {\n    return {\n      message: createIntroMessage(),\n      code: 'containsAtLeast',\n      format: [options.atLeast, options.expressions.length],\n      items: options.expressions.map(function (x) { return x.explain(); })\n    };\n  },\n  missing: function (options, password) {\n    var expressions = options.expressions && options.expressions.map(function (expression) {\n      var explained = expression.explain();\n      explained.verified = expression.test(password);\n      return explained;\n    });\n\n    var verifiedCount = expressions.reduce(function (val, ex) { return val + !!ex.verified; }, 0);\n    var verified = verifiedCount >= options.atLeast;\n\n    return {\n      message: createIntroMessage(),\n      code: 'containsAtLeast',\n      format: [options.atLeast, options.expressions.length],\n      items: expressions,\n      verified: verified\n    };\n  },\n  assert: function (options, password) {\n    if (!password) {\n      return false;\n    }\n\n    var workingExpressions = options.expressions.filter(function (expression) {\n      return expression.test(password);\n    });\n\n    return workingExpressions.length >= options.atLeast;\n  },\n  charsets: contains.charsets\n};\n\n\n//# sourceURL=webpack:///./src/lib/rules/containsAtLeast.js?")},"./src/lib/rules/identicalChars.js":function(module,exports,__webpack_require__){eval("var _ = __webpack_require__(/*! ../helper */ \"./src/lib/helper.js\");\n\nfunction assert(options, password) {\n  if (!password) {\n    return false;\n  }\n\n  var i, current = {c: null, count: 0};\n\n  for (i = 0; i < password.length; i++) {\n    if (current.c !== password[i]) {\n      current.c = password[i];\n      current.count = 1;\n    } else {\n      current.count++;\n    }\n\n    if (current.count > options.max) {\n      return false;\n    }\n  }\n\n  return true;\n}\nfunction explain (options, verified) {\n    var example = (new Array(options.max+2)).join('a');\n    var d = {\n      message: 'No more than %d identical characters in a row (e.g., \"%s\" not allowed)',\n      code: 'identicalChars',\n      format: [options.max, example]\n    };\n    if (verified !== undefined) {\n      d.verified = verified;\n    }\n    return d;\n  }\n\nmodule.exports = {\n  validate: function (options) {\n    if (!_.isObject(options)) {\n      throw new Error('options should be an object');\n    }\n\n    if (!_.isNumber(options.max) || _.isNaN(options.max) || options.max < 1 ) {\n      throw new Error('max should be a number greater than 1');\n    }\n\n    return true;\n  },\n  explain: explain,\n  missing: function (options, password) {\n    return explain(options, assert(options, password));\n  },\n  assert: assert\n};\n\n\n//# sourceURL=webpack:///./src/lib/rules/identicalChars.js?")},"./src/lib/rules/sequentialChars.js":function(module,exports,__webpack_require__){eval("var _ = __webpack_require__(/*! ../helper */ \"./src/lib/helper.js\");\n\n/**\n * @readonly\n * @enum {number}\n */\nvar Direction = {\n  Ascending: 1,\n  Descending: -1,\n  None: 0\n};\n\n/**\n * @readonly\n * @enum {number}\n */\nvar CharacterCodes = {\n  LowerCaseA: 'a'.charCodeAt(0),\n  LowerCaseZ: 'z'.charCodeAt(0),\n  Zero: '0'.charCodeAt(0),\n  Nine: '9'.charCodeAt(0),\n  UpperCaseA: 'A'.charCodeAt(0),\n  UpperCaseZ: 'Z'.charCodeAt(0),\n};\n\n/**\n * Determines if a character is alphanumeric\n *\n * @param {number} code character code\n * @return {boolean}\n */\nfunction isAlphanumeric(code) {\n  if (!_.isNumber(code) || _.isNaN(code)) {\n    return false;\n  }\n\n  if (code >= CharacterCodes.LowerCaseA && code <= CharacterCodes.LowerCaseZ) {\n    return true;\n  } else if (code >= CharacterCodes.UpperCaseA && code <= CharacterCodes.UpperCaseZ) {\n    return true;\n  } else if (code >= CharacterCodes.Zero && code <= CharacterCodes.Nine) {\n    return true;\n  }\n\n  return false;\n}\n\n/**\n * Returns true if password has more sequential characters the configured max allowed\n *\n * @param {{max: number}} options\n * @param {string} password\n * @return {boolean}\n */\nfunction assert(options, password) {\n  if (!password) {\n    return false;\n  }\n\n  var prevCode = password.charCodeAt(0);\n  var seqLen = isAlphanumeric(prevCode) ? 1 : 0;\n  var currentDirection = Direction.None;\n\n  for (var i = 1; i < password.length; i++) {\n    var currentCode = password.charCodeAt(i);\n    if (!isAlphanumeric(currentCode) || !isAlphanumeric(prevCode)) {\n      currentDirection = Direction.None;\n      seqLen = 1;\n      prevCode = currentCode;\n      continue;\n    }\n\n    var diff = currentCode - prevCode;\n    prevCode = currentCode;\n\n    if (diff === Direction.Ascending || diff === Direction.Descending) {\n      if (currentDirection === diff) {\n        seqLen += 1;\n      } else {\n        // start a new potential sequence of length 2 (prev + current)\n        currentDirection = diff;\n        seqLen = 2;\n      }\n    } else {\n      currentDirection = Direction.None;\n      seqLen = 1;\n    }\n\n    if (seqLen > options.max) {\n      return false;\n    }\n  }\n\n  return true;\n}\n\n/**\n * @param {{max: number}} options\n * @param {boolean} verified\n * @return {boolean}\n */\nfunction explain(options, verified) {\n  var example = '';\n  for (var i = 0; i < options.max + 1; i++) {\n    example += String.fromCharCode('a'.charCodeAt(0) + i);\n  }\n  var d = {\n    message: 'No more than %d sequential alphanumeric characters (e.g., \"%s\" not allowed)', // updated\n    code: 'sequentialChars',\n    format: [options.max, example]\n  };\n  if (verified !== undefined) {\n    d.verified = verified;\n  }\n  return d;\n}\n\n/**\n * @param {{max: number}} options\n * @return {boolean}\n */\nfunction validate(options) {\n  if (!_.isObject(options)) {\n    throw new Error('options should be an object');\n  }\n\n  if (!_.isNumber(options.max) || _.isNaN(options.max) || options.max < 2) {\n    throw new Error('max should be a number greater than or equal to 2');\n  }\n\n  if (!_.isNumber(options.max) || _.isNaN(options.max) || options.max > 26) {\n    throw new Error('max should be a number less than or equal to 26');\n  }\n\n  return true;\n}\n\nmodule.exports = {\n  validate,\n  explain,\n  missing: function (options, password) {\n    return explain(options, assert(options, password));\n  },\n  assert\n};\n\n\n//# sourceURL=webpack:///./src/lib/rules/sequentialChars.js?")},"./src/lib/rules/maxLength.js":function(module,exports,__webpack_require__){eval("var _ = __webpack_require__(/*! ../helper */ \"./src/lib/helper.js\");\n\n/**\n * Returns the byte length of a string\n * @param {string} str \n * @returns {number}\n */\nfunction getByteLength(str) {\n  if (!str) return 0;\n  // Prefer Node Buffer if available\n  if (typeof Buffer !== 'undefined' && Buffer && Buffer.byteLength) {\n    return Buffer.byteLength(str, 'utf8');\n  }\n  // Then browser TextEncoder\n  if (typeof TextEncoder !== 'undefined') {\n    return new TextEncoder().encode(str).length;\n  }\n  // Fallback for very old browsers\n  return new Blob([str]).size;\n}\n\n/**\n * Assert that the password does not exceed the configured max bytes (UTF-8)\n * @param {{maxBytes: number}} options\n * @param {string} password\n * @return {boolean}\n */\nfunction assert(options, password) {\n  if (!password) {\n    return false;\n  }\n  var bytes = getByteLength(password);\n  return bytes <= options.maxBytes;\n}\n\n/**\n * Build explanation object\n * @param {{maxBytes: number}} options\n * @param {boolean} verified\n * @return {object}\n */\nfunction explain(options, verified) {\n  var d = {\n    message: 'Maximum password length exceeded',\n    code: 'maxLength',\n    format: [options.maxBytes]\n  };\n  if (verified !== undefined) {\n    d.verified = verified;\n  }\n  return d;\n}\n\n/**\n * Validate options for rule\n * @param {{maxBytes: number}} options\n * @return {boolean}\n */\nfunction validate(options) {\n  if (!_.isObject(options)) {\n    throw new Error('options should be an object');\n  }\n  if (!_.isNumber(options.maxBytes) || _.isNaN(options.maxBytes) || options.maxBytes < 1) {\n    throw new Error('maxBytes should be a number greater than 0');\n  }\n  return true;\n}\n\nmodule.exports = {\n  validate,\n  explain,\n  missing: function(options, password) {\n    return explain(options, assert(options, password));\n  },\n  assert\n};\n\n\n//# sourceURL=webpack:///./src/lib/rules/maxLength.js?")},"./node_modules/util/util.js":function(module,exports,__webpack_require__){eval("\n// Browser-compatible util.js implementation\nvar formatRegExp = /%[sdj%]/g;\n\nexports.format = function(f) {\n  var i = 1;\n  var args = arguments;\n  var len = args.length;\n  var str = String(f).replace(formatRegExp, function(x) {\n    if (x === '%%') return '%';\n    if (i >= len) return x;\n    switch (x) {\n      case '%s': return String(args[i++]);\n      case '%d': return Number(args[i++]);\n      case '%j':\n        try {\n          return JSON.stringify(args[i++]);\n        } catch (_) {\n          return '[Circular]';\n        }\n      default:\n        return x;\n    }\n  });\n  for (var x = args[i]; i < len; x = args[++i]) {\n    if (x === null || (typeof x !== \"object\" && typeof x !== \"function\")) {\n      str += ' ' + x;\n    } else {\n      str += ' ' + JSON.stringify(x);\n    }\n  }\n  return str;\n};\n\nexports.inspect = function(obj) {\n  return JSON.stringify(obj);\n};\n\n\n//# sourceURL=webpack:///./node_modules/util/util.js?")}})}};return module.exports}function showHidePassword(){var e={};return e.exports=function(a,e,o,s,u,l,c,n){function p(e){"Escape"==e.code&&document.activeElement.blur()}n.enable_ulp_wcag_compliance&&e("div.c50d1bce1.password").forEach(function(e){var t,r,n=a(e,"input"),i=a(e,'[data-action="toggle"]');o(e,(t=n,r=i,function(e){if(e.target.classList.contains("ulp-button-icon")){t.type="password"===t.type?"text":"password",r&&(r.ariaChecked="false"===r.ariaChecked?"true":"false");var n=c(t);"text"===t.type?u(n,"show"):l(n,"show")}})),s(i,"keyup",p)})},e.exports}function showHidePasswordDeprecated(){var e={};return e.exports=function(r,e,o,s,u,l,c,n){n.enable_ulp_wcag_compliance||e("div.c50d1bce1.password").forEach(function(e){var i,a,n=r(e,"input"),t=r(e,'[data-action="toggle"]');o(e,(i=n,a=t,function(e){if(e.target.classList.contains("ulp-button-icon")){if(i.type="password"===i.type?"text":"password",a){var n=a.querySelector(".show-password-tooltip"),t=a.querySelector(".hide-password-tooltip");n&&l(n,"hide"),t&&l(t,"hide")}var r=c(i);"text"===i.type?s(r,"show"):u(r,"show")}}))})},e.exports}function inputFocusDeprecated(){var e={};return e.exports=function(r,e,i,a,o,s,u,l,t,c,n){if(!n.enable_ulp_wcag_compliance){if(r("body._simple-labels"))return e(".cea96adc7.no-js").forEach(function(e){o(e,"no-js")}),void e(".cea96adc7.js-required").forEach(function(e){a(e,"hide")});e(".c50d1bce1:not(.c443df954):not(disabled)").forEach(function(e){a(e,"c23b60020");var n,t=r(e,".input");t.value&&a(e,"cd8fa630b"),i(e,"change",p),i(t,"blur",p),i(t,"animationstart",d),n=t,u(function(){n.value&&l(n,"change",!0)},100)})}function p(e){var n=e.target,t=s(n);n.value||c(n,"data-autofilled")?a(t,"cd8fa630b"):o(t,"cd8fa630b")}function d(e){var n=e.target;"onAutoFillStart"===e.animationName&&(t(n,"data-autofilled",!0),l(e.target,"change",!0),i(n,"keyup",f,{once:!0}))}function f(e){var n=e.target;t(n,"data-autofilled","")}},e.exports}function passwordPolicies(){var e={},P={IS_FLEXIBLE:"passwordPolicy.isFlexible",FLEXIBLE:{MIN_LENGTH:"passwordPolicy.minLength",CHARACTER_TYPES:"passwordPolicy.characterTypes",CONTAINS_AT_LEAST:"passwordPolicy.containsAtLeast",CONTAINS:"passwordPolicy.contains",IDENTICAL_CHARS:"passwordPolicy.identicalChars",SEQUENTIAL_CHARS:"passwordPolicy.sequentialChars",MAX_LENGTH:"passwordPolicy.maxLength"},LEGACY:{MIN_LENGTH:"complexityOptions.minLength",STRENGTH_POLICY:"strengthPolicy"}};function T(e,n){return e('input[name="'+n+'"][type="hidden"]')}return e.exports=function(e,u,n,r,t,i,l,a,c,o,s,p,d,f){if((f=f||{}).enable_ulp_wcag_compliance){var h=e(),m=h.PasswordPolicy,v=function(e,n){var t=e.upperCase,r=e.lowerCase,i=e.numbers,a=e.specialCharacters,o={none:{length:{minLength:1}},low:{length:{minLength:6}},fair:{length:{minLength:8},contains:{expressions:[r,t,i]}},good:{length:{minLength:8},containsAtLeast:{atLeast:3,expressions:[r,t,i,a]}},excellent:{length:{minLength:10},containsAtLeast:{atLeast:3,expressions:[r,t,i,a]},identicalChars:{max:2}}},s={uppercase:t,lowercase:r,number:i,special:a},u=T(n,P.IS_FLEXIBLE);if(u&&"true"===u.value){var l={};(C=(x=T(n,P.FLEXIBLE.MIN_LENGTH))&&parseInt(x.value))&&!isNaN(C)&&(l.length={minLength:C});var c=T(n,P.FLEXIBLE.CHARACTER_TYPES),p=(c&&c.value?c.value.split(","):[]).map(function(e){return s[e]}),d=T(n,P.FLEXIBLE.CONTAINS_AT_LEAST),f=d&&parseInt(d.value),h=T(n,P.FLEXIBLE.CONTAINS),m={expressions:p};h&&"true"===h.value?l.contains=m:f&&!isNaN(f)&&(m.atLeast=f,l.containsAtLeast=m);var v=T(n,P.FLEXIBLE.IDENTICAL_CHARS),_=v&&parseInt(v.value);_&&!isNaN(_)&&(l.identicalChars={max:_});var g=T(n,P.FLEXIBLE.SEQUENTIAL_CHARS),b=g&&parseInt(g.value);b&&!isNaN(b)&&(l.sequentialChars={max:b});var w=T(n,P.FLEXIBLE.MAX_LENGTH),y=w&&parseInt(w.value);return y&&!isNaN(y)&&(l.maxLength={maxBytes:y}),l}var x,C=(x=T(n,P.LEGACY.MIN_LENGTH))&&parseInt(x.value),E=T(n,P.LEGACY.STRENGTH_POLICY),L={complexityOptions:{minLength:C&&C},strengthPolicy:E?E.value:"none"};return!!(l=o[L.strengthPolicy])&&(L.complexityOptions&&L.complexityOptions.minLength&&!isNaN(L.complexityOptions.minLength)&&(l.length.minLength=L.complexityOptions.minLength),l)}(h.charsets,u),_=new m(v);if(v){var g=u("form.ccf381147"),b=n('input[type="password"]'),w=n("div.c50d1bce1.password"),y=b[0]||!1,x=u(".c338398d7.c02bc9716"),C=n(".ulp-input-error-message");if(x){var E=u('.c338398d7 ul li[data-error-code="password-policy-max-length"]');E&&c(E,"hide")}x&&y&&t(x,"data-ulp-validation-target",y.id),y&&g&&x&&(o(y,"input",L),o(y,"input",A),o(g,"submit",function(e){var n=s("submitted");p("submitted",!0),S();var t,r,i=A();r=(t={event:e,passwordIsValid:i}).event,t.passwordIsValid||(r.stopPropagation(),r.preventDefault(),y.focus(),0)?f.disable_ulp_form_submission_fix||p("invalidPasswordPolicy",!1):(p("submitted",!1),f.disable_ulp_form_submission_fix||p("invalidPasswordPolicy",!0),L(),N(),d(e)),n&&d(e)}))}else console.error("ERROR: Couldn't find a matching password policy, disabling password policy validation.")}function L(e){r(x,"data-shown")||(l(x,"hide"),c(x,"cd18f3e25"),t(x,"data-shown",!0))}function A(e){a(y.value,C);var n=y.value,t=_.missing(n);return function e(n,t){if(n)for(var r=0;r<n.length;r++){var i=n[r],a=i.code.split(/([A-Z])/).map(function(e){return e.toLowerCase()}).map(function(e,n){return n%2==1?"-"+e:e}).join(""),o=u('.c338398d7 ul li[data-error-code="password-policy-'+a+'"]');if(o)if("maxLength"===i.code)t&&0<t.length&&!i.verified?(l(o,"hide"),l(o,"c55853f49"),c(o,"c3af492d8")):(c(o,"hide"),l(o,"c3af492d8"),l(o,"c55853f49"));else{l(o,"c3af492d8"),l(o,"c55853f49");var s=i.verified?"c55853f49":"c3af492d8";c(o,s)}i.items&&e(i.items,t)}}(t.rules,n),t.verified?S():r(x,"data-shown")&&n?N():n||S(),t.verified}function S(){b.forEach(function(e){l(e,"cc67b4263")}),w.forEach(function(e){l(e,"c3af492d8")}),i(x,"data-is-error")}function N(){b.forEach(function(e){c(e,"cc67b4263")}),w.forEach(function(e){c(e,"c3af492d8")}),t(x,"data-is-error",!0)}},e.exports}function passwordPoliciesDeprecated(){var e={},D={MIN_LENGTH:"complexityOptions.minLength",STRENGTH_POLICY:"strengthPolicy"};function M(e,n){return e('input[name="'+n+'"][type="hidden"]')}return e.exports=function(e,s,n,t,r,u,i,l,a,o,c,p,d){if(!d.enable_ulp_wcag_compliance){var f,h,m,v,_,g,b,w,y,x,C,E,L=e(),A=L.PasswordPolicy,S=(f=L.charsets,h=s,m=f.upperCase,v=f.lowerCase,_=f.numbers,g=f.specialCharacters,b={none:{length:{minLength:1}},low:{length:{minLength:6}},fair:{length:{minLength:8},contains:{expressions:[v,m,_]}},good:{length:{minLength:8},containsAtLeast:{atLeast:3,expressions:[v,m,_,g]}},excellent:{length:{minLength:10},containsAtLeast:{atLeast:3,expressions:[v,m,_,g]},identicalChars:{max:2}}},w=M(h,D.MIN_LENGTH),y=w&&parseInt(w.value),x=M(h,D.STRENGTH_POLICY),C={complexityOptions:{minLength:y&&y},strengthPolicy:x?x.value:"none"},!!(E=b[C.strengthPolicy])&&(C.complexityOptions&&C.complexityOptions.minLength&&!isNaN(C.complexityOptions.minLength)&&(E.length.minLength=C.complexityOptions.minLength),E)),N=new A(S);if(S){var P=s("form.ccf381147"),T=n('input[type="password"]'),j=n("div.c50d1bce1.password"),k=T[0]||!1,F=s(".c338398d7.c02bc9716"),O=(s("li.cbe2f57a0"),s("div.c0db1c71b"),n(".ulp-input-error-message"));k&&P&&F&&(a(k,"input",q),a(k,"keyup",I),a(P,"submit",function(e){var n=o("submitted");c("submitted",!0),R();var t,r,i=I();if(r=(t={event:e,passwordIsValid:i}).event,!t.passwordIsValid&&(r.stopPropagation(),r.preventDefault(),k.focus(),1))return c("submitted",!1),q(),T.forEach(function(e){l(e,"cc67b4263")}),void j.forEach(function(e){l(e,"c3af492d8")});n&&p(e)}))}else console.error("ERROR: Couldn't find a matching password policy, disabling password policy validation.")}function q(e){t(F,"data-shown")||(u(F,"hide"),l(F,"cd18f3e25"),r(F,"data-shown",!0))}function I(e){i(k.value,O);var n=k.value,t=N.missing(n);return function e(n){if(n)for(var t=0;t<n.length;t++){var r=n[t],i=r.code.split(/([A-Z])/).map(function(e){return e.toLowerCase()}).map(function(e,n){return n%2==1?"-"+e:e}).join(""),a=s('.c338398d7 ul li[data-error-code="password-policy-'+i+'"]');if(a){u(a,"c3af492d8"),u(a,"c55853f49");var o=r.verified?"c55853f49":"c3af492d8";l(a,o)}r.items&&e(r.items)}}(t.rules),t.verified&&R(),t.verified}function R(){T.forEach(function(e){u(e,"cc67b4263")}),j.forEach(function(e){u(e,"c3af492d8")})}},e.exports}function loadCaptcha(){var e={},j="recaptcha_v2",k="recaptcha_enterprise",F="hcaptcha",O="friendly_captcha",q="arkose",I="auth0_v2";return e.exports=function(a,s,u,l,c,p,d,f,t,i){if(!t.enable_ulp_rtl_support){var h=500,m=3,v=0,_=u("div[data-captcha-sitekey]"),g=u(".ulp-captcha-client-error"),r=g?g.innerHTML:"",b=u("div[data-captcha-sitekey] input");if(_){var e=C(),n=E();e&&n&&function(){var e="captchaCallback_"+Math.floor(1000001*Math.random()),n=C(),t={async:!0,defer:!0},r=function(e,n,t,r){switch(C()){case j:return"https://www.recaptcha.net/recaptcha/api.js?render=explicit&hl="+e+"&onload="+n;case k:return"https://www.recaptcha.net/recaptcha/enterprise.js?render=explicit&hl="+e+"&onload="+n;case F:return"https://js.hcaptcha.com/1/api.js?render=explicit&hl="+e+"&onload="+n;case O:return"https://cdn.jsdelivr.net/npm/friendly-challenge@0.9.14/widget.min.js";case q:return"https://"+t+".arkoselabs.com/v2/"+r+"/api.js";case I:return"https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload="+n}}(x(),e,_?_.getAttribute("data-captcha-client-subdomain"):null,E());if(n===q||n===I){t["data-callback"]=e;var o=!(t.onerror=function(){if(v<m)return s(r),a(r,t),void v++;s(r),A("BYPASS_CAPTCHA")}),i=function(e){o=!0;try{if(!e||"function"!=typeof e.run||"function"!=typeof e.setConfig)return void P("INVALID_CREDENTIALS");r=e,i=L(),a=function(e){var n=b?b.value:"";n&&""!==n||(e.preventDefault(),e.stopPropagation(),setTimeout(function(){r.run()},h))},i&&(i.addEventListener("submit",a,!0),r.setConfig({onCompleted:function(e){if(!e||!e.token)return i&&i.removeEventListener("submit",a,!0),void P("INVALID_CREDENTIALS");A(e.token),i&&(i.removeEventListener("submit",a,!0),i.requestSubmit?i.requestSubmit():i.submit())},onError:function(t){return fetch("https://status.arkoselabs.com/api/v2/status.json").then(function(e){return e.json()}).then(function(e){var n=e.status.indicator;return"none"===n}).catch(function(e){return!1}).then(function(e){if(e&&v<m)return r.reset(),new Promise(function(e){setTimeout(function(){e(r.run())},h),v++});var n=t&&t.c3af492d8?t.c3af492d8:"RUNTIME_ERROR";g.innerHTML=g.innerHTML.replace("#{errorCode}",f(n)),l(_,"c3af492d8"),c(g,"hide"),A("BYPASS_CAPTCHA"),i.removeEventListener("submit",a,!0)})}}))}catch(e){P("INIT_ERROR")}var r,i,a};n===I&&(i=function(){T()}),window[e]=i,n===q&&(t.onload=function(){setTimeout(function(){o||P("INVALID_CREDENTIALS")},250)})}else window[e]=function(){delete window[e],T()},n===O&&(l(y(),"frc-captcha"),d(y(),"data-sitekey",E()),t.onload=window[e]);a(r,t)}()}}function w(){switch(C()){case j:return window.grecaptcha;case k:return window.grecaptcha.enterprise;case F:return window.hcaptcha;case O:return window.friendlyChallenge;case q:return window.arkose;case I:return window.turnstile}}function y(){return u(function(){switch(C()){case j:case k:return"#ulp-recaptcha";case F:return"#ulp-hcaptcha";case O:return"#ulp-friendly-captcha";case q:return"#ulp-arkose";case I:return"#ulp-auth0-v2-captcha"}}())}function x(){return _?_.getAttribute("data-captcha-lang"):null}function C(){return _?_.getAttribute("data-captcha-provider"):null}function E(){return _?_.getAttribute("data-captcha-sitekey"):null}function L(){return u('form[data-form-primary="true"]')}function A(e){return b.value=e}function o(){return u("#error-element-captcha-required")}function S(){var e=o();e&&l(e,"hide");var n=u("#captcha-required-status");n&&(n.textContent=""),i&&i("invalidCaptcha",!1)}function N(n){if(t.enable_ulp_wcag_compliance){var e=L();e&&b&&n&&e.addEventListener("submit",function(e){b.value?S():(e.preventDefault(),l(_,"c3af492d8"),function(){var e=o();e&&c(e,"hide");var n=u("#captcha-required-status");if(n){var t=n.getAttribute("data-captcha-required-error");if(t){var r=-1!==n.textContent.indexOf("&ZeroWidthSpace;");n.textContent=t+(r?"":"&ZeroWidthSpace;")}}i&&i("invalidCaptcha",!0)}(),t.ulp_captcha_double_submit_fix&&i&&setTimeout(function(){i("submitted",!1)},0),n.focus())},!0)}}function P(e){if(g&&_){g.innerHTML=r.replace("#{errorCode}",f(e||"INIT_ERROR")),l(_,"c3af492d8"),c(g,"hide");var n=u("#error-element-captcha");n&&l(n,"hide")}}function T(){var e=w(),n=p("--ulp-captcha-widget-theme");n=n?n.trim():"light";var t=u("#captcha-status"),r=t?t.getAttribute("data-captcha-expired-error"):"";if(C()===O)"dark"===n&&l(u(".frc-captcha"),"dark"),(o=e.autoWidget).opts.language=x(),o.opts.doneCallback=function(e){A(e)};else{var i=y();d(i,"tabindex","-1");var a={sitekey:E(),theme:n,"expired-callback":function(){if(A(""),l(_,"c3af492d8"),t){var e=-1!==t.textContent.indexOf("&ZeroWidthSpace;");t.textContent=r+(e?"":"&ZeroWidthSpace;"),t.focus()}},callback:function(e){A(e),c(_,"c3af492d8"),t&&(t.textContent=""),S()}};C()===I&&(a.language=x(),a.retry="never",a.size="flexible",a["response-field"]=!1,a["error-callback"]=function(e){return console.error("ERROR: Auth Challenge Error Code",e),A(""),v<m?(v++,w().reset(o)):(g.innerHTML=g.innerHTML.replace("#{errorCode}",f(e)),l(_,"c3af492d8"),c(g,"hide")),!0});var o=e.render(i,a);t&&(t.textContent=""),C()===j&&N(i)}}},e.exports}function loadCaptchaRtl(){var e={},j="recaptcha_v2",k="recaptcha_enterprise",F="hcaptcha",O="friendly_captcha",q="arkose",I="auth0_v2";return e.exports=function(a,s,u,l,c,p,d,f,t,i){if(t.enable_ulp_rtl_support){var h=500,m=3,v=0,_=u("div[data-captcha-sitekey]"),g=u(".ulp-captcha-client-error"),r=g?g.innerHTML:"",b=u("div[data-captcha-sitekey] input");if(_){var e=C(),n=E();e&&n&&function(){var e="captchaCallback_"+Math.floor(1000001*Math.random()),n=C(),t={async:!0,defer:!0},r=function(e,n,t,r){switch(C()){case j:return"https://www.recaptcha.net/recaptcha/api.js?render=explicit&hl="+e+"&onload="+n;case k:return"https://www.recaptcha.net/recaptcha/enterprise.js?render=explicit&hl="+e+"&onload="+n;case F:return"https://js.hcaptcha.com/1/api.js?render=explicit&hl="+e+"&onload="+n;case O:return"https://cdn.jsdelivr.net/npm/friendly-challenge@0.9.14/widget.min.js";case q:return"https://"+t+".arkoselabs.com/v2/"+r+"/api.js";case I:return"https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload="+n}}(x(),e,_?_.getAttribute("data-captcha-client-subdomain"):null,E());if(n===q||n===I){t["data-callback"]=e;var o=!(t.onerror=function(){if(v<m)return s(r),a(r,t),void v++;s(r),A("BYPASS_CAPTCHA")}),i=function(e){o=!0;try{if(!e||"function"!=typeof e.run||"function"!=typeof e.setConfig)return void P("INVALID_CREDENTIALS");r=e,i=L(),a=function(e){var n=b?b.value:"";n&&""!==n||(e.preventDefault(),e.stopPropagation(),setTimeout(function(){r.run()},h))},i&&(i.addEventListener("submit",a,!0),r.setConfig({language:x(),onCompleted:function(e){if(!e||!e.token)return i&&i.removeEventListener("submit",a,!0),void P("INVALID_CREDENTIALS");A(e.token),i&&(i.removeEventListener("submit",a,!0),i.requestSubmit?i.requestSubmit():i.submit())},onError:function(t){return fetch("https://status.arkoselabs.com/api/v2/status.json").then(function(e){return e.json()}).then(function(e){var n=e.status.indicator;return"none"===n}).catch(function(e){return!1}).then(function(e){if(e&&v<m)return r.reset(),new Promise(function(e){setTimeout(function(){e(r.run())},h),v++});var n=t&&t.c3af492d8?t.c3af492d8:"RUNTIME_ERROR";g.innerHTML=g.innerHTML.replace("#{errorCode}",f(n)),l(_,"c3af492d8"),c(g,"hide"),A("BYPASS_CAPTCHA"),i.removeEventListener("submit",a,!0)})}}))}catch(e){P("INIT_ERROR")}var r,i,a};n===I&&(i=function(){T()}),window[e]=i,n===q&&(t.onload=function(){setTimeout(function(){o||P("INVALID_CREDENTIALS")},250)})}else window[e]=function(){delete window[e],T()},n===O&&(l(y(),"frc-captcha"),d(y(),"data-sitekey",E()),d(y(),"data-lang",x()),t.onload=window[e]);a(r,t)}()}}function w(){switch(C()){case j:return window.grecaptcha;case k:return window.grecaptcha.enterprise;case F:return window.hcaptcha;case O:return window.friendlyChallenge;case q:return window.arkose;case I:return window.turnstile}}function y(){return u(function(){switch(C()){case j:case k:return"#ulp-recaptcha";case F:return"#ulp-hcaptcha";case O:return"#ulp-friendly-captcha";case q:return"#ulp-arkose";case I:return"#ulp-auth0-v2-captcha"}}())}function x(){return _?_.getAttribute("data-captcha-lang"):null}function C(){return _?_.getAttribute("data-captcha-provider"):null}function E(){return _?_.getAttribute("data-captcha-sitekey"):null}function L(){return u('form[data-form-primary="true"]')}function A(e){return b.value=e}function o(){return u("#error-element-captcha-required")}function S(){var e=o();e&&l(e,"hide");var n=u("#captcha-required-status");n&&(n.textContent=""),i&&i("invalidCaptcha",!1)}function N(n){if(t.enable_ulp_wcag_compliance){var e=L();e&&b&&n&&e.addEventListener("submit",function(e){b.value?S():(e.preventDefault(),l(_,"c3af492d8"),function(){var e=o();e&&c(e,"hide");var n=u("#captcha-required-status");if(n){var t=n.getAttribute("data-captcha-required-error");if(t){var r=-1!==n.textContent.indexOf("&ZeroWidthSpace;");n.textContent=t+(r?"":"&ZeroWidthSpace;")}}i&&i("invalidCaptcha",!0)}(),t.ulp_captcha_double_submit_fix&&i&&setTimeout(function(){i("submitted",!1)},0),n.focus())},!0)}}function P(e){if(g&&_){g.innerHTML=r.replace("#{errorCode}",f(e||"INIT_ERROR")),l(_,"c3af492d8"),c(g,"hide");var n=u("#error-element-captcha");n&&l(n,"hide")}}function T(){var e=w(),n=p("--ulp-captcha-widget-theme");n=n?n.trim():"light";var t=u("#captcha-status"),r=t?t.getAttribute("data-captcha-expired-error"):"";if(C()===O)"dark"===n&&l(u(".frc-captcha"),"dark"),(o=e.autoWidget).opts.language=x(),o.opts.doneCallback=function(e){A(e)};else{var i=y();d(i,"tabindex","-1");var a={sitekey:E(),theme:n,"expired-callback":function(){if(A(""),l(_,"c3af492d8"),t){var e=-1!==t.textContent.indexOf("&ZeroWidthSpace;");t.textContent=r+(e?"":"&ZeroWidthSpace;"),t.focus()}},callback:function(e){A(e),c(_,"c3af492d8"),t&&(t.textContent=""),S()}};C()===I&&(a.language=x(),a.retry="never",a.size="flexible",a["response-field"]=!1,a["error-callback"]=function(e){return console.error("ERROR: Auth Challenge Error Code",e),A(""),v<m?(v++,w().reset(o)):(g.innerHTML=g.innerHTML.replace("#{errorCode}",f(e)),l(_,"c3af492d8"),c(g,"hide")),!0});var o=e.render(i,a);t&&(t.textContent=""),C()===j&&N(i)}}},e.exports}function ulpFieldStyling(){var e={};return e.exports=function(t,e,r,i,a,o,s,u,l,n,c,p){if(p.enable_ulp_wcag_compliance){var d=e("[id^='ulp-container-']");if(d&&d.length){var f=n(y);if(f)for(var h=0;h<d.length;h++)f.observe(d[h],{childList:!0,subtree:!0})}y()}function m(e){var n=e.target,t=o(n);n.value||u(n,"data-autofilled")?i(t,"cd8fa630b"):a(t,"cd8fa630b")}function v(e){var n=e.target,t=o(n);i(t,"focus"),w(n,t)}function _(e){var n=e.target,t=o(n);a(t,"focus"),m(e),w(n,t)}function g(e){var n=e.target;l(n,"data-autofilled","")}function b(e){var n=e.target;"onAutoFillStart"===e.animationName&&(l(n,"data-autofilled",!0),dispatchEvent(e.target,"change",!0),r(n,"keyup",g,{once:!0}))}function w(e,n){e.value?i(n,"cd8fa630b"):a(n,"cd8fa630b")}function y(){e(".ulp-field").forEach(function(e){if(!s(e,"c23b60020")){var n=t(e,c);n&&(i(e,"c23b60020"),w(n,e),setTimeout(function(){w(n,e)},50),n===document.activeElement&&i(e,"focus"),r(n,"change",m),r(n,"focus",v),r(n,"blur",_),r(n,"animationstart",b))}})}},e.exports}function ulpFieldStylingDeprecated(){var e={};return e.exports=function(t,e,r,i,a,o,s,n,u,l){if(!l.enable_ulp_wcag_compliance){var c=e("[id^='ulp-container-']");if(c&&c.length){var p=n(_);if(p)for(var d=0;d<c.length;d++)p.observe(c[d],{childList:!0,subtree:!0});_()}}function f(e){var n=e.target,t=o(n);n.value?i(t,"cd8fa630b"):a(t,"cd8fa630b")}function h(e){var n=e.target,t=o(n);i(t,"focus"),v(n,t)}function m(e){var n=e.target,t=o(n);a(t,"focus"),v(n,t)}function v(e,n){e.value?i(n,"cd8fa630b"):a(n,"cd8fa630b")}function _(){e("[id^='ulp-container-'] .ulp-field").forEach(function(e){if(!s(e,"c23b60020")){var n=t(e,u);n&&(i(e,"c23b60020"),v(n,e),setTimeout(function(){v(n,e)},50),n===document.activeElement&&i(e,"focus"),r(n,"change",f),r(n,"focus",h),r(n,"blur",m))}})}},e.exports}function ulpFieldValidation(){var e={};return e.exports=function(a,o,r,i,l,s,u,c,p,d,f,h,n,m,v,e,t,_,g,b,w,y){if(b.enable_ulp_wcag_compliance){var x=!1,C=e+',input[type="checkbox"]',E=50,L=2e3,A=[];return B(),[C,T,j,k,F,I,D,R,M,P,B]}function S(e){s(e,"disabled",!0),b.disable_back_button_block_submit_fix?b.ulp_field_validation_double_submit_fix&&setTimeout(function(){u(e,"disabled")},L):A.push(e)}function N(e){o(e,'button[data-action-button-primary="true"]').forEach(function(e){S(e)})}function P(){b.disable_back_button_block_submit_fix||r(h,"pageshow",function(){A.forEach(function(e){u(e,"disabled")}),A=[]})}function T(e){var n=l(e,"data-ulp-validation-function"),t=i(e);return{functionName:n,element:a(t,C),parent:t}}function j(e){var i=[],a=[];return o(e,"[data-ulp-validation-function]").forEach(function(e){var n=T(e),t=[];if(n.element){if("input"===n.element.tagName.toLowerCase()){var r=l(n.element,"type");"checkbox"!==r&&-1===v.indexOf(r)&&t.push("Unsupported input type: "+r)}}else t.push("Could not find element");h[n.functionName]||t.push("Could not find function with name: "+n.functionName),t.length?a=a.concat(t):i.push(e)}),a.length&&n(a.join("\r\n")),i}function k(e,n,t){var r=T(e),i=(0,h[r.functionName])(r.element,n,t);i?c(e,"ulp-validator-error")&&(d(e,"ulp-validator-error"),u(e,"data-is-error")):c(e,"ulp-validator-error")||(p(e,"ulp-validator-error"),s(e,"data-is-error",!0));var a=o(r.parent,".ulp-validator-error");return f(r.parent,"ulp-error",!!a.length),i}function F(n){var t=T(n),e=(l(n,"data-ulp-validation-event-listeners")||"").replace(/\s/g,"").split(",").filter(function(e){return!!e});e.length&&e.forEach(function(e){r(t.element,e,function(){k(n,x,e)})})}function O(e){e.forEach(function(e){var n=e.id,t=l(e,"data-ulp-validation-target"),r=a('[id="'+t+'"]');if(r){var i=l(r,"aria-describedby");i&&-1!==i.indexOf(n)||s(r,"aria-describedby",i?i+" "+n:n),s(r,"aria-invalid","true")}})}function q(e,n){var t=a("#ulp-error-announcer");if(t){t.textContent="";var r=[];if(e.forEach(function(e){var n=e.textContent;n&&n.trim()&&r.push(n.trim())}),n){var i=function(){var e=a(".c338398d7.c02bc9716");if(!e)return[];var i=[],n=a(e,".ca3dd0a6b");n&&n.textContent&&n.textContent.trim()&&i.push(n.textContent.trim());var t=o(e,"li.cade67c9c");return t&&t.length&&t.forEach(function(e){var n="";if(c(e,"c55853f49")){var t=a(e,".c12575aa3");t&&(n=t.textContent)}else if(c(e,"c3af492d8")){var r=a(e,".c7ee9be46");r&&(n=r.textContent)}n&&n.trim()&&i.push(n.trim())}),i}();i.length&&(r=r.concat(i))}r.length&&h.setTimeout(function(){t.textContent=r.map(function(e){return e.replace(/\.+$/,"")}).join(". ")},E)}}function I(e,n,t){var r=w&&w("submitted");if(!(b.ulp_field_validation_double_submit_fix&&n.defaultPrevented&&r)){x=!0;var i=t.filter(function(e){return!k(e,x,"submit")});if(b.disable_ulp_form_submission_fix){if(!i.length&&!n.defaultPrevented)return n.submitter&&"default"==l(n.submitter,"value")&&S(n.submitter),b.ulp_field_validation_double_submit_fix&&N(e),void e.submit();if(m(n),O(i),q(i,!1),b.ulp_field_validation_double_submit_fix&&y("submitted",!1),i.length){var a=T(i[0]);a.element.focus({preventScroll:!0}),a.parent.scrollIntoView({behavior:"smooth"})}}else{var o=w&&w("invalidPasswordPolicy"),s=w&&w("invalidCaptcha");if(!i.length&&!o&&!s)return n.submitter&&"default"==l(n.submitter,"value")&&S(n.submitter),b.ulp_field_validation_double_submit_fix&&N(e),void e.submit();if(m(n),O(i),q(i,!!o),b.ulp_field_validation_double_submit_fix&&y&&y("submitted",!1),i.length){var u=T(i[0]);u.element.focus({preventScroll:!0}),u.parent.scrollIntoView({behavior:"smooth"})}}}}function R(){var n=a('form[data-form-primary="true"]'),t=j(n);0!==t.length&&(t.forEach(function(e){F(e)}),r(n,"submit",function(e){I(n,e,t)}))}function D(){var t=a('form[data-form-primary="true"]'),e=o('form[data-form-secondary="true"]');t&&e.length&&e.forEach(function(n){r(n,"submit",function(){var e=_(t);e.length&&g(n,e)})})}function M(){if(t)for(var e in t)t.hasOwnProperty(e)&&(h[e]=t[e])}function B(){var e=a("form[data-disable-html-validations]");e&&(M(),s(e,"novalidate",""),R(),P(),b.custom_prompts_passkeys&&D())}},e.exports}function ulpFieldValidationDeprecated(){var e={};return e.exports=function(r,o,i,a,s,u,l,n,c,p,e,t){if(!t.enable_ulp_wcag_compliance){var d=!1,f=e+',input[type="checkbox"]';return w(),[f,h,m,v,_,g,b,w]}function h(e){var n=s(e,"data-ulp-validation-function"),t=a(e);return{functionName:n,element:r(t,f),parent:t}}function m(e){var i=[],a=[];return o(e,"[data-ulp-validation-function]").forEach(function(e){var n=h(e),t=[];if(n.element){if("input"===n.element.tagName.toLowerCase()){var r=s(n.element,"type");"checkbox"!==r&&-1===p.indexOf(r)&&t.push("Unsupported input type: "+r)}}else t.push("Could not find element");l[n.functionName]||t.push("Could not find function with name: "+n.functionName),t.length?a=a.concat(t):i.push(e)}),a.length&&n(a.join("\r\n")),i}function v(e,n,t){var r=h(e),i=(0,l[r.functionName])(r.element,n,t);u(e,"ulp-validator-error",!i);var a=o(r.parent,".ulp-validator-error");return u(r.parent,"ulp-error",!!a.length),i}function _(n){var t=h(n),e=(s(n,"data-ulp-validation-event-listeners")||"").replace(/\s/g,"").split(",").filter(function(e){return!!e});e.length&&e.forEach(function(e){i(t.element,e,function(){v(n,d,e)})})}function g(e,n,t){d=!0;var r=t.filter(function(e){return!v(e,d,"submit")});if(r.length){c(n);var i=h(r[0]);i.element.focus({preventScroll:!0}),i.parent.scrollIntoView({behavior:"smooth"})}else e.submit()}function b(){var n=r('form[data-form-primary="true"]'),t=m(n);0!==t.length&&(t.forEach(function(e){_(e)}),i(n,"submit",function(e){g(n,e,t)}))}function w(){var e=o("[id^='ulp-container-']");e&&e.length&&b()}},e.exports}function buttonNoFormValidate(){var e={};return e.exports=function(e,n,t){function r(t){n(t,"click",function(e){e.preventDefault();var n=document.createElement("input");n.name="action",n.type="hidden",n.value=t.value,t.form.appendChild(n),t.form.submit(),t.form.removeChild(n)})}function i(){e('form button[type="submit"][formnovalidate], form input[type="submit"][formnovalidate]').forEach(function(e){r(e)})}return t&&i(),[i,r]},e.exports}function ariaHandler(){var e={};return e.exports=function(o,e,s,u,l,c,n,p,t){if(t.enable_ulp_wcag_compliance){var r=e('[class*="aria-error-check"]');if(r&&r.length){var i=n(function(e){e&&e.length&&e.map(function(e){if(e.target&&s(e.target,"aria-error-check")){var n=o('[id="'+u(e.target,"data-ulp-validation-target")+'"');if(n){var t=u(n,"aria-describedby");u(e.target,"data-is-error")?(r=n,i=t,a=e.target.id,i&&-1!==i.search(a)||l(r,"aria-describedby",i?i+" "+a:a),l(r,"aria-invalid",!0)):function(e,n,t){if(n){var r=p(n,t);r.length?l(e,"aria-describedby",r):(c(e,"aria-invalid"),c(e,"aria-describedby"))}else c(e,"aria-invalid"),c(e,"aria-describedby")}(n,t,e.target.id)}}var r,i,a})});i&&r.map(function(e){i.observe(e,{attributes:!0,attributeFilter:["class","data-is-error"]})})}}},e.exports}function focusFirst(){var e={},f=['input[type="text"]','input[type="email"]','input[type="tel"]','input[type="number"]','input[type="url"]','input[type="password"]',"input:not([type])"].join(", "),h=['input:not([type="hidden"]):not([aria-hidden="true"]):not([disabled])','select:not([aria-hidden="true"]):not([disabled])','textarea:not([aria-hidden="true"]):not([disabled])','button:not([aria-hidden="true"]):not([disabled])'].join(", ");function m(e){var n=window.getComputedStyle(e);return"none"!==n.display&&"hidden"!==n.visibility}return e.exports=function(n,e,t,r){if(e.enable_ulp_wcag_compliance&&!n("#prompt-alert")){var i=r("(pointer: coarse), (pointer: fine), (pointer: none)"),a=r("(hover: hover), (hover: none)");if(i&&a&&(r("(pointer: coarse)")||!r("(hover: hover)")))return;var o=n(".cb74a5b27");if(o){for(var s=t(o.querySelectorAll(h)),u=null,l=0;l<s.length;l++)if(m(s[l])){u=s[l];break}if(u){for(var c=t(o.querySelectorAll(f)),p=null,d=0;d<c.length;d++)if(m(c[d])){p=c[d];break}setTimeout(function(){if(p&&p===u)p.focus();else{var e=n("#screen-header");e&&e.focus()}},250)}}}},e.exports}function loadOneTap(){var e={},o="https://accounts.google.com/gsi/client";return e.exports=function(n,t,u,e){var r=e("#one-tap-config-json");if(r&&r.clientId){var i=0;!function e(){n(o,{async:!0,defer:!0,onload:function(){!function(){var e=window.google;if(e&&e.accounts&&e.accounts.id){var n={client_id:r.clientId,callback:a,auto_select:!!r.autoSelect,nonce:r.nonce,cancel_on_tap_outside:!!r.cancelOnTapOutside,itp_support:!!r.itpSupport};r.context&&(n.context=r.context),e.accounts.id.initialize(n),e.accounts.id.prompt()}}()},onerror:function(){t(o),i<2&&(i++,e())}})}()}function a(e){if(e&&e.credential){var n,t=document.createElement("form");t.method="POST",t.action=(n=u('form[data-form-primary="true"]'))&&n.getAttribute("action")?n.getAttribute("action"):window.location.pathname,t.style.display="none";var r=document.createElement("input");r.type="hidden",r.name="action",r.value="google-one-tap",t.appendChild(r);var i=document.createElement("input");i.type="hidden",i.name="one_tap_credential",i.value=e.credential,t.appendChild(i);var a=u('form[data-form-primary="true"]'),o=a?u(a,'input[name="state"]'):null;if(o){var s=document.createElement("input");s.type="hidden",s.name="state",s.value=o.value,t.appendChild(s),document.body.appendChild(t),t.submit()}}}},e.exports}function identifierButtons(){var e={};return e.exports=function(u,l,c,p,e,d,f,n){if(n.enable_ulp_separate_login_display||n.enable_ulp_separate_signup_identifiers){var h=u('[data-identifier-group="panels"]'),m=u('[data-identifier-group="selector"]');if(h){var t=m?l(m,".ulp-identifier-selector-item"):[],v=u(h,'input[name="identifier_type"]'),r=f(h,"data-active-type");r&&a(r);for(var i=0;i<t.length;i++)e(t[i],"click",function(e){var n=f(e.currentTarget,"data-identifier-type");n&&a(n)})}}function a(e){for(var n=l(h,".ulp-identifier-panel"),t=0;t<n.length;t++)p(n[t],"_active");var r=u(h,"._identifier-panel-"+e);if(r&&c(r,"_active"),d(h,"data-active-type",e),v&&(v.value=e),m){d(m,"data-active-type",e);for(var i=l(m,".ulp-identifier-selector-item"),a=0;a<i.length;a++){var o=i[a];f(o,"data-identifier-type")===e?(c(o,"_active"),d(o,"aria-current","true")):(p(o,"_active"),d(o,"aria-current","false"))}}if(r){var s=u(r,'input:not([type="hidden"])');s&&s.focus()}}},e.exports}function compositePhoneInput(){var e={};return e.exports=function(e,n,s,u,t,a,o,r){if(r.enable_ulp_separate_login_display||r.enable_ulp_separate_signup_identifiers){var l=e("[data-composite-phone-input]");if(l){s(l,"js-enhanced");var i=e(l,"[data-composite-phone-trigger]"),c=e(l,"[data-composite-phone-dropdown]"),p=e(l,'select[name="identifier_phone_country_code"]'),d=e(l,'input[name="identifier_phone"]');if(i&&c&&p){var f,h=e(c,"[data-composite-phone-search]"),m=e(c,"[data-composite-phone-list]"),v=e(c,"[data-composite-phone-no-results]"),_=n(c,"[data-country-code]"),g=e(i,"[data-composite-phone-trigger-label]"),b=e(l,"[data-composite-phone-live-region]"),w=e(i,"[data-composite-phone-trigger-sr-label]");for(m&&!m.id&&a(m,"id","composite-phone-list"),f=0;f<_.length;f++)_[f].id||a(_[f],"id","composite-phone-option-"+_[f].getAttribute("data-country-code"));if(h&&(a(h,"role","combobox"),a(h,"aria-autocomplete","list"),a(h,"aria-expanded","false"),m&&m.id&&a(h,"aria-controls",m.id)),b&&d){b.id||a(b,"id","composite-phone-country-status");var y=(d.getAttribute("aria-describedby")||"").split(/\s+/),x=[];for(f=0;f<y.length;f++)y[f]&&x.push(y[f]);-1===x.indexOf(b.id)&&(x.push(b.id),a(d,"aria-describedby",x.join(" ")))}var C=null;t(i,"click",function(){!1===c.hidden?N(!1):(c.hidden=!1,s(l,"_composite-phone-open"),a(i,"aria-expanded","true"),h&&a(h,"aria-expanded","true"),E(null),h&&(h.value=""),T(""),m&&(m.scrollTop=0),S(),h&&h.focus())}),h&&(t(h,"input",function(e){T(e.target.value),E(null)}),t(h,"keydown",function(e){"ArrowDown"===e.c21414297||40===e.keyCode?(e.preventDefault(),L(1)):"ArrowUp"===e.c21414297||38===e.keyCode?(e.preventDefault(),L(-1)):"Enter"!==e.c21414297&&13!==e.keyCode||C&&(e.preventDefault(),P(C.getAttribute("data-country-code")))})),t(m,"click",function(e){for(var n=e.target;n&&n!==m&&(!n.getAttribute||!n.getAttribute("data-country-code"));)n=n.parentNode;n&&n!==m&&n.getAttribute&&P(n.getAttribute("data-country-code"))}),t(m,"keydown",function(e){var n=e.target;n&&n.getAttribute&&n.getAttribute("data-country-code")&&("Enter"!==e.c21414297&&13!==e.keyCode&&" "!==e.c21414297&&32!==e.keyCode||(e.preventDefault(),P(n.getAttribute("data-country-code"))))}),t(c,"keydown",function(e){if("Escape"===e.c21414297||27===e.keyCode)return e.preventDefault(),void N(!0);"Tab"!==e.c21414297&&9!==e.keyCode||(e.preventDefault(),e.shiftKey?N(!0):(N(!1),d&&d.focus()))})}}}function E(e){C&&u(C,"_composite-phone-option--active"),(C=e||null)?(s(C,"_composite-phone-option--active"),h&&a(h,"aria-activedescendant",C.id),"function"==typeof C.scrollIntoView&&C.scrollIntoView({block:"nearest"})):h&&a(h,"aria-activedescendant","")}function L(e){var n=function(){for(var e=[],n=null,t=0;t<_.length;t++)_[t].hidden||("true"===_[t].getAttribute("aria-selected")?n=_[t]:e.push(_[t]));return n&&e.unshift(n),e}();if(0!==n.length){for(var t=-1,r=0;r<n.length;r++)if(n[r]===C){t=r;break}(t+=e)<0?t=n.length-1:t>=n.length&&(t=0),E(n[t])}else E(null)}function A(){var e=l.closest?l.closest(".ca431c0f1"):null,n=e||(l.closest?l.closest(".c4cd036e4"):null);if(!n)return{top:0,bottom:window.visualViewport&&window.visualViewport.height||window.innerHeight||(document.documentElement||{}).clientHeight||0};var t=n.getBoundingClientRect(),r=e?function(e){if(!e||!window.getComputedStyle)return{top:0,bottom:0};var n=window.getComputedStyle(e);return{top:parseInt(n.paddingTop,10)||0,bottom:parseInt(n.paddingBottom,10)||0}}(e):{top:0,bottom:0};return{top:t.top+r.top,bottom:t.bottom-r.bottom}}function S(){if("undefined"!=typeof window&&"function"==typeof c.getBoundingClientRect){if(window.matchMedia&&window.matchMedia("(max-width: 600px)").matches)return u(c,"_composite-phone-up"),void(c.style.maxBlockSize="");var e=function(){var t=window.getComputedStyle&&window.getComputedStyle(c);function e(e,n){return t&&parseInt(t.getPropertyValue(e),10)||n}return{idealHeight:e("--composite-phone-dropdown-ideal-height",430),gap:e("--composite-phone-dropdown-flip-gap",8),minHeight:e("--composite-phone-dropdown-min-height",200)}}(),n=A(),t=l.getBoundingClientRect(),r=Math.max(0,n.bottom-t.bottom-e.gap),i=Math.max(0,t.top-n.top-e.gap),a=r<e.minHeight&&r<i;a?s(c,"_composite-phone-up"):u(c,"_composite-phone-up");var o=a?i:r;c.style.maxBlockSize=Math.min(e.idealHeight,o)+"px"}}function N(e){c.hidden=!0,u(l,"_composite-phone-open"),a(i,"aria-expanded","false"),h&&a(h,"aria-expanded","false"),E(null),e&&i.focus()}function P(e){p.value=e,o(p,"change",!0);var n=function(e){for(var n=0;n<_.length;n++)if(_[n].getAttribute("data-country-code")===e)return _[n];return null}(e);g&&n&&(g.innerHTML=n.innerHTML);for(var t=0;t<_.length;t++)a(_[t],"aria-selected",_[t]===n?"true":"false");if(n){var r=n.getAttribute("data-country-name")||e;if(b&&(b.textContent=r),w){var i=w.getAttribute("data-sr-label-template")||"Selected country: #{country}, change country";w.textContent=i.replace(/#\{country\}/g,r)}}N(!0),d&&d.focus()}function T(e){for(var n=e.trim().toLowerCase(),t=0,r=0;r<_.length;r++){var i=_[r],a=(i.getAttribute("data-country-search")||"")+" "+(i.textContent||"").toLowerCase(),o=""===n||-1<a.indexOf(n),s="true"===i.getAttribute("aria-selected");i.hidden=!s&&!o,o&&t++}v&&(v.hidden=0<t)}},e.exports}function compositePhoneInputFormatting(){var e={};return e.exports=function(P,T,j,k,F,O,e,q,I){function n(){var a=P("[data-composite-phone-input]");if(a){var e=P(a,'select[name="identifier_phone_country_code"]')||P(a,'input[name="identifier_phone_country_code"]'),s=P(a,'input[name="identifier_phone"]');if(e&&s){var i=s.form,o=P(a,"._composite-phone-field"),u="error-element-identifier_phone",l=window.libphonenumberJsBundle;if(l){var c="error-cs-identifier_phone-invalid-format",p="error-cs-identifier_phone-required",d=a.ownerDocument.getElementById(c),t=d?d.textContent:"",f=!t,h=a.ownerDocument.getElementById(p),m=!(h&&h.textContent),n=s.getAttribute("placeholder")||"",v=0,_=0;r(),s.value&&x(!1,!1),k(s,"input",function(e){E(),L(),S(),x(!(!e||!e.inputType||"deleteContentBackward"!==e.inputType&&"deleteContentForward"!==e.inputType&&"deleteByCut"!==e.inputType&&"deleteByDrag"!==e.inputType),!(!e||!e.inputType))}),k(e,"change",function(){E(),L(),S(),r(),x(!1,!1)}),i&&(k(i,"submit",function(e){var n=P(i,'input[name="identifier_type"]');if(!(n&&"phone"!==n.value||e.defaultPrevented)){var t=g(),r=y(s.value);if(r)return f||function(e,n){if(!n||!e)return!1;try{return l.isValidPhoneNumber(e,n)}catch(e){return!0}}(r,t)?void(s.value=r):(e.preventDefault(),e.stopPropagation(),void function(e){var n=C();if(n){n.textContent=e,T(n,"ulp-validator-error"),F(n,"data-is-error","true"),F(s,"aria-invalid","true");var t=(s.getAttribute("aria-describedby")||"").split(/\s+/).filter(Boolean);-1===t.indexOf(c)&&t.push(c),F(s,"aria-describedby",t.join(" ")),T(s,"_input-error--client"),o&&T(o,"error--client")}}(N(t)));m||(e.preventDefault(),e.stopPropagation(),function(){if(h){T(h,"ulp-validator-error"),F(h,"data-is-error","true"),F(s,"aria-invalid","true");var e=(s.getAttribute("aria-describedby")||"").split(/\s+/).filter(Boolean);-1===e.indexOf(p)&&e.push(p),F(s,"aria-describedby",e.join(" ")),T(s,"_input-error--client"),o&&T(o,"error--client")}}())}},!0),I&&q&&k(I,"pageshow",function(){q("submitted",!1)}))}}}function g(){return(e.value||"").trim().toUpperCase()}function b(e){if(!e)return"";try{var n=l.getCountryCallingCode(e);return n?"+"+n:""}catch(e){return""}}function w(n,t){if(!n)return"";if(!t)return n;try{var e=new l.AsYouType(t).input(n);if(e)return e;var r=b(t);return r?r+" "+n:n}catch(e){var i=b(t);return i?i+" "+n:n}}function r(){var e=function(e){if(!e||!l.examples)return"";try{var n=l.getExampleNumber(e,l.examples);return n?n.formatNational():""}catch(e){return""}}(g());e?F(s,"placeholder",e):n?F(s,"placeholder",n):O(s,"placeholder")}function y(e){return(e||"").replace(/[^0-9]/g,"")}function x(e,n){var t=g(),r=s.value,i=y(r);!e&&!n&&r.length<_&&(e=!0);var a=s.selectionStart===r.length,o=w(i,t);if(e&&(i.length===v&&r.length<o.length&&(o=w(i=i.slice(0,-1),t)),o=o.replace(/[^0-9]+$/,"")),v=i.length,_=o.length,o!==r&&(s.value=o,a&&s.setSelectionRange))try{s.setSelectionRange(o.length,o.length)}catch(e){}}function C(){return a.ownerDocument.getElementById(c)}function E(){var e=C();e&&(j(e,"ulp-validator-error"),O(e,"data-is-error"),A(c))}function L(){h&&(j(h,"ulp-validator-error"),O(h,"data-is-error"),A(p))}function A(n){var e=(s.getAttribute("aria-describedby")||"").split(/\s+/).filter(function(e){return e&&e!==n});e.length?F(s,"aria-describedby",e.join(" ")):O(s,"aria-describedby");var t=d&&d.classList.contains("ulp-validator-error"),r=h&&h.classList.contains("ulp-validator-error");t||r||(j(s,"_input-error--client"),o&&j(o,"error--client"));var i=!!a.ownerDocument.getElementById(u);t||r||i||O(s,"aria-invalid")}function S(){var e=a.ownerDocument.getElementById(u);if(e){T(e,"hide"),o&&(j(o,"c3af492d8"),j(o,"c5ef90f73"));var n=(s.getAttribute("aria-describedby")||"").split(/\s+/).filter(function(e){return e&&e!==u});n.length?F(s,"aria-describedby",n.join(" ")):O(s,"aria-describedby"),o&&o.classList.contains("error--client")||O(s,"aria-invalid")}}function N(e){var n=function(e){if(!e)return"";var n=P(a,'[data-country-code="'+e+'"]');return n?n.getAttribute("data-country-name"):e}(e);return t.replace(/#\{country\}/g,n)}}(e.enable_ulp_separate_login_display||e.enable_ulp_separate_signup_identifiers)&&("loading"===document.readyState?document.addEventListener("DOMContentLoaded",n):n())},e.exports}function compositePhoneInputPaste(){var e={};return e.exports=function(h,m,e,v,n){function t(){var s=h("[data-composite-phone-input]");if(s){var n=h(s,'input[name="identifier_phone"]'),u=h(s,'select[name="identifier_phone_country_code"]')||h(s,'input[name="identifier_phone_country_code"]');if(n&&u){var r=window.libphonenumberJsBundle;r&&"function"==typeof r.AsYouType&&e(n,"paste",function(e){var n=e.clipboardData;if(n&&"function"==typeof n.getData){var t=n.getData("text");if("string"==typeof t&&t){var r=t.replace(/^\s+|\s+$/g,"");if(r){var i=function(){for(var e=m(u,"option"),n=[],t=0;t<e.length;t++){var r=(e[t].value||"").trim().toUpperCase();r&&n.push(r)}if(!n.length){var i=c();i&&n.push(i)}return n}();if("+"===r.charAt(0)){var a=function(e,n){var t=l(e,null);if(!t)return null;var r=t.nationalNumber||"",i=t.country||"";if(!i&&"function"==typeof t.getPossibleCountries){var a=t.getPossibleCountries()||[];1<a.length&&(i=d(a,n))}return i&&p(i,n)&&r?{country:i,national:r}:null}(r,i);if(!a)return;return e.preventDefault(),function(e){if("SELECT"===u.tagName&&u.value!==e){u.value=e,v(u,"change",!0);var n=h(s,"[data-composite-phone-trigger-label]"),t=h(s,'[data-country-code="'+e+'"]');n&&t&&(n.innerHTML=t.innerHTML);var r=t&&t.getAttribute("data-country-name")||e,i=h(s,"[data-composite-phone-live-region]");i&&(i.textContent="",setTimeout(function(){i.textContent=r},0));var a=h(s,"[data-composite-phone-trigger-sr-label]");if(a){var o=a.getAttribute("data-sr-label-template")||"Selected country: #{country}, change country";a.textContent=o.replace(/#\{country\}/g,r)}}}(a.country),void f(a.national)}var o=function(e){var n=c();if(!n)return null;var t=l(e,n);if(!t)return null;var r=t.nationalNumber||"";return r?{national:r}:null}(r);o&&(e.preventDefault(),f(o.national))}}}})}}function l(e,n){try{var t=n?new r.AsYouType(n):new r.AsYouType;return t.input(e),t.getNumber()||null}catch(e){return null}}function c(){return(u.value||"").trim().toUpperCase()}function p(e,n){if(!e)return!1;for(var t=e.toUpperCase(),r=0;r<n.length;r++)if(n[r]===t)return!0;return!1}function d(e,n){for(var t=c(),r={},i=0;i<e.length;i++)r[e[i]]=!0;if(t&&r[t]&&p(t,n))return t;var a,o=(a=h(u,"option[selected]"))?(a.value||"").trim().toUpperCase():"";if(o&&r[o]&&p(o,n))return o;for(var s=0;s<n.length;s++)if(r[n[s]])return n[s];return n.length?n[0]:""}function f(e){n.value=e||"",v(n,"input",!0)}}(n.enable_ulp_separate_login_display||n.enable_ulp_separate_signup_identifiers)&&("loading"===document.readyState?document.addEventListener("DOMContentLoaded",t):t())},e.exports}var _flags=flags()(window,document),_utils=utils()(window,document),_validationFunctions=validationFunctions()(window,document,_utils.arrayIncludes,_utils.stringStartsWith,_utils.stringEndsWith),_passwordSheriffBundle=passwordSheriffBundle();showHidePassword()(_utils.querySelector,_utils.querySelectorAll,_utils.addClickListener,_utils.addEventListener,_utils.addClass,_utils.removeClass,_utils.getParent,_flags),showHidePasswordDeprecated()(_utils.querySelector,_utils.querySelectorAll,_utils.addClickListener,_utils.addClass,_utils.removeClass,_utils.toggleClass,_utils.getParent,_flags),inputFocusDeprecated()(_utils.querySelector,_utils.querySelectorAll,_utils.addEventListener,_utils.addClass,_utils.removeClass,_utils.getParent,_utils.setTimeout,_utils.dispatchEvent,_utils.setAttribute,_utils.getAttribute,_flags),passwordPolicies()(_passwordSheriffBundle,_utils.querySelector,_utils.querySelectorAll,_utils.getAttribute,_utils.setAttribute,_utils.removeAttribute,_utils.removeClass,_utils.cleanServerErrorMessage,_utils.addClass,_utils.addEventListener,_utils.getGlobalFlag,_utils.setGlobalFlag,_utils.preventFormSubmit,_flags),passwordPoliciesDeprecated()(_passwordSheriffBundle,_utils.querySelector,_utils.querySelectorAll,_utils.getAttribute,_utils.setAttribute,_utils.removeClass,_utils.cleanServerErrorMessage,_utils.addClass,_utils.addEventListener,_utils.getGlobalFlag,_utils.setGlobalFlag,_utils.preventFormSubmit,_flags),loadCaptcha()(_utils.loadScript,_utils.removeScript,_utils.querySelector,_utils.addClass,_utils.removeClass,_utils.getCSSVariable,_utils.setAttribute,_utils.htmlEncode,_flags,_utils.setGlobalFlag),loadCaptchaRtl()(_utils.loadScript,_utils.removeScript,_utils.querySelector,_utils.addClass,_utils.removeClass,_utils.getCSSVariable,_utils.setAttribute,_utils.htmlEncode,_flags,_utils.setGlobalFlag),ulpFieldStyling()(_utils.querySelector,_utils.querySelectorAll,_utils.addEventListener,_utils.addClass,_utils.removeClass,_utils.getParent,_utils.hasClass,_utils.getAttribute,_utils.setAttribute,_utils.createMutationObserver,_utils.ELEMENT_TYPE_SELECTOR,_flags),ulpFieldStylingDeprecated()(_utils.querySelector,_utils.querySelectorAll,_utils.addEventListener,_utils.addClass,_utils.removeClass,_utils.getParent,_utils.hasClass,_utils.createMutationObserver,_utils.ELEMENT_TYPE_SELECTOR,_flags),ulpFieldValidation()(_utils.querySelector,_utils.querySelectorAll,_utils.addEventListener,_utils.getParent,_utils.getAttribute,_utils.setAttribute,_utils.removeAttribute,_utils.hasClass,_utils.addClass,_utils.removeClass,_utils.toggleClass,_utils.globalWindow,_utils.consoleWarn,_utils.preventFormSubmit,_utils.SUPPORTED_INPUT_TYPES,_utils.ELEMENT_TYPE_SELECTOR,_validationFunctions,_utils.getUlpFields,_utils.appendUlpFieldsToForm,_flags,_utils.getGlobalFlag,_utils.setGlobalFlag),ulpFieldValidationDeprecated()(_utils.querySelector,_utils.querySelectorAll,_utils.addEventListener,_utils.getParent,_utils.getAttribute,_utils.toggleClass,_utils.globalWindow,_utils.consoleWarn,_utils.preventFormSubmit,_utils.SUPPORTED_INPUT_TYPES,_utils.ELEMENT_TYPE_SELECTOR,_flags),buttonNoFormValidate()(_utils.querySelectorAll,_utils.addEventListener,_utils.RUN_INIT),ariaHandler()(_utils.querySelector,_utils.querySelectorAll,_utils.hasClass,_utils.getAttribute,_utils.setAttribute,_utils.removeAttribute,_utils.createMutationObserver,_utils.removeAndTrimString,_flags),focusFirst()(_utils.querySelector,_flags,_utils.arrayFrom,_utils.matchMedia),loadOneTap()(_utils.loadScript,_utils.removeScript,_utils.querySelector,_utils.getConfigJson),identifierButtons()(_utils.querySelector,_utils.querySelectorAll,_utils.addClass,_utils.removeClass,_utils.addEventListener,_utils.setAttribute,_utils.getAttribute,_flags),compositePhoneInput()(_utils.querySelector,_utils.querySelectorAll,_utils.addClass,_utils.removeClass,_utils.addEventListener,_utils.setAttribute,_utils.dispatchEvent,_flags),compositePhoneInputFormatting()(_utils.querySelector,_utils.addClass,_utils.removeClass,_utils.addEventListener,_utils.setAttribute,_utils.removeAttribute,_flags,_utils.setGlobalFlag,_utils.globalWindow),compositePhoneInputPaste()(_utils.querySelector,_utils.querySelectorAll,_utils.addEventListener,_utils.dispatchEvent,_flags)}();
+</script>
+
+
+            <footer class="footer signup-footer">
+                <div>
+                    <a href="https://www.twilio.com/legal/tos" target="_blank" rel="noopener noreferrer">Terms of service</a>
+                    <div class="separator">|</div>
+                    <a href="https://www.twilio.com/legal/privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a>
+                </div>
+                <div class="rights">
+                    © <script>document.write(new Date().getFullYear())</script>2026 <a href="https://www.twilio.com/" target="_blank" rel="noopener noreferrer">Twilio</a> Inc. all rights reserved
+                </div>
+            </footer>
+
+        </div>
+
+    </div><script async="" defer="" data-callback="captchaCallback_837405" src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=captchaCallback_837405"></script>
+    <script>
+
+          let loginLink = document.querySelector("a[href*='/login?']");
+          if (loginLink) {
+            let loginHref = "https://auth.twilio.com/login";
+
+            loginLink.setAttribute("href", loginHref);
+          }
+
+
+          let signupLink = document.querySelector("a[href*='/signup']:not([data-link-name='edit-email'])");
+          if (signupLink) {
+            let signupHref = "https://www.twilio.com/v2/user/signup";
+
+            signupLink.setAttribute("href", signupHref);
+          }
+
+    </script>
+
+
+</body></html>
