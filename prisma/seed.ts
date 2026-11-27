@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Keep the prototype seed lists in one place: the implementation spec.
+// Keep the prototype range list in one place: the implementation spec.
 const spec = readFileSync(path.resolve('setps.md'), 'utf8');
 const seedArray = (name: string) => {
   const block = spec.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`))?.[1];
@@ -28,28 +28,26 @@ async function main() {
     update: { name: 'Twilio', enabled: true },
   });
 
-  const domains = seedArray('TEMP_MAIL_SITE_SEED');
-  const sites = domains.map((domain, i) => ({
-    name: domain,
-    domain,
-    url: `https://${domain}/`,
+  const site = {
+    name: 'Temp Mail',
+    domain: 'temp-mail.org',
+    url: 'https://temp-mail.org/en/',
     adapterKey: 'generic',
-    enabled: i === 0,
+    enabled: true,
     isBuiltin: true,
-    sortOrder: i,
-  }));
+    sortOrder: 0,
+  };
 
-  // Replace only seeded built-ins; user-added sites are left untouched.
+  // Keep only the single built-in temp-mail site; user-added rows are untouched.
   await prisma.tempMailProvider.deleteMany({
-    where: { isBuiltin: true, domain: { notIn: domains } },
+    where: { isBuiltin: true, domain: { not: site.domain } },
   });
   await prisma.tempMailProvider.updateMany({ where: { url: '' }, data: { enabled: false } });
-
-  await Promise.all(sites.map((data) => prisma.tempMailProvider.upsert({
-    where: { domain: data.domain },
-    create: data,
-    update: data,
-  })));
+  await prisma.tempMailProvider.upsert({
+    where: { domain: site.domain },
+    create: site,
+    update: site,
+  });
 
   // A previously selected built-in may have been removed above.
   const selected = await prisma.setting.findUnique({ where: { key: 'selected_tempmail_id' } });
@@ -66,7 +64,7 @@ async function main() {
     return prisma.range.upsert({ where: { display }, create: data, update: data });
   }));
 
-  console.log(`Seeded ${sites.length} mail sites and ${ranges.length} ranges`);
+  console.log(`Seeded 1 mail site and ${ranges.length} ranges`);
 }
 
 main()

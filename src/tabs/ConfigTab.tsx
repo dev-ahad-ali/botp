@@ -9,7 +9,6 @@ export default function ConfigTab({ onOpenSite }: Props) {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [ranges, setRanges] = useState<Range[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [newProviderUrl, setNewProviderUrl] = useState('');
   const [newRange, setNewRange] = useState('');
   const [message, setMessage] = useState('');
 
@@ -31,15 +30,6 @@ export default function ConfigTab({ onOpenSite }: Props) {
     try {
       await Promise.all(Object.entries(draft).map(([key, value]) => api.config.set(key, value)));
       setMessage('Settings saved');
-    } catch (e) { setMessage(String(e)); }
-  };
-
-  const addProvider = async () => {
-    if (!newProviderUrl.trim()) return;
-    try {
-      await api.providers.add({ url: newProviderUrl.trim() });
-      setNewProviderUrl('');
-      await load();
     } catch (e) { setMessage(String(e)); }
   };
 
@@ -104,17 +94,8 @@ export default function ConfigTab({ onOpenSite }: Props) {
             </Button>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Every configured URL appears in the dropdown. <strong>Open site</strong> saves the choice and switches to the embedded tab.
+            Only the built-in temp-mail.org site is configured. <strong>Open site</strong> switches to the embedded tab.
           </p>
-          <div className="mt-3 flex gap-2">
-            <Input
-              value={newProviderUrl}
-              onChange={(e) => setNewProviderUrl(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && void addProvider()}
-              placeholder="https://temp-mail.org/en/"
-            />
-            <Button variant="outline" onClick={() => void addProvider()}>Add site</Button>
-          </div>
         </Card>
 
         <Card title="Number API">
