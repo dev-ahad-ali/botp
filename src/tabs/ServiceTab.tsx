@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge, Button, Input } from '../components/ui';
 import { api } from '../lib/ipc';
+import { useAppStore } from '../store/appStore';
 
 export default function ServiceTab() {
-  const [service, setService] = useState('Service');
-  const [url, setUrl] = useState('');
   const [message, setMessage] = useState('');
+  const service = useAppStore((s) => s.service);
+  const url = useAppStore((s) => s.serviceUrl);
+  const stage = useAppStore((s) => s.stage);
+  const setService = useAppStore((s) => s.setService);
+  const setUrl = useAppStore((s) => s.setServiceUrl);
   const barRef = useRef<HTMLDivElement>(null);
   const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
 
@@ -17,8 +21,9 @@ export default function ServiceTab() {
       const info = await api.serviceSite.resolve();
       if (!alive) return;
       setService(info.service);
-      setUrl(info.url);
-      await api.serviceSite.attach(info.url, top());
+      const next = info.url || useAppStore.getState().serviceUrl;
+      setUrl(next);
+      await api.serviceSite.attach(next, top());
     };
     void boot().catch((e) => { if (alive) setMessage(String(e)); });
 
@@ -30,7 +35,7 @@ export default function ServiceTab() {
       window.removeEventListener('resize', onResize);
       void api.serviceSite.detach();
     };
-  }, []);
+  }, [setService, setUrl]);
 
   const go = (next = url) => {
     if (!next.trim()) return;
@@ -43,6 +48,7 @@ export default function ServiceTab() {
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-lg font-semibold">Service</h1>
           <Badge>{service}</Badge>
+          {stage !== 'idle' && <Badge tone="amber">{stage}</Badge>}
           <span className="ml-auto text-xs text-muted-foreground">{message}</span>
         </div>
 
@@ -59,7 +65,7 @@ export default function ServiceTab() {
           <Button onClick={() => go()}>Go</Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          The selected service ({service}) is embedded here. Account creation automation will be added later.
+          The selected service is embedded here. Navigation state is kept in the app store and main process, so switching tabs does not restart the flow.
         </p>
       </div>
     </div>

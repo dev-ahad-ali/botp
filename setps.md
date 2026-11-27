@@ -1,7 +1,7 @@
 # Twilio Signup Automation Tool — Implementation Doc
 
 **Version:** 0.1 (Prototype)
-**Stack:** Electron · React · shadcn/ui · Playwright · SQLite (Prisma)
+**Stack:** Electron · React · shadcn/ui · Zustand · SQLite (Prisma)
 **Theme:** shadcn dark tokens by default (`<html class="dark">` in `src/index.html`)
 **First service:** Twilio (modular — more services later)
 **Goal:** A working prototype base that demonstrates the full loop end-to-end. Twilio selectors will be tuned after live testing; this doc focuses on the parts we already know work.
@@ -15,7 +15,7 @@ The app is a local desktop tool with **five tabs**:
 | # | Tab | Purpose |
 |---|-----|---------|
 | 1 | **Configuration** | Pick the single seeded temp-mail site (`https://temp-mail.org/en/`), configure the number API (URL + auth header), manage ranges, select the target service (Twilio first) |
-| 2 | **Automation** | Control panel: Start / Stop, live status, step log, per-run stats. Playwright drives a separate Chromium window only for the Twilio signup flow |
+| 2 | **Automation** | Start / Stop, live stage, step log, per-run stats. The engine drives the embedded service and temp-mail views through DOM automation |
 | 3 | **Service** | Embeds the selected service (Twilio by default) for later account-creation automation |
 | 4 | **Temp Mail Site** | The real temp-mail website embedded in the app via `WebContentsView`, with extracted email and code fields |
 | 5 | **Free Browser** | Plain browser for the user (URL bar + embedded `WebContentsView`) — no automation |
@@ -26,7 +26,7 @@ The automation loop depends on tab 1 for:
 - The selected temp-mail **website URL** (loaded in the embedded view)
 - The selected target service (Twilio for now)
 
-There is **no programmatic inbox creation** and no temp-mail npm package. The app opens the real site (e.g. `https://temp-mail.org/en/`) inside the Electron window, reads the generated address from its DOM, clicks inbox rows, and extracts the OTP from the message body. Playwright is reserved for the Twilio signup page. The site choice is no longer cosmetic: it determines which page is automated.
+There is **no programmatic inbox creation** and no temp-mail npm package. The app opens the real site (e.g. `https://temp-mail.org/en/`) inside the Electron window, reads the generated address from its DOM, watches the inbox for the Twilio mail, opens it, and extracts the code. The service page is embedded in a second `WebContentsView` and driven by service-specific adapters.
 
 ---
 
@@ -37,7 +37,7 @@ There is **no programmatic inbox creation** and no temp-mail npm package. The ap
 | Shell | Electron (≥ 30 for `WebContentsView`) |
 | Renderer UI | React 18 + shadcn/ui + Tailwind |
 | State | Zustand or simple React context (prototype) |
-| Automation | Playwright (Chromium, headed) |
+| Automation | `WebContentsView` + `executeJavaScript` |
 | DB | SQLite via Prisma |
 | Build | Vite + electron-builder (or electron-vite) |
 | IPC | Electron `contextBridge` + `ipcMain`/`ipcRenderer` |
@@ -68,14 +68,14 @@ There is **no programmatic inbox creation** and no temp-mail npm package. The ap
                             │                    │
                             ▼                    │
                  ┌───────────────────────┐       │
-                 │ Playwright Chromium  │       │
-                 │ Twilio signup only   │       │
+                 │ Embedded Service View │       │
+                 │ (Twilio adapter)     │       │
                  └───────────────────────┘       │
                                                  ▼
                                      real temp-mail site (embedded)
 ```
 
-**Prototype note:** the temp-mail site is embedded in the app window and controlled with `webContents.executeJavaScript`. Playwright runs in a separate OS window only for the Twilio flow.
+**Prototype note:** both the temp-mail site and the selected service are embedded in the app window and controlled with `webContents.executeJavaScript`. Renderer state is held in Zustand; main-process view state prevents tab switches from resetting a flow.
 
 ---
 
@@ -102,7 +102,7 @@ twilio-automation/
 │  ├─ dbOps.ts                # providers/ranges/services CRUD
 │  ├─ tempMail/
 │  │  ├─ types.ts             # message/provider shapes
-│  │  └─ session.ts           # loads embedded site; owns Playwright browser for Twilio
+│  │  └─ session.ts           # wrappers around embedded temp-mail view
 │  ├─ numbers/
 │  │  └─ client.ts            # POST getnum
 │  ├─ generators.ts           # random name/pass helpers
@@ -134,7 +134,7 @@ model Setting {
   value String
 }
 
-// A real temp-mail website that Playwright will open.
+// A real temp-mail website embedded in the app.
 model TempMailProvider {
   id         Int      @id @default(autoincrement())
   name       String
@@ -322,18 +322,17 @@ function extractCode(text: string) {
 
 `readAddress()` scans the visible address inputs, then falls back to the page text. `copyAddress()` clicks the site's copy button when available. `waitForCode()` polls inbox rows, clicks a message if the code is not in the preview, and stops when the stop signal resolves.
 
-`server/tempMail/session.ts` loads the embedded site for the engine and owns the Playwright browser used only for Twilio:
+`server/tempMail/session.ts` wraps the embedded temp-mail view for the engine:
 
 ```ts
 export async function openTempMail(config) {
   // load embedded view with config.url -> read address -> return { address, service, url }
 }
-export async function newAutomationPage() {
-  // separate headed Chromium page for the Twilio flow
-}
+export const waitForTwilioCode = (timeoutMs?: number) =>
+  tempView.waitForTwilioCode(timeoutMs ?? 180_000);
 export const waitForCode = (timeoutMs?: number) => tempView.waitForCode(timeoutMs ?? 180_000);
 export function stopWaits() { /* resolve pending waits */ }
-export async function closeAll() { /* close Playwright browser; stop waits */ }
+export async function closeAll() { /* stop pending waits */ }
 ```
 
 ### 7.3 Number API Client (`server/numbers/client.ts`)
@@ -382,17 +381,17 @@ export const randomLastName  = () => LAST_NAMES[Math.floor(Math.random() * LAST_
 ### 7.5 Automation Service Interface (`server/automation/types.ts`)
 
 ```ts
-import type { Page } from 'playwright';
+import type { NumberInfo } from '../numbers/client';
 
 export interface RunContext {
-  page: Page;
+  view: ServiceView;
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  number: NumberInfo;             // phone + country/dial-code metadata
   rangeDisplay: string;           // e.g. "99277XXX"
-  getOtp: () => Promise<string>;  // resolves to 6-digit code
+  getCode: () => Promise<string>; // resolves to the verification code
   log: (msg: string, data?: any) => Promise<void>;
   stop: () => boolean;
 }
@@ -773,11 +772,11 @@ const off = api.automation.onEvent((e) => {
 });
 ```
 
-The Twilio browsing happens in Playwright's Chromium window. The Automation tab is the control panel.
+The engine switches focus between the embedded service and temp-mail tabs as the flow advances. Zustand mirrors the stage, extracted email/code, and current URLs in the renderer.
 
 ### 9.3 Service Tab (`tabs/ServiceTab.tsx`)
 
-React resolves the selected service from `config.selected_service`, then embeds its start URL in a `WebContentsView` below the measured toolbar. Twilio opens `https://www.twilio.com/try-twilio`. On deactivation: `api.serviceSite.detach()`. Account creation automation is intentionally deferred.
+React resolves the selected service from `config.selected_service`, then embeds its current URL in a `WebContentsView` below the measured toolbar. Twilio opens `https://www.twilio.com/try-twilio`. The URL is kept in Zustand and main-process state so switching tabs does not restart the form. On deactivation: `api.serviceSite.detach()`.
 
 ### 9.4 Temp Mail Site Tab (`tabs/TempMailSiteTab.tsx`)
 
@@ -802,13 +801,13 @@ Follow in order. Each step ends with a concrete verification.
 4. **Implement `server/config.ts`** and IPC handlers. Wire the Config tab to read/write.
    - Verify: set a value in the UI, restart the app, value persists.
 5. **Implement `server/numbers/client.ts`** plus a smoke IPC.
-   - Verify: response parses into a phone number string.
+   - Verify: response parses into a phone plus country/dial-code metadata.
 6. **Implement generators, `AutomationService`, `twilioService`, registry.**
-   - Keep the Twilio selectors as placeholders for live tuning.
+   - Selectors are best-effort (see reference HTML); tune in `services/twilio.ts` after live testing.
 7. **Implement `electron/tempMailView.ts` and `server/tempMail/session.ts`.**
    - Verify: "Temp Mail Site" tab embeds the chosen real site and its address appears in the extracted email field.
 8. **Implement `server/automation/engine.ts`.**
-   - Verify: Start loads the embedded temp-mail site and opens the Twilio page in Chromium; Stop closes Playwright and pending waits.
+   - Verify: Start loads the embedded temp-mail site and service form; Stop cancels pending waits.
 9. **Wire Automation, Service, and Temp Mail Site tabs** to IPC and event streams.
    - Verify: log lines stream live; address/code appear in the Temp Mail Site tab; runs persist.
 10. **Implement the Free Browser tab** with `WebContentsView`.
@@ -831,7 +830,7 @@ Follow in order. Each step ends with a concrete verification.
 | 7 | Smoke-test getnum returns a phone number string | ✔ |
 | 8 | Start → embedded temp-mail site loads + Chromium Twilio signup form fills | ✔ |
 | 9 | Email OTP read from the temp-mail inbox → entered | ✔ |
-| 10 | Phone number submitted | ✔ (until SMS-OTP wall — expected) |
+| 10 | Phone number submitted and flow reset | ✔ |
 | 11 | Stop → Chromium closes, no orphan processes | ✔ |
 | 12 | Service, Temp Mail Site, and Free Browser tabs each load and detach cleanly | ✔ |
 | 13 | Run rows + logs are persisted | ✔ |
@@ -845,7 +844,7 @@ Failures in tests 8–10 are expected on first run and mean selector tuning, not
 - **Temp-mail selectors** are best-effort. Sites can change their DOM or add bot protection; tune `electron/tempMailView.ts` against the live page.
 - **Twilio selectors** are placeholders; expect to iterate live.
 - **SMS verification**: Twilio's final step sends an SMS to the number. If a receive-SMS endpoint exists, add `server/numbers/sms.ts` and wire it into `RunContext`. Without it, the flow stops at phone submission.
-- **Playwright Chromium runs in a separate OS window for Twilio only.** The temp-mail site is embedded in the Electron window.
+- **Both service and temp-mail pages are embedded in the Electron window.** No separate browser is launched.
 - **`getnum` requires a valid `mauthapi` header**; the app cannot supply it automatically. Enter it in Configuration and click Save settings.
 - Old decorative provider rows remain in SQLite but are disabled and hidden because they have no URL.
 
@@ -873,4 +872,4 @@ Failures in tests 8–10 are expected on first run and mean selector tuning, not
 | Inbox message + OTP | Found by clicking rows in the real site's inbox and matching a 4–8 digit code |
 | A range dropdown with `99277XXX` | `Range.display` shown; `Range.prefix` (`"99277"`) sent as `rid` |
 
-The temp-mail work happens in the embedded view; Twilio work happens in Playwright and `server/`. SQLite stores settings, site metadata, runs, and logs.
+The temp-mail work happens in its embedded view; service work lives in `server/automation/services/*`. SQLite stores settings, site metadata, runs, and logs.

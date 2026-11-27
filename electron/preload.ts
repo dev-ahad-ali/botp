@@ -53,6 +53,7 @@ const api: Api = {
     address: () => ipcRenderer.invoke('tempSite:address'),
     copy: () => ipcRenderer.invoke('tempSite:copy'),
     regenerate: () => ipcRenderer.invoke('tempSite:regenerate'),
+    delete: () => ipcRenderer.invoke('tempSite:delete'),
     messages: () => ipcRenderer.invoke('tempSite:messages'),
     openMessage: (index) => ipcRenderer.invoke('tempSite:openMessage', index),
     waitForCode: (timeoutMs) => ipcRenderer.invoke('tempSite:waitForCode', timeoutMs),

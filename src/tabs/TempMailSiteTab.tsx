@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { Badge, Button, Field, Input, Select } from '../components/ui';
 import { api, type Provider } from '../lib/ipc';
+import { useAppStore } from '../store/appStore';
 
 export default function TempMailSiteTab() {
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [url, setUrl] = useState('');
-  const [address, setAddress] = useState('');
-  const [code, setCode] = useState('');
   const [message, setMessage] = useState('');
+  const url = useAppStore((s) => s.tempUrl);
+  const email = useAppStore((s) => s.email);
+  const code = useAppStore((s) => s.code);
+  const setUrl = useAppStore((s) => s.setTempUrl);
+  const setEmail = useAppStore((s) => s.setEmail);
+  const setCode = useAppStore((s) => s.setCode);
   const barRef = useRef<HTMLDivElement>(null);
   const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
 
@@ -16,7 +20,7 @@ export default function TempMailSiteTab() {
     const offUrl = api.tempSite.onUrl((next) => { if (alive) setUrl(next); });
     const offEvent = api.tempMail.onEvent((e) => {
       if (!alive) return;
-      if (e.type === 'temp:address') setAddress(e.address);
+      if (e.type === 'temp:address') setEmail(e.address);
       if (e.type === 'temp:code') setCode(e.code);
     });
 
@@ -27,11 +31,12 @@ export default function TempMailSiteTab() {
       const chosen = sites.find((p) => String(p.id) === cfg.selected_tempmail_id) ?? sites.find((p) => p.enabled) ?? sites[0];
       if (!chosen) throw new Error('No temp-mail websites configured');
       if (!alive) return;
-      await api.tempSite.attach(chosen.url, top());
+      const next = useAppStore.getState().tempUrl || chosen.url;
+      await api.tempSite.attach(next, top());
       if (!alive) return;
-      setUrl(chosen.url);
+      setUrl(next);
       const current = await api.tempSite.address().catch(() => '');
-      if (alive) setAddress(current);
+      if (alive) setEmail(current);
     };
     void boot().catch((e) => { if (alive) setMessage(String(e)); });
 
@@ -44,7 +49,7 @@ export default function TempMailSiteTab() {
       window.removeEventListener('resize', onResize);
       void api.tempSite.detach();
     };
-  }, []);
+  }, [setCode, setEmail, setUrl]);
 
   const go = (next = url) => {
     if (!next.trim()) return;
@@ -59,7 +64,7 @@ export default function TempMailSiteTab() {
       await api.providers.setEnabled(id, true);
       await api.tempSite.attach(provider.url, top());
       setUrl(provider.url);
-      setAddress(await api.tempSite.address().catch(() => ''));
+      setEmail(await api.tempSite.address().catch(() => ''));
     } catch (e) { setMessage(String(e)); }
   };
 
@@ -95,15 +100,16 @@ export default function TempMailSiteTab() {
 
         <div className="grid gap-2 sm:grid-cols-2">
           <Field label="Extracted email">
-            <Input value={address} readOnly placeholder="—" />
+            <Input value={email} readOnly placeholder="—" />
           </Field>
           <Field label="Extracted code">
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Will be populated later" />
+            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Waiting for verification mail" />
           </Field>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={() => void api.tempSite.copy().then(setAddress).catch((e) => setMessage(String(e)))}>Copy email</Button>
-          <Button variant="outline" onClick={() => void api.tempSite.regenerate().then(setAddress).catch((e) => setMessage(String(e)))}>New email</Button>
+          <Button variant="outline" onClick={() => void api.tempSite.copy().then(setEmail).catch((e) => setMessage(String(e)))}>Copy email</Button>
+          <Button variant="outline" onClick={() => void api.tempSite.regenerate().then(setEmail).catch((e) => setMessage(String(e)))}>New email</Button>
+          <Button variant="outline" onClick={() => void api.tempSite.delete().then(setEmail).catch((e) => setMessage(String(e)))}>Delete address</Button>
         </div>
       </div>
     </div>

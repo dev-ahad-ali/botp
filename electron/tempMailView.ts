@@ -42,6 +42,8 @@ const SELECTORS = {
     '[data-testid="email-body"]',
     'article',
   ],
+  messageLink: ['a.viewLink[data-mail-id]', '.viewLink[data-mail-id]', 'a[href*="/view/"]'],
+  delete: ['#click-to-delete', 'button.click-to-delete', 'a.click-to-delete', 'button[title*="delete" i]'],
 };
 
 type StopSignal = { promise: Promise<void>; resolve: () => void; triggered: boolean };
@@ -57,6 +59,7 @@ let view: WebContentsView | null = null;
 let attached = false;
 let top = 120;
 let siteUrl = '';
+let inboxUrl = '';
 let stopSignal = createStopSignal();
 
 export function setMainWindow(window: BrowserWindow) {
@@ -179,8 +182,37 @@ const READ_BODY = `(arg) => {
   return (document.body.innerText || '').slice(0, 4000);
 }`;
 
+const FIND_TWILIO_MESSAGE = `() => {
+  for (const link of document.querySelectorAll('a.viewLink[data-mail-id]')) {
+    const r = link.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) continue;
+    const text = ((link.textContent || link.innerText || '') + '').trim().replace(/\\s+/g, ' ');
+    const parent = link.closest('.col-box')?.parentElement?.textContent || '';
+    const haystack = (text + ' ' + parent).toLowerCase();
+    if (/twilio|no-reply@twilio\\.com|verify your email/.test(haystack)) {
+      return { href: link.href, id: link.getAttribute('data-mail-id') || '', preview: text };
+    }
+  }
+  return null;
+}`;
+
+const READ_CODE_FROM_MESSAGE = `() => {
+  const text = (document.body.innerText || '').replace(/\\u00a0/g, ' ');
+  const after = text.split(/enter the following code/i)[1] || '';
+  const m = after.match(/\\b[A-Z0-9]{4,10}\\b/);
+  if (m) return m[0];
+  for (const span of document.querySelectorAll('table p span, p span, span')) {
+    const value = ((span.textContent || '') + '').trim();
+    if (/^[A-Z0-9]{4,10}$/.test(value)) return value;
+  }
+  return '';
+}`;
+
 export function findOtp(text: string) {
-  return text.match(/\b(\d{6})\b/)?.[1] ?? text.match(/\b(\d{4,8})\b/)?.[1] ?? null;
+  return text.match(/\b(\d{6})\b/)?.[1]
+    ?? text.match(/\b([A-Z0-9]{6})\b/)?.[1]
+    ?? text.match(/\b(\d{4,8})\b/)?.[1]
+    ?? null;
 }
 
 export function getUrl() {
@@ -194,6 +226,7 @@ export async function openSite(url: string) {
   if (siteUrl !== url) {
     await current.webContents.loadURL(url);
     siteUrl = url;
+    if (!/\/view\//.test(url)) inboxUrl = url;
   }
   return current;
 }
@@ -280,6 +313,55 @@ async function findCode() {
     if (opened?.code) return { code: opened.code, message: opened };
   }
   return null;
+}
+
+/** Clicks temp-mail.org's Delete button and reads the newly generated address. */
+export async function deleteAddress() {
+  await openSite(inboxUrl || siteUrl);
+  const clicked = await run<boolean>(CLICK_ACTION, {
+    selectors: SELECTORS.delete,
+    text: ['delete this address', 'delete'],
+  }).catch(() => false);
+  if (!clicked) reload();
+  await sleep(300);
+  await run<boolean>(CLICK_ACTION, {
+    selectors: SELECTORS.delete,
+    text: ['yes', 'confirm', 'delete this address', 'delete'],
+  }).catch(() => false);
+  await sleep(900);
+  await openSite(inboxUrl || siteUrl);
+  return readAddress();
+}
+
+/** Polls the inbox, opens the Twilio verification mail, reads its code, then returns to the inbox. */
+export async function waitForTwilioCode(timeoutMs = 180_000) {
+  resetStop();
+  const signal = stopSignal;
+  const current = await ensureView();
+  const inbox = inboxUrl || siteUrl;
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const found = await Promise.race([
+      run<{ href: string; id: string; preview: string } | null>(FIND_TWILIO_MESSAGE).catch(() => null),
+      signal.promise.then(() => STOP),
+    ]);
+    if (found && 'stopped' in found) throw new Error('Stopped');
+
+    if (found?.href) {
+      await current.webContents.loadURL(found.href);
+      siteUrl = found.href;
+      await sleep(700);
+      const code = await run<string>(READ_CODE_FROM_MESSAGE).catch(() => '');
+      await current.webContents.loadURL(inbox);
+      siteUrl = inbox;
+      if (code) {
+        return { code, message: { subject: 'Verify your Email', preview: found.preview, body: '' } };
+      }
+    }
+    await sleep(1500);
+  }
+  throw new Error('Temp mail: verification code timeout');
 }
 
 export async function waitForCode(timeoutMs = 180_000) {

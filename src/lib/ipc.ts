@@ -29,6 +29,8 @@ export type TempMailEvent =
 
 export type AutomationEvent =
   | { type: 'status'; running: boolean }
+  | { type: 'stage'; stage: 'signup' | 'email-code' | 'phone' | 'done' }
+  | { type: 'focus'; tab: 'service' | 'tempsite' }
   | { type: 'log'; runId: number; message: string; data?: unknown }
   | { type: 'run:start'; runId: number; range: string; pkg: string }
   | { type: 'run:info'; runId: number; phone?: string; email?: string; range?: string }
@@ -52,7 +54,7 @@ export type Api = {
   };
   services: { list: () => Promise<Service[]> };
   serviceSite: {
-    resolve: () => Promise<{ service: string; url: string }>;
+    resolve: () => Promise<{ service: string; url: string; key: string }>;
     attach: (url: string, top?: number) => Promise<void>;
     setTop: (top: number) => Promise<void>;
     navigate: (url: string) => Promise<void>;
@@ -81,6 +83,7 @@ export type Api = {
     address: () => Promise<string>;
     copy: () => Promise<string>;
     regenerate: () => Promise<string>;
+    delete: () => Promise<string>;
     messages: () => Promise<TempMailMessage[]>;
     openMessage: (index: number) => Promise<TempMailMessage>;
     waitForCode: (timeoutMs?: number) => Promise<{ code: string; message: TempMailMessage }>;

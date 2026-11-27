@@ -1,23 +1,18 @@
 import { app, BrowserWindow, WebContentsView, ipcMain } from 'electron';
 import path from 'node:path';
 import { startAutomation, stopAutomation } from '../server/automation/engine';
+import { SERVICES } from '../server/automation/registry';
 import type { TempMailEvent } from '../server/automation/types';
 import { getConfig, setConfig } from '../server/config';
 import * as dbOps from '../server/dbOps';
 import { prisma } from '../server/db';
 import { getNumber } from '../server/numbers/client';
+import * as serviceView from './serviceView';
 import * as tempView from './tempMailView';
 
 let win: BrowserWindow | null = null;
 let freeView: WebContentsView | null = null;
 let freeTop = 120;
-let serviceView: WebContentsView | null = null;
-let serviceTop = 120;
-
-// Start URLs for selectable services. Only Twilio is wired up in this prototype.
-const SERVICE_URLS: Record<string, string> = {
-  twilio: 'https://www.twilio.com/try-twilio',
-};
 
 function updateFreeBounds() {
   if (!freeView || !win) return;
@@ -25,20 +20,15 @@ function updateFreeBounds() {
   freeView.setBounds({ x: 0, y: freeTop, width, height: Math.max(height - freeTop, 0) });
 }
 
-function updateServiceBounds() {
-  if (!serviceView || !win) return;
-  const [width, height] = win.getContentSize();
-  serviceView.setBounds({ x: 0, y: serviceTop, width, height: Math.max(height - serviceTop, 0) });
-}
-
 async function selectedService() {
   const [cfg, services] = await Promise.all([getConfig(), dbOps.listServices()]);
   const key = cfg.selected_service || services[0]?.key;
   const service = services.find((s) => s.key === key) ?? services[0];
   if (!service) throw new Error('No services configured');
-  const url = SERVICE_URLS[service.key];
-  if (!url) throw new Error(`No start URL configured for ${service.name}`);
-  return { service: service.name, url };
+  const startUrl = serviceView.getUrl() || SERVICES[service.key]?.startUrl;
+  if (!startUrl) throw new Error(`No start URL configured for ${service.name}`);
+  serviceView.rememberStartUrl(startUrl);
+  return { service: service.name, url: startUrl, key: service.key };
 }
 
 const emitTemp = (event: TempMailEvent) => win?.webContents.send('tempMail:event', event);
@@ -68,8 +58,9 @@ function createWindow() {
   const url = process.env.ELECTRON_RENDERER_URL ?? `file://${path.join(__dirname, '../renderer/index.html')}`;
   void win.loadURL(url);
   tempView.setMainWindow(win);
-  win.on('closed', () => { win = null; freeView = null; serviceView = null; });
-  win.on('resize', () => { updateFreeBounds(); updateServiceBounds(); tempView.updateBounds(); });
+  serviceView.setMainWindow(win);
+  win.on('closed', () => { win = null; freeView = null; });
+  win.on('resize', () => { updateFreeBounds(); tempView.updateBounds(); });
 }
 
 function registerIpc() {
@@ -86,31 +77,13 @@ function registerIpc() {
 
   ipcMain.handle('services:list', () => dbOps.listServices());
   ipcMain.handle('serviceSite:resolve', () => selectedService());
-  ipcMain.handle('serviceSite:attach', async (_e, url: string, top?: number) => {
-    if (!win) return;
-    if (!serviceView) {
-      serviceView = new WebContentsView({ webPreferences: { sandbox: true } });
-      win.contentView.addChildView(serviceView);
-      serviceView.webContents.on('did-navigate', (_wc, next) => win?.webContents.send('serviceSite:url', next));
-    }
-    if (top !== undefined) serviceTop = top;
-    updateServiceBounds();
-    if (url) await serviceView.webContents.loadURL(url);
-  });
-  ipcMain.handle('serviceSite:setTop', (_e, top: number) => {
-    serviceTop = top;
-    updateServiceBounds();
-  });
-  ipcMain.handle('serviceSite:navigate', (_e, url: string) => serviceView?.webContents.loadURL(url));
-  ipcMain.handle('serviceSite:detach', () => {
-    if (serviceView && win) {
-      win.contentView.removeChildView(serviceView);
-      serviceView = null;
-    }
-  });
-  ipcMain.handle('serviceSite:back', () => { if (serviceView?.webContents.canGoBack()) serviceView.webContents.goBack(); });
-  ipcMain.handle('serviceSite:forward', () => { if (serviceView?.webContents.canGoForward()) serviceView.webContents.goForward(); });
-  ipcMain.handle('serviceSite:reload', () => serviceView?.webContents.reload());
+  ipcMain.handle('serviceSite:attach', (_e, url: string, top?: number) => serviceView.attach(url, top));
+  ipcMain.handle('serviceSite:setTop', (_e, top: number) => serviceView.setTop(top));
+  ipcMain.handle('serviceSite:navigate', (_e, url: string) => serviceView.navigate(url));
+  ipcMain.handle('serviceSite:detach', () => serviceView.detach());
+  ipcMain.handle('serviceSite:back', () => serviceView.back());
+  ipcMain.handle('serviceSite:forward', () => serviceView.forward());
+  ipcMain.handle('serviceSite:reload', () => serviceView.reload());
 
   ipcMain.handle('runs:list', (_e, limit?: number) => dbOps.listRuns(limit ?? 20));
 
@@ -120,12 +93,12 @@ function registerIpc() {
     const selectedId = Number(overrides?.rangeId || cfg.selected_range_id || 0);
     const range = ranges.find((r) => r.id === selectedId) ?? ranges[0];
     if (!range) throw new Error('No ranges configured');
-    const phone = await getNumber({
+    const number = await getNumber({
       url: overrides?.url?.trim() || cfg.number_api_url,
       headerRaw: overrides?.header ?? cfg.number_api_header ?? '',
       rid: range.prefix,
     });
-    return { phone, range: range.display };
+    return { phone: number.phone, range: range.display };
   });
 
   ipcMain.handle('tempSite:open', async (_e, id?: number) => {
@@ -149,6 +122,7 @@ function registerIpc() {
   ipcMain.handle('tempSite:address', () => tempView.readAddress());
   ipcMain.handle('tempSite:copy', () => tempView.copyAddress());
   ipcMain.handle('tempSite:regenerate', () => tempView.regenerate());
+  ipcMain.handle('tempSite:delete', () => tempView.deleteAddress());
   ipcMain.handle('tempSite:messages', () => tempView.listMessages());
   ipcMain.handle('tempSite:openMessage', (_e, index: number) => tempView.openMessage(index));
   ipcMain.handle('tempSite:waitForCode', async (_e, timeoutMs?: number) => {

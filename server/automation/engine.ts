@@ -4,11 +4,13 @@ import { getProvider } from '../dbOps';
 import { randomPassword, randomFirstName, randomLastName } from '../generators';
 import { getNumber } from '../numbers/client';
 import * as tempMail from '../tempMail/session';
+import * as serviceView from '../../electron/serviceView';
 import { SERVICES } from './registry';
-import type { AutomationEvent } from './types';
+import type { AutomationEvent, ServiceView } from './types';
 
 let running = false;
 let shouldStop = false;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
   if (running) return;
@@ -37,19 +39,30 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
       : await prisma.tempMailProvider.findFirst({ where: { enabled: true, url: { not: '' } }, orderBy: { sortOrder: 'asc' } });
     if (!provider?.url) throw new Error('Select a temp-mail website in Configuration');
 
+    serviceView.rememberStartUrl(service.startUrl);
+    const view: ServiceView = {
+      goto: async (url) => { await serviceView.openSite(url); },
+      evaluate: <T>(fn: string, arg?: unknown) => serviceView.evaluate<T>(fn, arg),
+      url: () => serviceView.getUrl(),
+    };
+
     const opened = await tempMail.openTempMail(provider);
     emit({ type: 'temp:open', service: provider.name, url: provider.url });
     emit({ type: 'temp:address', address: opened.address });
+    emit({ type: 'focus', tab: 'tempsite' });
 
-    let attempt = 0;
     let address = opened.address;
+    let attempt = 0;
     while (!shouldStop) {
       const range = rotation[attempt++ % rotation.length];
       if (attempt > 1) {
-        address = await tempMail.regenerate();
+        address = await tempMail.deleteAddress();
         emit({ type: 'temp:address', address });
+        emit({ type: 'focus', tab: 'tempsite' });
       }
 
+      emit({ type: 'focus', tab: 'service' });
+      emit({ type: 'stage', stage: 'signup' });
       const run = await prisma.run.create({
         data: { serviceKey: service.key, rangeId: range.id, providerId: provider.id, status: 'running' },
       });
@@ -61,28 +74,29 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
         emit({ type: 'log', runId: run.id, message, data });
       };
 
-      let page: Awaited<ReturnType<typeof tempMail.newAutomationPage>> | null = null;
       emit({ type: 'run:start', runId: run.id, range: range.display, pkg: provider.adapterKey });
       await log(`temp-mail site: ${provider.name} (${address})`);
 
       try {
-        const phone = await getNumber({ url: cfg.number_api_url, headerRaw: cfg.number_api_header, rid: range.prefix });
-        await log(`phone fetched: ${phone}`);
-        emit({ type: 'run:info', runId: run.id, phone, email: address, range: range.display });
+        const number = await getNumber({ url: cfg.number_api_url, headerRaw: cfg.number_api_header, rid: range.prefix });
+        await log(`phone fetched: ${number.phone}`, { country: number.country, countryCode: number.countryCode, dialCode: number.dialCode });
+        emit({ type: 'run:info', runId: run.id, phone: number.phone, email: address, range: range.display });
 
-        page = await tempMail.newAutomationPage();
         await service.run({
-          page,
+          view,
           email: address,
           password: randomPassword(16),
           firstName: randomFirstName(),
           lastName: randomLastName(),
-          phone,
+          number,
           rangeDisplay: range.display,
-          getOtp: async () => {
-            const found = await tempMail.waitForCode(180_000);
+          getCode: async () => {
+            emit({ type: 'stage', stage: 'email-code' });
+            emit({ type: 'focus', tab: 'tempsite' });
+            const found = await tempMail.waitForTwilioCode(180_000);
             emit({ type: 'temp:code', code: found.code });
             await log(`verification code: ${found.code}`);
+            emit({ type: 'focus', tab: 'service' });
             return found.code;
           },
           log,
@@ -91,6 +105,11 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
 
         await prisma.run.update({ where: { id: run.id }, data: { status: 'success', endedAt: new Date() } });
         emit({ type: 'run:done', runId: run.id, status: 'success' });
+        emit({ type: 'stage', stage: 'done' });
+        if (!shouldStop) {
+          await serviceView.reset();
+          await sleep(1500);
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         const status = shouldStop ? 'stopped' : 'failed';
@@ -99,15 +118,13 @@ export async function startAutomation(onEvent: (e: AutomationEvent) => void) {
           data: { status, endedAt: new Date(), error: message },
         });
         emit({ type: 'run:done', runId: run.id, status, error: message });
-      } finally {
-        if (page) await page.close().catch(() => undefined);
       }
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     emit({ type: 'log', runId: 0, message: `automation error: ${message}` });
   } finally {
-    await tempMail.closeAll();
+    tempMail.closeAll();
     running = false;
     emit({ type: 'status', running: false });
   }
@@ -117,5 +134,4 @@ export function stopAutomation() {
   if (!running) return;
   shouldStop = true;
   tempMail.stopWaits();
-  void tempMail.closeAll();
 }
