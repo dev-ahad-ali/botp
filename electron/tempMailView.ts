@@ -139,9 +139,18 @@ const READ_ADDRESS = `(arg) => {
 const READ_INPUT_ADDRESS = `(arg) => {
   for (const selector of ['input#mail', ...arg.selectors.address]) {
     for (const el of document.querySelectorAll(selector)) {
-      const text = ((el.value || el.textContent || '') + '').trim();
-      const match = text.match(/${EMAIL_RE.source}/i);
-      if (match) return match[0];
+      const sources = [
+        el.value,
+        el.textContent,
+        el.getAttribute && el.getAttribute('data-value'),
+        el.getAttribute && el.getAttribute('title'),
+        el.getAttribute && el.getAttribute('placeholder'),
+      ];
+      for (const source of sources) {
+        const text = ((source || '') + '').trim();
+        const match = text.match(/${EMAIL_RE.source}/i);
+        if (match) return match[0];
+      }
     }
   }
   return '';
@@ -268,7 +277,11 @@ export function getHomeUrl() {
   return homeUrl;
 }
 
-/** Only the configured inbox and its opened-message links may be loaded. */
+/**
+ * Only the configured inbox, its opened-message links, and the site root are allowed.
+ * temp-mail.org's Delete button generates a new mailbox and then navigates to '/',
+ * so that redirect must not be blocked or the new address never renders.
+ */
 function isAllowedTempUrl(url: string) {
   if (!homeUrl) return true;
   try {
@@ -277,7 +290,7 @@ function isAllowedTempUrl(url: string) {
     if (target.origin !== home.origin) return false;
     const path = target.pathname.replace(/\/+$/, '') || '/';
     const homePath = home.pathname.replace(/\/+$/, '') || '/';
-    return path === homePath || /\/view\/[^/]+/.test(target.pathname);
+    return path === homePath || path === '/' || /\/view\/[^/]+/.test(target.pathname);
   } catch {
     return false;
   }
@@ -331,7 +344,10 @@ export function reload() {
   else view?.webContents.reload();
 }
 
+/** Prefer the address field; only fall back to page text if the field is not ready. */
 export async function readAddress() {
+  const input = (await run<string>(READ_INPUT_ADDRESS, { selectors: SELECTORS })).trim();
+  if (input) return input;
   return (await run<string>(READ_ADDRESS, { selectors: SELECTORS })).trim();
 }
 
@@ -339,23 +355,43 @@ export async function readInputAddress() {
   return (await run<string>(READ_INPUT_ADDRESS, { selectors: SELECTORS })).trim();
 }
 
+async function waitForInputAddress(timeoutMs: number, differentFrom = '') {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (stopRequested) throw new Error('Stopped');
+    const address = await readInputAddress().catch(() => '');
+    if (address && address !== differentFrom) return address;
+    await sleep(300);
+  }
+  return '';
+}
+
+async function settleOnHome(address: string) {
+  const home = homeUrl || inboxUrl || siteUrl;
+  if (home && siteUrl !== home) await openSite(home).catch(() => {});
+  return address;
+}
+
 /**
  * Deletes the current temp-mail address and polls until a genuinely new one appears.
- * temp-mail.org needs a moment after the delete/reload before the new address is in the DOM.
+ * temp-mail.org's Delete handler creates a new mailbox, then sets location.href = '/',
+ * so the navigation guard must allow the root path for the new address to render.
  */
 export async function freshAddress(previous = '', timeoutMs = 30_000) {
   if (stopRequested) throw new Error('Stopped');
   const started = Date.now();
   const home = homeUrl || inboxUrl || siteUrl;
   await openSite(home);
-  await sleep(400);
 
-  const before = await readInputAddress().catch(() => '');
-  const baseline = previous || before;
+  // Wait for the real field to populate; a caller-supplied value may be stale page text.
+  const before = await waitForInputAddress(Math.min(timeoutMs, 15_000));
+  const baseline = before || previous;
+  if (!baseline) throw new Error('Temp mail: address not found');
+  console.log('[temp-mail] address before delete:', baseline, 'url:', siteUrl);
+
   // A reload can already have generated a new address before we click Delete.
-  if (baseline && before && before !== baseline) return before;
+  if (before && previous && before !== previous) return settleOnHome(before);
 
-  // temp-mail.org's Delete button clears the inbox and generates a new address in one click.
   let clicked = await run<boolean>(CLICK_ACTION, {
     selectors: ['#click-to-delete', ...SELECTORS.delete],
     text: ['delete this address', 'delete'],
@@ -367,19 +403,20 @@ export async function freshAddress(previous = '', timeoutMs = 30_000) {
       text: ['delete this address', 'delete'],
     }).catch(() => false);
   }
-  if (!clicked) await openSite(home);
-  await sleep(500);
+  if (!clicked) throw new Error('Temp mail: delete button not found');
+  console.log('[temp-mail] clicked delete, waiting for new address');
 
-  while (Date.now() - started < timeoutMs) {
-    if (stopRequested) throw new Error('Stopped');
-    const next = await readInputAddress().catch(() => '');
-    if (next && next !== baseline) return next;
-    await sleep(400);
-  }
-  throw new Error('Temp mail: timed out waiting for a new email address');
+  const remaining = timeoutMs - (Date.now() - started);
+  const next = remaining > 0
+    ? await waitForInputAddress(remaining, baseline)
+    : '';
+  if (!next) throw new Error('Temp mail: timed out waiting for a new email address');
+  console.log('[temp-mail] new address:', next, 'url:', siteUrl);
+  return settleOnHome(next);
 }
 
 export async function copyAddress() {
+  await waitForInputAddress(15_000);
   await run<boolean>(CLICK_ACTION, { selectors: SELECTORS.copy, text: ['copy'] }).catch(() => false);
   const address = await readAddress();
   if (!address) throw new Error('Temp mail: address not found');
