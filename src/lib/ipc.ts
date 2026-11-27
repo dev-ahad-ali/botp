@@ -51,6 +51,17 @@ export type Api = {
     setEnabled: (id: number, enabled: boolean) => Promise<Range>;
   };
   services: { list: () => Promise<Service[]> };
+  serviceSite: {
+    resolve: () => Promise<{ service: string; url: string }>;
+    attach: (url: string, top?: number) => Promise<void>;
+    setTop: (top: number) => Promise<void>;
+    navigate: (url: string) => Promise<void>;
+    detach: () => Promise<void>;
+    back: () => Promise<void>;
+    forward: () => Promise<void>;
+    reload: () => Promise<void>;
+    onUrl: (cb: (url: string) => void) => () => void;
+  };
   runs: { list: (limit?: number) => Promise<RunRow[]> };
   smoke: {
     number: (cfg?: { url?: string; header?: string; rangeId?: string }) => Promise<{ phone: string; range: string }>;

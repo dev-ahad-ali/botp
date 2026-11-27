@@ -17,6 +17,21 @@ const api: Api = {
     setEnabled: (id, enabled) => ipcRenderer.invoke('ranges:setEnabled', id, enabled),
   },
   services: { list: () => ipcRenderer.invoke('services:list') },
+  serviceSite: {
+    resolve: () => ipcRenderer.invoke('serviceSite:resolve'),
+    attach: (url, top) => ipcRenderer.invoke('serviceSite:attach', url, top),
+    setTop: (top) => ipcRenderer.invoke('serviceSite:setTop', top),
+    navigate: (url) => ipcRenderer.invoke('serviceSite:navigate', url),
+    detach: () => ipcRenderer.invoke('serviceSite:detach'),
+    back: () => ipcRenderer.invoke('serviceSite:back'),
+    forward: () => ipcRenderer.invoke('serviceSite:forward'),
+    reload: () => ipcRenderer.invoke('serviceSite:reload'),
+    onUrl: (cb) => {
+      const listener = (_e: unknown, url: string) => cb(url);
+      ipcRenderer.on('serviceSite:url', listener);
+      return () => ipcRenderer.removeListener('serviceSite:url', listener);
+    },
+  },
   runs: { list: (limit) => ipcRenderer.invoke('runs:list', limit) },
   smoke: { number: (cfg) => ipcRenderer.invoke('smoke:number', cfg) },
   tempMail: {

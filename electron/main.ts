@@ -11,11 +11,34 @@ import * as tempView from './tempMailView';
 let win: BrowserWindow | null = null;
 let freeView: WebContentsView | null = null;
 let freeTop = 120;
+let serviceView: WebContentsView | null = null;
+let serviceTop = 120;
+
+// Start URLs for selectable services. Only Twilio is wired up in this prototype.
+const SERVICE_URLS: Record<string, string> = {
+  twilio: 'https://www.twilio.com/try-twilio',
+};
 
 function updateFreeBounds() {
   if (!freeView || !win) return;
   const [width, height] = win.getContentSize();
   freeView.setBounds({ x: 0, y: freeTop, width, height: Math.max(height - freeTop, 0) });
+}
+
+function updateServiceBounds() {
+  if (!serviceView || !win) return;
+  const [width, height] = win.getContentSize();
+  serviceView.setBounds({ x: 0, y: serviceTop, width, height: Math.max(height - serviceTop, 0) });
+}
+
+async function selectedService() {
+  const [cfg, services] = await Promise.all([getConfig(), dbOps.listServices()]);
+  const key = cfg.selected_service || services[0]?.key;
+  const service = services.find((s) => s.key === key) ?? services[0];
+  if (!service) throw new Error('No services configured');
+  const url = SERVICE_URLS[service.key];
+  if (!url) throw new Error(`No start URL configured for ${service.name}`);
+  return { service: service.name, url };
 }
 
 const emitTemp = (event: TempMailEvent) => win?.webContents.send('tempMail:event', event);
@@ -45,8 +68,8 @@ function createWindow() {
   const url = process.env.ELECTRON_RENDERER_URL ?? `file://${path.join(__dirname, '../renderer/index.html')}`;
   void win.loadURL(url);
   tempView.setMainWindow(win);
-  win.on('closed', () => { win = null; freeView = null; });
-  win.on('resize', () => { updateFreeBounds(); tempView.updateBounds(); });
+  win.on('closed', () => { win = null; freeView = null; serviceView = null; });
+  win.on('resize', () => { updateFreeBounds(); updateServiceBounds(); tempView.updateBounds(); });
 }
 
 function registerIpc() {
@@ -62,6 +85,33 @@ function registerIpc() {
   ipcMain.handle('ranges:setEnabled', (_e, id: number, enabled: boolean) => dbOps.setRangeEnabled(id, enabled));
 
   ipcMain.handle('services:list', () => dbOps.listServices());
+  ipcMain.handle('serviceSite:resolve', () => selectedService());
+  ipcMain.handle('serviceSite:attach', async (_e, url: string, top?: number) => {
+    if (!win) return;
+    if (!serviceView) {
+      serviceView = new WebContentsView({ webPreferences: { sandbox: true } });
+      win.contentView.addChildView(serviceView);
+      serviceView.webContents.on('did-navigate', (_wc, next) => win?.webContents.send('serviceSite:url', next));
+    }
+    if (top !== undefined) serviceTop = top;
+    updateServiceBounds();
+    if (url) await serviceView.webContents.loadURL(url);
+  });
+  ipcMain.handle('serviceSite:setTop', (_e, top: number) => {
+    serviceTop = top;
+    updateServiceBounds();
+  });
+  ipcMain.handle('serviceSite:navigate', (_e, url: string) => serviceView?.webContents.loadURL(url));
+  ipcMain.handle('serviceSite:detach', () => {
+    if (serviceView && win) {
+      win.contentView.removeChildView(serviceView);
+      serviceView = null;
+    }
+  });
+  ipcMain.handle('serviceSite:back', () => { if (serviceView?.webContents.canGoBack()) serviceView.webContents.goBack(); });
+  ipcMain.handle('serviceSite:forward', () => { if (serviceView?.webContents.canGoForward()) serviceView.webContents.goForward(); });
+  ipcMain.handle('serviceSite:reload', () => serviceView?.webContents.reload());
+
   ipcMain.handle('runs:list', (_e, limit?: number) => dbOps.listRuns(limit ?? 20));
 
   ipcMain.handle('smoke:number', async (_e, overrides?: { url?: string; header?: string; rangeId?: string }) => {

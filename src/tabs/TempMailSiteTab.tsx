@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Badge, Button, Input, Select } from '../components/ui';
+import { Badge, Button, Field, Input, Select } from '../components/ui';
 import { api, type Provider } from '../lib/ipc';
 
 export default function TempMailSiteTab() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [url, setUrl] = useState('');
   const [address, setAddress] = useState('');
+  const [code, setCode] = useState('');
   const [message, setMessage] = useState('');
   const barRef = useRef<HTMLDivElement>(null);
   const top = () => Math.round(barRef.current?.getBoundingClientRect().bottom ?? 190);
@@ -13,6 +14,11 @@ export default function TempMailSiteTab() {
   useEffect(() => {
     let alive = true;
     const offUrl = api.tempSite.onUrl((next) => { if (alive) setUrl(next); });
+    const offEvent = api.tempMail.onEvent((e) => {
+      if (!alive) return;
+      if (e.type === 'temp:address') setAddress(e.address);
+      if (e.type === 'temp:code') setCode(e.code);
+    });
 
     const boot = async () => {
       const [cfg, list] = await Promise.all([api.config.get(), api.providers.list()]);
@@ -34,6 +40,7 @@ export default function TempMailSiteTab() {
     return () => {
       alive = false;
       offUrl();
+      offEvent();
       window.removeEventListener('resize', onResize);
       void api.tempSite.detach();
     };
@@ -86,8 +93,15 @@ export default function TempMailSiteTab() {
           <Button onClick={() => go()}>Go</Button>
         </div>
 
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Field label="Extracted email">
+            <Input value={address} readOnly placeholder="—" />
+          </Field>
+          <Field label="Extracted code">
+            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Will be populated later" />
+          </Field>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
-          <code className="rounded bg-background px-2 py-1 font-mono text-xs text-primary">{address || '—'}</code>
           <Button variant="outline" onClick={() => void api.tempSite.copy().then(setAddress).catch((e) => setMessage(String(e)))}>Copy email</Button>
           <Button variant="outline" onClick={() => void api.tempSite.regenerate().then(setAddress).catch((e) => setMessage(String(e)))}>New email</Button>
         </div>

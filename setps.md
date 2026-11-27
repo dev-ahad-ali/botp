@@ -16,8 +16,8 @@ The app is a local desktop tool with **five tabs**:
 |---|-----|---------|
 | 1 | **Configuration** | Pick the single seeded temp-mail site (`https://temp-mail.org/en/`), configure the number API (URL + auth header), manage ranges, select the target service (Twilio first) |
 | 2 | **Automation** | Control panel: Start / Stop, live status, step log, per-run stats. Playwright drives a separate Chromium window only for the Twilio signup flow |
-| 3 | **Temp Mail** | Inbox control panel: current address, copy/regenerate, message list, and wait-for-code |
-| 4 | **Temp Mail Site** | The real temp-mail website embedded in the app via `WebContentsView` |
+| 3 | **Service** | Embeds the selected service (Twilio by default) for later account-creation automation |
+| 4 | **Temp Mail Site** | The real temp-mail website embedded in the app via `WebContentsView`, with extracted email and code fields |
 | 5 | **Free Browser** | Plain browser for the user (URL bar + embedded `WebContentsView`) — no automation |
 
 The automation loop depends on tab 1 for:
@@ -86,13 +86,13 @@ twilio-automation/
 ├─ electron/
 │  ├─ main.ts                 # BrowserWindow, WebContentsView, IPC handlers
 │  ├─ preload.ts              # contextBridge API surface
-│  ├─ tempMailView.ts         # embedded temp-mail view + DOM automation
-│  └─ tabs/freeBrowser.ts     # WebContentsView management for Free Browser
+│  └─ tempMailView.ts         # embedded temp-mail view + DOM automation
 ├─ src/                       # React renderer
 │  ├─ App.tsx
 │  ├─ tabs/ConfigTab.tsx
 │  ├─ tabs/AutomationTab.tsx
-│  ├─ tabs/TempMailTab.tsx
+│  ├─ tabs/ServiceTab.tsx
+│  ├─ tabs/TempMailSiteTab.tsx
 │  ├─ tabs/FreeBrowserTab.tsx
 │  ├─ components/ui/…         # lightweight Tailwind primitives
 │  └─ lib/ipc.ts              # typed ipc wrappers
@@ -552,7 +552,7 @@ export function stopAutomation() {
 }
 ```
 
-`automation:event` streams `status`, `log`, `run:start`, `run:info`, `run:done`, plus `temp:open`, `temp:address`, and `temp:code` so the Temp Mail tab stays in sync.
+`automation:event` streams `status`, `log`, `run:start`, `run:info`, `run:done`, plus `temp:open`, `temp:address`, and `temp:code` so the Temp Mail Site tab stays in sync.
 
 ---
 
@@ -742,7 +742,7 @@ contextBridge.exposeInMainWorld('api', {
 
 ## 9. UI — Five Tabs
 
-Wrap in `<Tabs>` in `App.tsx`. The **Temp Mail Site** and **Free Browser** tabs attach their `WebContentsView` only while active; the React toolbar height is measured from the DOM and sent to main with `setTop`.
+Wrap in `<Tabs>` in `App.tsx`. The **Service**, **Temp Mail Site**, and **Free Browser** tabs attach their `WebContentsView` only while active; the React toolbar height is measured from the DOM and sent to main with `setTop`.
 
 ### 9.1 Config Tab (`tabs/ConfigTab.tsx`)
 
@@ -775,18 +775,13 @@ const off = api.automation.onEvent((e) => {
 
 The Twilio browsing happens in Playwright's Chromium window. The Automation tab is the control panel.
 
-### 9.3 Temp Mail Tab (`tabs/TempMailTab.tsx`)
+### 9.3 Service Tab (`tabs/ServiceTab.tsx`)
 
-Inbox control panel (no embedded view):
-
-- Current address with **Copy email**, **New email**, **Refresh inbox**, and **Wait for code**
-- Inbox message list; clicking a row opens it and shows the body/code
-- Listens to `tempMail:event` so codes/addresses discovered during automation appear here too
-- **Open site tab** button switches to the embedded website
+React resolves the selected service from `config.selected_service`, then embeds its start URL in a `WebContentsView` below the measured toolbar. Twilio opens `https://www.twilio.com/try-twilio`. On deactivation: `api.serviceSite.detach()`. Account creation automation is intentionally deferred.
 
 ### 9.4 Temp Mail Site Tab (`tabs/TempMailSiteTab.tsx`)
 
-React renders a toolbar with a site selector (full URLs), URL bar, back/forward/reload, address, and copy/regenerate buttons. The `WebContentsView` is attached below the measured toolbar. On tab activation: `api.tempSite.attach(selectedUrl, top)`; on deactivation: `api.tempSite.detach()`.
+React renders a toolbar with a site selector (full URL), URL bar, back/forward/reload, **Extracted email** and **Extracted code** fields, and copy/regenerate buttons. The code field is a placeholder until extraction logic is added; it also accepts `temp:code` events when they arrive. The `WebContentsView` is attached below the measured toolbar. On tab activation: `api.tempSite.attach(selectedUrl, top)`; on deactivation: `api.tempSite.detach()`.
 
 ### 9.5 Free Browser Tab (`tabs/FreeBrowserTab.tsx`)
 
@@ -811,11 +806,11 @@ Follow in order. Each step ends with a concrete verification.
 6. **Implement generators, `AutomationService`, `twilioService`, registry.**
    - Keep the Twilio selectors as placeholders for live tuning.
 7. **Implement `electron/tempMailView.ts` and `server/tempMail/session.ts`.**
-   - Verify: "Temp Mail Site" tab embeds the chosen real site and the address appears in the Temp Mail tab.
+   - Verify: "Temp Mail Site" tab embeds the chosen real site and its address appears in the extracted email field.
 8. **Implement `server/automation/engine.ts`.**
    - Verify: Start loads the embedded temp-mail site and opens the Twilio page in Chromium; Stop closes Playwright and pending waits.
-9. **Wire Automation and Temp Mail tabs** to IPC and event streams.
-   - Verify: log lines stream live; address/code appear in both tabs; runs persist.
+9. **Wire Automation, Service, and Temp Mail Site tabs** to IPC and event streams.
+   - Verify: log lines stream live; address/code appear in the Temp Mail Site tab; runs persist.
 10. **Implement the Free Browser tab** with `WebContentsView`.
     - Verify: user can navigate to any site, back/forward works, tab detach hides the view.
 11. **Polish:** disable Start while running, disable Stop while idle, show last 20 runs.
@@ -838,7 +833,7 @@ Follow in order. Each step ends with a concrete verification.
 | 9 | Email OTP read from the temp-mail inbox → entered | ✔ |
 | 10 | Phone number submitted | ✔ (until SMS-OTP wall — expected) |
 | 11 | Stop → Chromium closes, no orphan processes | ✔ |
-| 12 | Temp Mail Site and Free Browser tabs each load and detach cleanly | ✔ |
+| 12 | Service, Temp Mail Site, and Free Browser tabs each load and detach cleanly | ✔ |
 | 13 | Run rows + logs are persisted | ✔ |
 
 Failures in tests 8–10 are expected on first run and mean selector tuning, not an architectural problem.
